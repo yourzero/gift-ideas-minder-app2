@@ -38,6 +38,7 @@ fun AddEditGiftScreen(
 ) {
     val context = LocalContext.current
 
+    // State variables with remember for performance
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var url by remember { mutableStateOf("") }
@@ -51,15 +52,16 @@ fun AddEditGiftScreen(
     var showAddPersonDialog by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
 
+    // Load existing gift if editing
     if (giftId != null) {
         LaunchedEffect(giftId) {
             viewModel.getGiftById(giftId).collectLatest { gift ->
                 if (gift != null) {
                     title = gift.title
-                    description = gift.description ?: ""
-                    url = gift.url ?: ""
-                    price = gift.price?.toString() ?: ""
-                    eventDate = gift.eventDate ?: 0L
+                    description = gift.description
+                    url = gift.url
+                    price = gift.price.toString()
+                    eventDate = gift.eventDate
                     selectedPersonId = gift.personId
                 }
             }
@@ -69,10 +71,12 @@ fun AddEditGiftScreen(
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)) {
+        // Title field with validation
         TextField(
             value = title,
             onValueChange = { title = it },
-            label = { Text("Title") }
+            label = { Text("Title") },
+            isError = title.isBlank()
         )
         TextField(
             value = description,
@@ -122,23 +126,26 @@ fun AddEditGiftScreen(
             }
         }
 
+        // Save button with validation
         Button(onClick = {
-            val newPrice = price.toDoubleOrNull()
-            val newGift = Gift(
-                id = giftId ?: 0,
-                title = title,
-                description = description,
-                url = url,
-                price = newPrice,
-                eventDate = if (eventDate > 0) eventDate else null,
-                personId = selectedPersonId
-            )
-            if (giftId != null) {
-                viewModel.updateGift(newGift)
-            } else {
-                viewModel.insertGift(newGift)
+            if (title.isNotBlank()) {
+                val newPrice = price.toDoubleOrNull() ?: 0.0
+                val newGift = Gift(
+                    id = giftId ?: 0,
+                    title = title,
+                    description = description,
+                    url = url,
+                    price = newPrice,
+                    eventDate = if (eventDate > 0) eventDate else 0L,
+                    personId = selectedPersonId
+                )
+                if (giftId != null) {
+                    viewModel.updateGift(newGift)
+                } else {
+                    viewModel.insertGift(newGift)
+                }
+                navController.popBackStack()
             }
-            navController.popBackStack()
         }) {
             Text(if (giftId != null) "Update Gift" else "Add Gift")
         }

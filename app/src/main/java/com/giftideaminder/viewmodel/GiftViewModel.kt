@@ -7,6 +7,7 @@ import com.giftideaminder.data.model.Person
 import com.giftideaminder.data.repository.GiftRepository
 import com.giftideaminder.data.repository.PersonRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,15 +22,18 @@ class GiftViewModel @Inject constructor(
 
     val allPersons: Flow<List<Person>> = personRepository.allPersons
 
-    fun insertGift(gift: Gift) = viewModelScope.launch {
+    // Insert gift in background
+    fun insertGift(gift: Gift) = viewModelScope.launch(Dispatchers.IO) {
         giftRepository.insert(gift)
     }
 
-    fun updateGift(gift: Gift) = viewModelScope.launch {
+    // Update gift in background
+    fun updateGift(gift: Gift) = viewModelScope.launch(Dispatchers.IO) {
         giftRepository.update(gift)
     }
 
-    fun deleteGift(gift: Gift) = viewModelScope.launch {
+    // Delete gift in background
+    fun deleteGift(gift: Gift) = viewModelScope.launch(Dispatchers.IO) {
         giftRepository.delete(gift)
     }
 
