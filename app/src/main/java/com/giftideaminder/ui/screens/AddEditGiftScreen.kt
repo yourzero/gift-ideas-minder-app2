@@ -27,6 +27,9 @@ import androidx.navigation.NavController
 import com.giftideaminder.data.model.Gift
 import com.giftideaminder.data.model.Person
 import com.giftideaminder.viewmodel.GiftViewModel
+import com.giftideaminder.viewmodel.PersonViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import java.util.Calendar
 
@@ -37,8 +40,8 @@ fun AddEditGiftScreen(
     giftId: Int?
 ) {
     val context = LocalContext.current
+    val personViewModel: PersonViewModel = hiltViewModel()
 
-    // State variables with remember for performance
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var url by remember { mutableStateOf("") }
@@ -46,22 +49,21 @@ fun AddEditGiftScreen(
     var eventDate by remember { mutableLongStateOf(0L) }
     var selectedPersonId by remember { mutableStateOf<Int?>(null) }
 
-    val persons by viewModel.allPersons.collectAsState(initial = emptyList())
+    val persons by personViewModel.allPersons.collectAsState(initial = emptyList())
 
     var expanded by remember { mutableStateOf(false) }
     var showAddPersonDialog by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
 
-    // Load existing gift if editing
     if (giftId != null) {
         LaunchedEffect(giftId) {
             viewModel.getGiftById(giftId).collectLatest { gift ->
                 if (gift != null) {
                     title = gift.title
-                    description = gift.description
-                    url = gift.url
-                    price = gift.price.toString()
-                    eventDate = gift.eventDate
+                    description = gift.description ?: ""
+                    url = gift.url ?: ""
+                    price = gift.price?.toString() ?: ""
+                    eventDate = gift.eventDate ?: 0L
                     selectedPersonId = gift.personId
                 }
             }
@@ -71,12 +73,10 @@ fun AddEditGiftScreen(
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)) {
-        // Title field with validation
         TextField(
             value = title,
             onValueChange = { title = it },
-            label = { Text("Title") },
-            isError = title.isBlank()
+            label = { Text("Title") }
         )
         TextField(
             value = description,
@@ -126,26 +126,23 @@ fun AddEditGiftScreen(
             }
         }
 
-        // Save button with validation
         Button(onClick = {
-            if (title.isNotBlank()) {
-                val newPrice = price.toDoubleOrNull() ?: 0.0
-                val newGift = Gift(
-                    id = giftId ?: 0,
-                    title = title,
-                    description = description,
-                    url = url,
-                    price = newPrice,
-                    eventDate = if (eventDate > 0) eventDate else 0L,
-                    personId = selectedPersonId
-                )
-                if (giftId != null) {
-                    viewModel.updateGift(newGift)
-                } else {
-                    viewModel.insertGift(newGift)
-                }
-                navController.popBackStack()
+            val newPrice = price.toDoubleOrNull()
+            val newGift = Gift(
+                id = giftId ?: 0,
+                title = title,
+                description = description,
+                url = url,
+                price = newPrice,
+                eventDate = if (eventDate > 0) eventDate else null,
+                personId = selectedPersonId
+            )
+            if (giftId != null) {
+                viewModel.updateGift(newGift)
+            } else {
+                viewModel.insertGift(newGift)
             }
+            navController.popBackStack()
         }) {
             Text(if (giftId != null) "Update Gift" else "Add Gift")
         }
@@ -166,7 +163,7 @@ fun AddEditGiftScreen(
             confirmButton = {
                 Button(onClick = {
                     if (personName.isNotEmpty()) {
-                        viewModel.insertPerson(Person(name = personName))
+                        personViewModel.insertPerson(Person(name = personName))
                         showAddPersonDialog = false
                     }
                 }) {

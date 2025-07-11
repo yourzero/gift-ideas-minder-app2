@@ -10,13 +10,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.giftideaminder.viewmodel.GiftViewModel
+import com.giftideaminder.viewmodel.PersonViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 
 @Composable
 fun GiftDetailScreen(giftId: Int, viewModel: GiftViewModel, navController: NavController) {
+    val personViewModel: PersonViewModel = hiltViewModel()
     val gift = viewModel.getGiftById(giftId).collectAsState(initial = null).value ?: return
-    val persons = viewModel.allPersons.collectAsState(initial = emptyList()).value
+    val persons = personViewModel.allPersons.collectAsState(initial = emptyList()).value
     val personName = persons.find { it.id == gift.personId }?.name ?: "None"
 
     Column(modifier = Modifier.padding(16.dp)) {

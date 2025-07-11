@@ -10,4 +10,14 @@ class PersonRepository(private val personDao: PersonDao) {
     suspend fun insert(person: Person) {
         personDao.insert(person)
     }
+
+    suspend fun update(person: Person) {
+        personDao.update(person)
+    }
+
+    suspend fun delete(person: Person) {
+        personDao.delete(person)
+    }
+
+    fun getPersonById(id: Int): Flow<Person> = personDao.getPersonById(id)
 } 

@@ -8,9 +8,10 @@ data class Gift(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val title: String,
-    val description: String = "",
-    val url: String = "",
-    val price: Double = 0.0,
-    val eventDate: Long = 0L,
-    val personId: Int? = null
+    val description: String? = null,
+    val url: String? = null,
+    val price: Double? = null,
+    val eventDate: Long? = null,
+    val personId: Int? = null,
+    val reminderOffset: Int = 7  // days before event
 ) 

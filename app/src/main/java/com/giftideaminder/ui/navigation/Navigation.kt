@@ -8,6 +8,8 @@ import androidx.navigation.compose.rememberNavController
 import com.giftideaminder.ui.screens.AddEditGiftScreen
 import com.giftideaminder.ui.screens.GiftDetailScreen
 import com.giftideaminder.ui.screens.GiftListScreen
+import com.giftideaminder.ui.screens.PersonListScreen
+import com.giftideaminder.ui.screens.AddEditPersonScreen
 import com.giftideaminder.viewmodel.GiftViewModel
 
 @Composable
@@ -27,6 +29,16 @@ fun Navigation(viewModel: GiftViewModel) {
         composable("edit_gift/{giftId}") { backStackEntry ->
             val giftId = backStackEntry.arguments?.getString("giftId")?.toIntOrNull() ?: 0
             AddEditGiftScreen(viewModel = viewModel, navController = navController, giftId = giftId)
+        }
+        composable("person_list") {
+            PersonListScreen(navController = navController)
+        }
+        composable("add_person") {
+            AddEditPersonScreen(navController = navController, personId = null)
+        }
+        composable("edit_person/{personId}") { backStackEntry ->
+            val personId = backStackEntry.arguments?.getString("personId")?.toIntOrNull() ?: 0
+            AddEditPersonScreen(navController = navController, personId = personId)
         }
     }
 } 
