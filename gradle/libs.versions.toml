@@ -18,6 +18,8 @@ hiltNavigationCompose = "1.2.0"
 room = "2.6.1"
 mlkit-vision-text = "16.0.0"
 opencsv = "5.7.1"
+retrofit = "2.9.0"
+gson = "2.10.1"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,6 +49,8 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 mlkit-vision-text = { group = "com.google.mlkit", name = "vision-text", version.ref = "mlkit-vision-text" }
 opencsv = { group = "com.opencsv", name = "opencsv", version.ref = "opencsv" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

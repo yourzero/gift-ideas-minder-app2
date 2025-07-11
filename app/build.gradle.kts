@@ -72,6 +72,8 @@ dependencies {
     //implementation(libs.mlkitVisionText)
     implementation("com.google.mlkit:text-recognition:16.0.1")
     implementation("com.opencsv:opencsv:5.11.2")
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

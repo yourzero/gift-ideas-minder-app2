@@ -13,5 +13,8 @@ data class Gift(
     val price: Double? = null,
     val eventDate: Long? = null,
     val personId: Int? = null,
-    val reminderOffset: Int = 7  // days before event
+    val reminderOffset: Int = 7,
+    val currentPrice: Double? = null,
+    val budget: Double? = null,
+    val isPurchased: Boolean = false
 ) 

@@ -36,7 +36,6 @@ fun ImportScreen(navController: NavController) {
                     }
             } catch (e: IOException) {
                 // Handle error
-                var i = 1+2;
             }
         }
     }
