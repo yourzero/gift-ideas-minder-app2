@@ -69,6 +69,9 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     kapt(libs.room.compiler)
+    //implementation(libs.mlkitVisionText)
+    implementation("com.google.mlkit:text-recognition:16.0.1")
+    implementation("com.opencsv:opencsv:5.11.2")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -10,6 +10,7 @@ import com.giftideaminder.ui.screens.GiftDetailScreen
 import com.giftideaminder.ui.screens.GiftListScreen
 import com.giftideaminder.ui.screens.PersonListScreen
 import com.giftideaminder.ui.screens.AddEditPersonScreen
+import com.giftideaminder.ui.screens.ImportScreen
 import com.giftideaminder.viewmodel.GiftViewModel
 
 @Composable
@@ -39,6 +40,9 @@ fun Navigation(viewModel: GiftViewModel) {
         composable("edit_person/{personId}") { backStackEntry ->
             val personId = backStackEntry.arguments?.getString("personId")?.toIntOrNull() ?: 0
             AddEditPersonScreen(navController = navController, personId = personId)
+        }
+        composable("import") {
+            ImportScreen(navController = navController)
         }
     }
 } 

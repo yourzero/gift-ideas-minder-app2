@@ -22,6 +22,9 @@ fun GiftListScreen(viewModel: GiftViewModel, navController: NavController) {
             Button(onClick = { navController.navigate("person_list") }) {
                 Text("Manage Persons")
             }
+            Button(onClick = { navController.navigate("import") }) {
+                Text("Import Gifts")
+            }
         }
         items(gifts) { gift ->
             GiftItem(gift = gift) {
