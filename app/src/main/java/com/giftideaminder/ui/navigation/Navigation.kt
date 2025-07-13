@@ -11,6 +11,7 @@ import com.giftideaminder.ui.screens.GiftListScreen
 import com.giftideaminder.ui.screens.PersonListScreen
 import com.giftideaminder.ui.screens.AddEditPersonScreen
 import com.giftideaminder.ui.screens.ImportScreen
+import com.giftideaminder.ui.screens.BudgetScreen
 import com.giftideaminder.viewmodel.GiftViewModel
 
 @Composable
@@ -43,6 +44,9 @@ fun Navigation(viewModel: GiftViewModel) {
         }
         composable("import") {
             ImportScreen(navController = navController)
+        }
+        composable("budget") {
+            BudgetScreen(navController = navController)
         }
     }
 } 

@@ -74,6 +74,7 @@ dependencies {
     implementation("com.opencsv:opencsv:5.11.2")
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
+    implementation(libs.gson)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

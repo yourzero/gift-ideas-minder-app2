@@ -51,6 +51,7 @@ mlkit-vision-text = { group = "com.google.mlkit", name = "vision-text", version.
 opencsv = { group = "com.opencsv", name = "opencsv", version.ref = "opencsv" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
