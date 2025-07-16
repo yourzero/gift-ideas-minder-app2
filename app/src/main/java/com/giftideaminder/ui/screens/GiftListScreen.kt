@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavController
 import com.giftideaminder.ui.components.GiftItem
+import com.giftideaminder.ui.components.SuggestionsCarousel
 import com.giftideaminder.viewmodel.GiftViewModel
 
 @Composable
@@ -28,6 +29,17 @@ fun GiftListScreen(viewModel: GiftViewModel, navController: NavController) {
             Button(onClick = { navController.navigate("budget") }) {
                 Text("View Budget")
             }
+        }
+        item {
+            SuggestionsCarousel(
+                suggestions = viewModel.suggestions,
+                onAccept = { suggestion ->
+                    viewModel.insertGift(suggestion.copy(id = 0))  // Insert as new gift
+                },
+                onDismiss = { suggestion ->
+                    viewModel.dismissSuggestion(suggestion)
+                }
+            )
         }
         items(gifts) { gift ->
             GiftItem(gift = gift) {

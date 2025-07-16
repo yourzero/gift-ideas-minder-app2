@@ -5,18 +5,35 @@ import androidx.lifecycle.viewModelScope
 import com.giftideaminder.data.model.Gift
 import com.giftideaminder.data.repository.GiftRepository
 import com.giftideaminder.data.api.PriceService
+import com.giftideaminder.data.api.AIService
+import com.giftideaminder.data.api.AIRequest
+import com.giftideaminder.data.model.Person
+import com.giftideaminder.data.repository.PersonRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class GiftViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
-    private val priceService: PriceService
+    private val priceService: PriceService,
+    private val personRepository: PersonRepository,
+    private val aiService: AIService
 ) : ViewModel() {
 
     val allGifts: Flow<List<Gift>> = giftRepository.allGifts
+
+    private val _suggestions = MutableStateFlow<List<Gift>>(emptyList())
+    val suggestions: StateFlow<List<Gift>> = _suggestions.asStateFlow()
+
+    init {
+        fetchSuggestions()
+    }
 
     fun insertGift(gift: Gift) = viewModelScope.launch {
         giftRepository.insert(gift)
@@ -47,6 +64,22 @@ class GiftViewModel @Inject constructor(
                 // Handle error
             }
         }
+    }
+
+    fun fetchSuggestions() = viewModelScope.launch {
+        try {
+            val allGiftsList = allGifts.first()
+            val allPersons = personRepository.allPersons.first()
+            val request = AIRequest(gifts = allGiftsList, persons = allPersons)
+            val response = aiService.getSuggestions(request)
+            _suggestions.value = response
+        } catch (e: Exception) {
+            // Handle error, e.g., _suggestions.value = emptyList()
+        }
+    }
+
+    fun dismissSuggestion(suggestion: Gift) {
+        _suggestions.value = _suggestions.value.filter { it != suggestion }
     }
 
     private fun extractAsinFromUrl(url: String): String? {
