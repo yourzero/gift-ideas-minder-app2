@@ -34,6 +34,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,8 +99,12 @@ fun GiftListScreen(viewModel: GiftViewModel, navController: NavController) {
                 AnimatedVisibility(visible = true) {  // Can tie to suggestions availability
                     SuggestionsCarousel(
                         suggestions = viewModel.suggestions,
-                        onAccept = { viewModel.insertGift(it.copy(id = 0)) },
-                        onDismiss = { viewModel.dismissSuggestion(it) }
+                        onAccept = { suggestion ->
+                            viewModel.insertGift(suggestion.copy(id = 0))
+                        },
+                        onDismiss = { suggestion ->
+                            viewModel.dismissSuggestion(suggestion)
+                        }
                     )
                 }
             }

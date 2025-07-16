@@ -11,6 +11,9 @@ import androidx.compose.ui.Modifier
 import com.giftideaminder.data.model.Gift
 import kotlinx.coroutines.flow.StateFlow
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 
 @Composable
 fun SuggestionsCarousel(
@@ -21,9 +24,9 @@ fun SuggestionsCarousel(
     val suggestionList = suggestions.collectAsState().value
     if (suggestionList.isNotEmpty()) {
         Text("Today’s Suggestions")
-        LazyRow {
-            items(suggestionList) { suggestion ->
-                Card(modifier = Modifier.padding(8.dp)) {
+        LazyRow(modifier = Modifier.semantics { contentDescription = "Suggestions carousel" }) {
+            items(suggestionList) { suggestion: Gift ->
+                Card(modifier = Modifier.padding(8.dp).semantics { contentDescription = "Suggestion: ${suggestion.title}" }) {
                     Text(suggestion.title)
                     Text(suggestion.description ?: "")
                     Button(onClick = { onAccept(suggestion) }) {
@@ -35,5 +38,7 @@ fun SuggestionsCarousel(
                 }
             }
         }
+    } else {
+        Text("No suggestions yet—add more gifts!")
     }
 } 
