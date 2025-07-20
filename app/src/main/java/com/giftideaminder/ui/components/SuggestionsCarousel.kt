@@ -14,6 +14,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 
 @Composable
 fun SuggestionsCarousel(
@@ -27,13 +31,17 @@ fun SuggestionsCarousel(
         LazyRow(modifier = Modifier.semantics { contentDescription = "Suggestions carousel" }) {
             items(suggestionList) { suggestion: Gift ->
                 Card(modifier = Modifier.padding(8.dp).semantics { contentDescription = "Suggestion: ${suggestion.title}" }) {
-                    Text(suggestion.title)
-                    Text(suggestion.description ?: "")
-                    Button(onClick = { onAccept(suggestion) }) {
-                        Text("Accept")
-                    }
-                    Button(onClick = { onDismiss(suggestion) }) {
-                        Text("Dismiss")
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        // Placeholder for image: Text("[Image]")
+                        Text("[Image Placeholder]")
+                        Text(suggestion.title)
+                        Text(suggestion.description ?: "")
+                        Text("Est. Price: $${suggestion.price ?: "N/A"}")
+                        Row {
+                            Button(onClick = { onAccept(suggestion) }) { Text("Accept") }
+                            Spacer(Modifier.width(8.dp))
+                            Button(onClick = { onDismiss(suggestion) }) { Text("Dismiss") }
+                        }
                     }
                 }
             }

@@ -20,6 +20,9 @@ mlkit-vision-text = "16.0.0"
 opencsv = "5.7.1"
 retrofit = "2.9.0"
 gson = "2.10.1"
+material3 = "1.2.1"
+material-icons = "1.6.8"
+compose-material = "1.6.8"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -52,6 +55,7 @@ opencsv = { group = "com.opencsv", name = "opencsv", version.ref = "opencsv" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "material-icons" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

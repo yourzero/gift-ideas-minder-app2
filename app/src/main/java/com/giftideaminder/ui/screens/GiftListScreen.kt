@@ -15,11 +15,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -36,8 +31,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun GiftListScreen(viewModel: GiftViewModel, navController: NavController) {
     val gifts = viewModel.allGifts.collectAsState(initial = emptyList()).value
@@ -50,14 +54,14 @@ fun GiftListScreen(viewModel: GiftViewModel, navController: NavController) {
                 title = { Text("Gift Idea Minder") },
                 actions = {
                     IconButton(onClick = { /* TODO: Settings */ }) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                        //Icon(Icons.Filled.Settings, contentDescription = "Settings")
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { navController.navigate("add_gift") }) {
-                Icon(Icons.Default.Add, contentDescription = "Add New Gift")
+                //Icon(Icons.Filled.Add, contentDescription = "Add New Gift")
             }
         }
     ) { paddingValues ->
@@ -66,16 +70,17 @@ fun GiftListScreen(viewModel: GiftViewModel, navController: NavController) {
             contentPadding = PaddingValues(16.dp)
         ) {
             item {
-                Row(
+                Text("Quick Actions", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
+                // Replace Row with FlowRow for better wrapping on small screens
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Button(onClick = { navController.navigate("add_gift") }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Gift")
                         Text("Add Gift")
                     }
                     Button(onClick = { navController.navigate("person_list") }) {
-                        Icon(Icons.Default.Person, contentDescription = "Manage Persons")
                         Text("Persons")
                     }
                     Button(onClick = { navController.navigate("import") }) {
@@ -85,18 +90,29 @@ fun GiftListScreen(viewModel: GiftViewModel, navController: NavController) {
                         Text("Budget")
                     }
                 }
+                Spacer(modifier = Modifier.height(16.dp))
+                Divider()
+                Spacer(modifier = Modifier.height(16.dp))
             }
             item {
+                Text("Search Gifts", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
                 TextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
                     label = { Text("Search Gifts") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+                    leadingIcon = { //Icon(Icons.Filled.Search, contentDescription = "Search") }
+                    },
                     modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Search field" }
                 )
             }
             item {
-                AnimatedVisibility(visible = true) {  // Can tie to suggestions availability
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text("Today’s Suggestions", style = MaterialTheme.typography.titleMedium)
+                    IconButton(onClick = { viewModel.fetchSuggestions() }) {
+                        //Icon(Icons.Filled.Refresh, contentDescription = "Refresh Suggestions")
+                    }
+                }
+                AnimatedVisibility(visible = true) {
                     SuggestionsCarousel(
                         suggestions = viewModel.suggestions,
                         onAccept = { suggestion ->
@@ -107,10 +123,22 @@ fun GiftListScreen(viewModel: GiftViewModel, navController: NavController) {
                         }
                     )
                 }
+                Spacer(modifier = Modifier.height(16.dp))
+                Divider()
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            item {
+                Text("Your Gifts", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
             }
             if (filteredGifts.isEmpty()) {
                 item {
-                    Text("No gifts yet. Add some!")
+                    Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("No gifts yet. Start adding some!", textAlign = TextAlign.Center)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(onClick = { navController.navigate("add_gift") }) {
+                            Text("Add Your First Gift")
+                        }
+                    }
                 }
             } else {
                 items(
