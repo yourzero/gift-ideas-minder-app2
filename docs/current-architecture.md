@@ -4,33 +4,35 @@
 
 The Gift Idea Minder Android app uses Jetpack Compose for UI, Room for persistence, Hilt for dependency injection, and follows a clean architecture pattern adapted to the existing structure. It implements unidirectional data flow with ViewModels managing state via Flows and Coroutines.
 
-Key features include gift management (Epic 1), person management (Epic 2), basic reminders (Epic 3), and integrations/import (Epic 4), with navigation handled via Compose Navigation.
+Key features include gift management (Epic 1), person management (Epic 2), basic reminders (Epic 3), integrations/import (Epic 4), budgeting (Epic 5), AI-driven suggestions (Epic 6), and partial price tracking (Epic 7), with navigation handled via Compose Navigation.
 
 ## Architecture Layers
 
 ### Data Layer
-- Handles data persistence and retrieval using Room.
+- Handles data persistence and retrieval using Room, plus network APIs for AI and price tracking.
 - Located in `app/src/main/java/com/giftideaminder/data/`.
 - Components:
-  - **Models**: Entity classes like `Gift.kt` (now with reminderOffset for Epic 3) and `Person.kt`.
+  - **Models**: Entity classes like `Gift.kt` (with reminderOffset, currentPrice, budget, isPurchased, priceHistory) and `Person.kt`.
   - **DAO**: Interfaces for database operations, e.g., `GiftDao.kt`, `PersonDao.kt`.
   - **Repository**: Abstraction over data sources, e.g., `GiftRepository.kt`, `PersonRepository.kt`.
-  - **Database**: `AppDatabase.kt` for Room database setup (version bumped to 2 with migration for reminderOffset).
+  - **Database**: `AppDatabase.kt` for Room database setup (version 4 with migrations for reminderOffset, price fields, and priceHistory).
+  - **API**: Services like `AIService.kt` for AI suggestions and `PriceService.kt` for CamelCamelCamel price history.
+  - **Converter**: `PriceHistoryConverter.kt` for handling price history lists in Room.
 
 ### Presentation Layer
 - Manages UI and user interactions using Jetpack Compose.
 - Located in `app/src/main/java/com/giftideaminder/ui/` and `viewmodel/`.
 - Components:
-  - **Screens**: Composable functions for main views, e.g., `GiftListScreen.kt`, `AddEditGiftScreen.kt`, `PersonListScreen.kt`, `AddEditPersonScreen.kt`, `ImportScreen.kt` (for Epic 4 imports).
-  - **Components**: Reusable UI elements, e.g., `GiftItem.kt`, `PersonItem.kt`.
-  - **Navigation**: `Navigation.kt` for app routing (add 'import' route to access ImportScreen).
+  - **Screens**: Composable functions for main views, e.g., `GiftListScreen.kt`, `AddEditGiftScreen.kt`, `PersonListScreen.kt`, `AddEditPersonScreen.kt`, `ImportScreen.kt` (for Epic 4 imports), `BudgetScreen.kt` (for Epic 5 budgeting), `GiftDetailScreen.kt`, dashboard variants like `DashboardScreenMock.kt`, `HomeDashboardGenerated.kt`, `HomeDashboardGenerated_Chatgpt.kt`.
+  - **Components**: Reusable UI elements, e.g., `GiftItem.kt`, `PersonItem.kt`, `SuggestionsCarousel.kt` (for Epic 6 AI suggestions).
+  - **Navigation**: `Navigation.kt` for app routing, including routes for import, budget, etc.
   - **Theme**: Material Design theming in `theme/` (Color.kt, Shape.kt, Theme.kt, Type.kt).
-  - **ViewModels**: Manage UI state, e.g., `GiftViewModel.kt`, `PersonViewModel.kt`, `ImportViewModel.kt` (for Epic 4 parsing/insertion).
+  - **ViewModels**: Manage UI state, e.g., `GiftViewModel.kt` (handles AI suggestions and price updates), `PersonViewModel.kt`, `ImportViewModel.kt` (for Epic 4 parsing/insertion).
 
 ### Dependency Injection
 - Uses Hilt for DI.
 - Located in `app/src/main/java/com/giftideaminder/di/`.
-- Modules: `DatabaseModule.kt`, `RepositoryModule.kt`.
+- Modules: `DatabaseModule.kt`, `RepositoryModule.kt`, `NetworkModule.kt` (for AI and price services).
 
 ### Main Entry Points
 - `MainApplication.kt`: Application class with Hilt setup.
@@ -38,33 +40,39 @@ Key features include gift management (Epic 1), person management (Epic 2), basic
 
 ### Additional Configurations
 - **Permissions**: Added READ_SMS and READ_EXTERNAL_STORAGE in AndroidManifest.xml for Epic 4.
-- **Dependencies**: Added ML Kit Text Recognition and OpenCSV for Epic 4 imports (via libs.versions.toml).
+- **Dependencies**: Added ML Kit Text Recognition and OpenCSV for Epic 4 imports, Retrofit and Gson for network APIs (via libs.versions.toml).
 
 ## Folder Structure
 
 ```
-gift-idea-minder-android--cursor-2/
+gift-idea-minder-android--cursor/
   - app/
     - build.gradle.kts
     - src/
       - main/
-        - AndroidManifest.xml  # Updated with permissions for Epic 4
+        - AndroidManifest.xml
         - java/
           - com/
             - giftideaminder/
               - data/
+                - api/
+                  - AIService.kt
+                  - PriceService.kt
+                - converter/
+                  - PriceHistoryConverter.kt
                 - dao/
                   - GiftDao.kt
                   - PersonDao.kt
                 - model/
-                  - AppDatabase.kt  # Updated for Epic 3 migration
-                  - Gift.kt  # Updated with reminderOffset for Epic 3
+                  - AppDatabase.kt
+                  - Gift.kt
                   - Person.kt
                 - repository/
                   - GiftRepository.kt
                   - PersonRepository.kt
               - di/
                 - DatabaseModule.kt
+                - NetworkModule.kt
                 - RepositoryModule.kt
               - MainActivity.kt
               - MainApplication.kt
@@ -72,15 +80,20 @@ gift-idea-minder-android--cursor-2/
                 - components/
                   - GiftItem.kt
                   - PersonItem.kt
+                  - SuggestionsCarousel.kt
                 - navigation/
                   - Navigation.kt
                 - screens/
                   - AddEditGiftScreen.kt
+                  - AddEditPersonScreen.kt
+                  - BudgetScreen.kt
+                  - DashboardScreenMock.kt
                   - GiftDetailScreen.kt
                   - GiftListScreen.kt
-                  - AddEditPersonScreen.kt
+                  - HomeDashboardGenerated_Chatgpt.kt
+                  - HomeDashboardGenerated.kt
+                  - ImportScreen.kt
                   - PersonListScreen.kt
-                  - ImportScreen.kt  # New for Epic 4
                 - theme/
                   - Color.kt
                   - Shape.kt
@@ -88,10 +101,11 @@ gift-idea-minder-android--cursor-2/
                   - Type.kt
               - viewmodel/
                 - GiftViewModel.kt
+                - ImportViewModel.kt
                 - PersonViewModel.kt
-                - ImportViewModel.kt  # New for Epic 4
         - res/
           - drawable/
+            - edit_gift___select_occasions_modal.xml
             - ic_launcher_foreground.xml
           - mipmap-anydpi-v26/
             - ic_launcher_round.xml
@@ -104,6 +118,61 @@ gift-idea-minder-android--cursor-2/
           - values/
             - strings.xml
             - themes.xml
+        - scripts/
+          - s2c.sh
+        - svg/
+          - Edit Gift - Select Occasions Modal.svg
+          - Edit Gift B.svg
+          - Edit Giftee A.svg
+          - Edit Giftee B.svg
+          - Edit Giftee C.svg
+          - Event Details.svg
+          - Giftees.svg
+          - Home-Dashboard.svg
+          - myiconpack/
+            - src/
+              - gift-idea-minder-android/
+                - __.git.kt
+                - git/
+                  - __Hooks.kt
+                  - __Info.kt
+                  - __Logs.kt
+                  - __Objects.kt
+                  - __Refs.kt
+                  - logs/
+                    - __Refs.kt
+                    - refs/
+                      - __Heads.kt
+                      - __Remotes.kt
+                      - remotes/
+                        - __Origin.kt
+                  - objects/
+                    - ___02.kt
+                    - ___1a.kt
+                    - ___2f.kt
+                    - ___53.kt
+                    - ___56.kt
+                    - ___62.kt
+                    - ___72.kt
+                    - ___85.kt
+                    - ___8b.kt
+                    - ___9a.kt
+                    - __Ac.kt
+                    - __Af.kt
+                    - __Be.kt
+                    - __Ca.kt
+                    - __D9.kt
+                    - __De.kt
+                    - __E2.kt
+                    - __E9.kt
+                    - __Info.kt
+                    - __Pack.kt
+                  - refs/
+                    - __Heads.kt
+                    - __Remotes.kt
+                    - __Tags.kt
+                    - remotes/
+                      - __Origin.kt
   - build.gradle.kts
   - docs/
     - android-jetpack-compose-cursorrules-prompt-file/
@@ -114,13 +183,9 @@ gift-idea-minder-android--cursor-2/
       - android-jetpack-compose---ui-guidelines.mdc
     - architecture.md
     - clean-code.md
+    - current-architecture.md
     - Project-design.md
-    - current-architecture.md  # This file
   - gradle/
-    - libs.versions.toml  # Updated for Epic 4 dependencies
-    - wrapper/
-      - gradle-wrapper.jar
-      - gradle-wrapper.properties
   - gradle.properties
   - gradlew
   - gradlew.bat
@@ -133,7 +198,7 @@ gift-idea-minder-android--cursor-2/
 - State hoisting: State managed in ViewModels, passed to composables.
 - Clean code: Single responsibility (separate ViewModels for Gift, Person, Import), meaningful names, no magic numbers.
 - Compose guidelines: Proper use of remember, Modifiers, theming, previews (to be added).
-- Async handling: Coroutines for imports/parsing in Epic 4.
+- Async handling: Coroutines for imports/parsing in Epic 4, AI fetches, and price updates.
 - Testing: Guidelines suggest unit tests for ViewModels (to be implemented).
 
-This structure adapts the recommended clean architecture while building on the initial project setup. For future expansions, consider adding a domain layer for use cases if business logic grows complex, runtime permission handling for Epic 4, and full reminder scheduling for Epic 3. 
+This structure adapts the recommended clean architecture while building on the initial project setup. For future expansions, consider adding a domain layer for use cases if business logic grows complex, runtime permission handling for Epic 4, full reminder scheduling for Epic 3, completing price tracking alerts (Epic 7), and implementing security features (Epic 8). 
