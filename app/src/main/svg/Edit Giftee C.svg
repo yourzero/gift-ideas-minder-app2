@@ -1,0 +1,139 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 375 726" width="375" height="726" fill="none">
+  <rect width="375" height="726" fill="#e8eddb"></rect>
+  <g opacity="100%">
+    <text x="63" y="60.5" font-family="Open Sans" font-size="20" fill="#030303" letter-spacing="0" font-weight="500" font-style="normal">
+      <tspan x="140">Edit Giftee</tspan>
+    </text>
+  </g>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="24" height="24" fill="#030303" x="24" y="41" opacity="100%">
+    <path d="M447.1 256C447.1 273.7 433.7 288 416 288H109.3l105.4 105.4c12.5 12.5 12.5 32.75 0 45.25C208.4 444.9 200.2 448 192 448s-16.38-3.125-22.62-9.375l-160-160c-12.5-12.5-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25L109.3 224H416C433.7 224 447.1 238.3 447.1 256z"></path>
+  </svg>
+  <g opacity="100%">
+    <rect x="0" y="94" width="375" height="632" fill="#fef6db" rx="30" filter="url(#filter_dshadow_0_0_0_00000014)"></rect>
+  </g>
+  <g opacity="100%">
+    <text x="24" y="138.5" font-family="Open Sans" font-size="20" fill="#030303" letter-spacing="0" font-weight="500" font-style="normal">Basic Information</text>
+  </g>
+  <g opacity="100%">
+    <text x="24" y="178.5" font-family="Open Sans" font-size="14" fill="#030303" letter-spacing="0" font-weight="normal" font-style="normal">Name</text>
+  </g>
+  <g opacity="100%">
+    <rect filter="url(#filter_dshadow_0_0_0_00000014)" x="24" y="193" width="327" height="48" fill="#fff" rx="2" stroke="#e5e7eb" stroke-width="0"></rect>
+    <text x="32" y="222.5" font-family="Open Sans" font-size="14" fill="#242424" letter-spacing="0" font-weight="normal" font-style="normal">
+      <tspan>Enter name here</tspan>
+    </text>
+    <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#242424" x="329" y="210">
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M16.59 8.59 12 13.17 7.41 8.59 6 10l6 6 6-6z"></path>
+    </svg>
+  </g>
+  <g opacity="100%">
+    <text x="24" y="271.5" font-family="Open Sans" font-size="14" fill="#030303" letter-spacing="0" font-weight="normal" font-style="normal">Birthday / Anniversary</text>
+  </g>
+  <g opacity="100%">
+    <rect filter="url(#filter_dshadow_0_0_0_00000014)" x="24" y="286" width="327" height="48" fill="#fff" rx="2" stroke="#e5e7eb" stroke-width="0"></rect>
+    <text x="32" y="315.5" font-family="Open Sans" font-size="14" fill="#242424" letter-spacing="0" font-weight="normal" font-style="normal">
+      <tspan>Select date</tspan>
+    </text>
+    <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#242424" x="329" y="303">
+      <path d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M16.59 8.59 12 13.17 7.41 8.59 6 10l6 6 6-6z"></path>
+    </svg>
+  </g>
+  <g opacity="100%">
+    <rect x="1" y="358" width="375" height="368" fill="#fff" stroke="#e5e7eb" stroke-width="0" rx="15" filter="url(#filter_dshadow_2_0_1_0000000d)"></rect>
+  </g>
+  <g opacity="100%">
+    <text x="24" y="402.5" font-family="Open Sans" font-size="20" fill="#242424" letter-spacing="0" font-weight="500" font-style="normal">Relationship</text>
+  </g>
+  <g opacity="100%">
+    <rect x="24" y="436" width="151" height="162" fill="#fff" stroke="#e5e7eb" stroke-width="0" rx="15" filter="url(#filter_dshadow_2_0_1_0000000d)"></rect>
+  </g>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" width="40" height="40" fill="#595236" x="80" y="460" opacity="100%">
+    <path d="M224 256c70.7 0 128-57.31 128-128S294.7 0 224 0C153.3 0 96 57.31 96 128S153.3 256 224 256zM274.7 304H173.3c-95.73 0-173.3 77.6-173.3 173.3C0 496.5 15.52 512 34.66 512H413.3C432.5 512 448 496.5 448 477.3C448 381.6 370.4 304 274.7 304zM479.1 320h-73.85C451.2 357.7 480 414.1 480 477.3C480 490.1 476.2 501.9 470 512h138C625.7 512 640 497.6 640 479.1C640 391.6 568.4 320 479.1 320zM432 256C493.9 256 544 205.9 544 144S493.9 32 432 32c-25.11 0-48.04 8.555-66.72 22.51C376.8 76.63 384 101.4 384 128c0 35.52-11.93 68.14-31.59 94.71C372.7 243.2 400.8 256 432 256z"></path>
+  </svg>
+  <g opacity="100%">
+    <text x="37" y="524.5" font-family="Open Sans" font-size="16" fill="#242424" letter-spacing="0" font-weight="500" font-style="normal">
+      <tspan x="60">Select one</tspan>
+    </text>
+  </g>
+  <g opacity="100%" mask="url(#mask_rbjax8ebzo)">
+    <text x="37" y="544.5" font-family="Open Sans" font-size="12" fill="#c2c2c2" letter-spacing="0" font-weight="normal" font-style="normal">
+      <tspan x="58">Family, Friend,</tspan>
+    </text>
+    <text x="37" y="560.5" font-family="Open Sans" font-size="12" fill="#c2c2c2" letter-spacing="0" font-weight="normal" font-style="normal">
+      <tspan x="70">Coworker</tspan>
+    </text>
+    <defs>
+      <mask id="mask_rbjax8ebzo">
+        <rect x="37" y="532" width="124" height="16" fill="white"></rect>
+      </mask>
+    </defs>
+  </g>
+  <g opacity="100%">
+    <text x="37" y="574.5" font-family="Open Sans" font-size="16" fill="#242424" letter-spacing="0" font-weight="500" font-style="normal">
+      <tspan x="77">Notes</tspan>
+    </text>
+  </g>
+  <g opacity="100%">
+    <rect x="199" y="436" width="151" height="162" fill="#fff" stroke="#e5e7eb" stroke-width="0" rx="15" filter="url(#filter_dshadow_2_0_1_0000000d)"></rect>
+  </g>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="40" height="40" fill="#c2c2c2" x="255" y="460" opacity="100%">
+    <path d="M400 32h-352C21.49 32 0 53.49 0 80v352C0 458.5 21.49 480 48 480h245.5c16.97 0 33.25-6.744 45.26-18.75l90.51-90.51C441.3 358.7 448 342.5 448 325.5V80C448 53.49 426.5 32 400 32zM64 96h320l-.001 224H320c-17.67 0-32 14.33-32 32v64H64V96z"></path>
+  </svg>
+  <g opacity="100%" mask="url(#mask_uxptohvbu)">
+    <text x="209" y="524.5" font-family="Open Sans" font-size="16" fill="#c2c2c2" letter-spacing="0" font-weight="500" font-style="normal">
+      <tspan x="214">Enter any notes</tspan>
+    </text>
+    <text x="209" y="545.5" font-family="Open Sans" font-size="16" fill="#c2c2c2" letter-spacing="0" font-weight="500" font-style="normal">
+      <tspan x="254">here</tspan>
+    </text>
+    <defs>
+      <mask id="mask_uxptohvbu">
+        <rect x="209" y="508" width="128" height="21" fill="white"></rect>
+      </mask>
+    </defs>
+  </g>
+  <g opacity="100%">
+    <text x="209" y="544.5" font-family="Open Sans" font-size="12" fill="#c2c2c2" letter-spacing="0" font-weight="normal" font-style="normal">
+      <tspan x="224">Additional details</tspan>
+    </text>
+  </g>
+  <g opacity="100%">
+    <text x="209" y="574.5" font-family="Open Sans" font-size="16" fill="#c2c2c2" letter-spacing="0" font-weight="500" font-style="normal">
+      <tspan x="240">Optional</tspan>
+    </text>
+  </g>
+  <g opacity="100%">
+    <rect filter="url(#filter_dshadow_0_0_0_00000014)" x="24" y="638" width="327" height="48" fill="#f7ee47" rx="15"></rect>
+    <text x="170" y="668" font-family="Open Sans" font-size="16" fill="#595236" letter-spacing="0" font-weight="500" font-style="normal">
+      <tspan>Save</tspan>
+    </text>
+  </g>
+  <defs>
+    <filter id="filter_dshadow_0_0_0_00000014" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feFlood flood-opacity="0" result="bg-fix"></feFlood>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="alpha"></feColorMatrix>
+      <feOffset dx="0" dy="0"></feOffset>
+      <feGaussianBlur stdDeviation="0"></feGaussianBlur>
+      <feComposite in2="alpha" operator="out"></feComposite>
+      <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0"></feColorMatrix>
+      <feBlend mode="normal" in2="bg-fix" result="bg-fix-filter_dshadow_0_0_0_00000014"></feBlend>
+      <feBlend in="SourceGraphic" in2="bg-fix-filter_dshadow_0_0_0_00000014" result="shape"></feBlend>
+    </filter>
+    <filter id="filter_dshadow_2_0_1_0000000d" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feFlood flood-opacity="0" result="bg-fix"></feFlood>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="alpha"></feColorMatrix>
+      <feOffset dx="0" dy="1"></feOffset>
+      <feGaussianBlur stdDeviation="1"></feGaussianBlur>
+      <feComposite in2="alpha" operator="out"></feComposite>
+      <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0"></feColorMatrix>
+      <feBlend mode="normal" in2="bg-fix" result="bg-fix-filter_dshadow_2_0_1_0000000d"></feBlend>
+      <feBlend in="SourceGraphic" in2="bg-fix-filter_dshadow_2_0_1_0000000d" result="shape"></feBlend>
+    </filter>
+    <style id="google">@import url(https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&amp;display=swap);
+</style>
+    <style id="brand"></style>
+  </defs>
+</svg>

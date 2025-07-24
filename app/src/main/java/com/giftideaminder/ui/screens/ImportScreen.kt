@@ -19,7 +19,11 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import java.io.File
 import com.google.android.gms.tasks.Task
 import java.io.IOException
+import androidx.compose.ui.tooling.preview.Preview
 
+
+
+@Preview
 @Composable
 fun ImportScreen(navController: NavController) {
     val viewModel: ImportViewModel = hiltViewModel()

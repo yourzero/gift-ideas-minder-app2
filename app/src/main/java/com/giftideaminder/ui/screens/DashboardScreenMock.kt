@@ -20,7 +20,7 @@ import com.giftideaminder.data.model.Gift
 
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true, widthDp = 360, heightDp = 640)
+@Preview(showBackground = true, widthDp = 360, heightDp = 640)@Preview
 @Composable
 fun DashboardScreen(
     gifts: List<Gift> = emptyList(),
@@ -156,7 +156,7 @@ fun DashboardScreen(
         }
     }
 }
-
+@Preview
 @Composable
 fun GiftCard(gift: Gift, onClick: () -> Unit) {
     Card(

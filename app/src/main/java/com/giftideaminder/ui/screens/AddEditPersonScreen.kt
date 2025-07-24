@@ -24,7 +24,9 @@ import com.giftideaminder.data.model.Person
 import com.giftideaminder.viewmodel.PersonViewModel
 import kotlinx.coroutines.flow.collectLatest
 import java.util.Calendar
+import androidx.compose.ui.tooling.preview.Preview
 
+@Preview
 @Composable
 fun AddEditPersonScreen(
     navController: NavController,

@@ -20,7 +20,10 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.Checkbox
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.tooling.preview.Preview
 
+
+@Preview
 @Composable
 fun GiftDetailScreen(giftId: Int, viewModel: GiftViewModel, navController: NavController) {
     val personViewModel: PersonViewModel = hiltViewModel()

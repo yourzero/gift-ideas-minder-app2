@@ -10,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.giftideaminder.ui.navigation.Navigation
 import com.giftideaminder.ui.theme.GiftIdeaMinderTheme
+//import com.giftideaminder.ui.screens.HomeDashboardGenerated
 import com.giftideaminder.viewmodel.GiftViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -26,6 +27,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Navigation(viewModel)
+                    //HomeDashboardGenerated(viewmodel)
                 }
             }
         }

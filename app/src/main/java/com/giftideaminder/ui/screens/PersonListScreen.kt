@@ -11,7 +11,11 @@ import com.giftideaminder.data.model.Person
 import com.giftideaminder.ui.components.PersonItem
 import com.giftideaminder.viewmodel.PersonViewModel
 import kotlinx.coroutines.flow.collectLatest
+import androidx.compose.ui.tooling.preview.Preview
 
+
+
+@Preview
 @Composable
 fun PersonListScreen(navController: NavController) {
     val viewModel: PersonViewModel = hiltViewModel()

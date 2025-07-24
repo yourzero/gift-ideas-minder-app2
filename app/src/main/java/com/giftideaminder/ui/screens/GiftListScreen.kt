@@ -40,8 +40,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+
+
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)@Preview
 @Composable
 fun GiftListScreen(viewModel: GiftViewModel, navController: NavController) {
     val gifts = viewModel.allGifts.collectAsState(initial = emptyList()).value

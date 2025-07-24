@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.googleDaggerHilt)
     alias(libs.plugins.kotlinKapt)
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.20"
+    id("dev.tonholo.s2c") version "2.1.2"  // ← use this ID and the latest version :contentReference[oaicite:0]{index=0}
 }
 
 android {
@@ -12,7 +13,8 @@ android {
 
     defaultConfig {
         applicationId = "com.giftideaminder"
-        minSdk = 24
+        //minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -80,4 +82,21 @@ dependencies {
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
-} 
+}
+
+//svgToCompose {
+//    processor {
+//        val projectIcons by creating {
+//            from(layout.projectDirectory.dir("src/main/svg"))
+//            destinationPackage("com.threekidsinatrenchcoat.ui.icons")
+//            icons {
+//                theme("com.example.app.ui.theme.AppTheme")
+//            }
+//            // Additional configurations...
+//        }
+//    }
+//}
+////s2c {
+////    inputDirectory.set(file("src/main/svg"))
+////    outputPackage.set("com.threekidsinatrenchcoat.ui.icons")
+////}

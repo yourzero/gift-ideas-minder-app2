@@ -17,7 +17,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.giftideaminder.viewmodel.GiftViewModel
 import kotlin.math.abs
+import androidx.compose.ui.tooling.preview.Preview
 
+
+@Preview
 @Composable
 fun BudgetScreen(navController: NavController) {
     val viewModel: GiftViewModel = hiltViewModel()

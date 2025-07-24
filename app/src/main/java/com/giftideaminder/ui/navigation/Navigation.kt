@@ -13,7 +13,10 @@ import com.giftideaminder.ui.screens.AddEditPersonScreen
 import com.giftideaminder.ui.screens.ImportScreen
 import com.giftideaminder.ui.screens.BudgetScreen
 import com.giftideaminder.viewmodel.GiftViewModel
+import androidx.compose.ui.tooling.preview.Preview
 
+
+@Preview
 @Composable
 fun Navigation(viewModel: GiftViewModel) {
     val navController = rememberNavController()

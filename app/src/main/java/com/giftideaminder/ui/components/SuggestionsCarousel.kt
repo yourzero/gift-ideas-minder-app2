@@ -18,7 +18,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.tooling.preview.Preview
 
+@Preview
 @Composable
 fun SuggestionsCarousel(
     suggestions: StateFlow<List<Gift>>,
