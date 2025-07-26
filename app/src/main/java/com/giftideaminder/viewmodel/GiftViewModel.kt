@@ -7,7 +7,6 @@ import com.giftideaminder.data.repository.GiftRepository
 import com.giftideaminder.data.api.PriceService
 import com.giftideaminder.data.api.AIService
 import com.giftideaminder.data.api.AIRequest
-import com.giftideaminder.data.model.Person
 import com.giftideaminder.data.repository.PersonRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -26,13 +25,24 @@ class GiftViewModel @Inject constructor(
     private val aiService: AIService
 ) : ViewModel() {
 
+    // Current user name for personalization
+    private val _currentUserName = MutableStateFlow("Guest")
+    val currentUserName: StateFlow<String> = _currentUserName.asStateFlow()
+
+    // All stored gifts
     val allGifts: Flow<List<Gift>> = giftRepository.allGifts
 
+    // AI suggestions
     private val _suggestions = MutableStateFlow<List<Gift>>(emptyList())
     val suggestions: StateFlow<List<Gift>> = _suggestions.asStateFlow()
 
     init {
         fetchSuggestions()
+    }
+
+    /** Update the current user name **/
+    fun setCurrentUserName(name: String) {
+        _currentUserName.value = name
     }
 
     fun insertGift(gift: Gift) = viewModelScope.launch {
@@ -83,6 +93,9 @@ class GiftViewModel @Inject constructor(
     }
 
     private fun extractAsinFromUrl(url: String): String? {
-        return Regex("/([A-Z0-9]{10})(?:/|\$)").find(url)?.groupValues?.get(1)
+        return Regex("/([A-Z0-9]{10})(?:/|\$)")
+            .find(url)
+            ?.groupValues
+            ?.get(1)
     }
-} 
+}

@@ -1,5 +1,4 @@
-package com.giftideaminder
-//package com.threekidsinatrenchcoat.ui.screens
+package com.giftideaminder.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -7,21 +6,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CardGiftcard   // same path, but backed by M3 artifact
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Event
-
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,8 +29,7 @@ import androidx.navigation.compose.rememberNavController
 import com.giftideaminder.viewmodel.GiftViewModel
 import java.util.Calendar
 
-// Simple data model for events
-// Simple data model for events
+// Data class for event cards
 data class GiftEvent(val title: String, val subtitle: String)
 
 // Pastel & brand colors
@@ -55,55 +43,38 @@ private val FabPeach     = Color(0xFFFFAB91)
 private val TextDark     = Color(0xFF5D4037)
 
 @Composable
-fun HomeDashboardScreen(name: String,
-                        navController: NavController,
-                        viewModel: GiftViewModel = hiltViewModel()
+fun HomeDashboardScreen(
+    name: String,
+    navController: NavController,
+    viewModel: GiftViewModel = hiltViewModel()
 ) {
-    // 1) Collect your gifts
+    // Collect gifts
     val gifts by viewModel.allGifts.collectAsState(initial = emptyList())
 
-    // 2) Compute timestamps
+    // Time calculations
     val now = remember { System.currentTimeMillis() }
     val weekMillis = 7L * 24 * 60 * 60 * 1000
 
-    // 3) Compute stats
+    // Compute stats
     val upcomingCount = gifts.count {
-        it.eventDate != null &&
-                it.eventDate!! > now &&
-                it.eventDate!! <= now + weekMillis
+        it.eventDate != null && it.eventDate!! in (now + 1)..(now + weekMillis)
     }
     val pendingCount = gifts.count { !it.isPurchased }
     val sentThisMonth = gifts.count { gift ->
-        gift.isPurchased &&
-                gift.purchaseDate?.let { sameMonth(now, it) } == true
+        gift.isPurchased && gift.purchaseDate?.let { sameMonth(now, it) } == true
     }
     val missedCount = gifts.count {
-        it.eventDate != null &&
-                it.eventDate!! < now &&
-                !it.isPurchased
+        it.eventDate != null && it.eventDate!! < now && !it.isPurchased
     }
 
-
-//    val stats = listOf(
-//        Triple("Upcoming Gifts",     "5 in the next week",  StatsYellow),
-//        Triple("Pending Purchases",  "3 awaiting action",  StatsBrown),
-//        Triple("Gift Sent This Month","12 gifts",           StatsPurple),
-//        Triple("Missed Events",      "2 events missed",     StatsOlive)
-//    )
-//    val upcomingEvents = listOf(
-//        GiftEvent("Mom's Birthday",     "Send flowers"),
-//        GiftEvent("Anniversary Dinner", "Book a table"),
-//        GiftEvent("Friend's Wedding",   "Buy a gift card")
-//    )
-
     val stats = listOf(
-        Triple("Upcoming Gifts",     "$upcomingCount in next 7d",    StatsYellow),
-        Triple("Pending Purchases",  "$pendingCount awaiting",      StatsBrown),
-        Triple("Sent This Month",    "$sentThisMonth gifts",        StatsPurple),
-        Triple("Missed Events",      "$missedCount missed",         StatsOlive)
+        Triple("Upcoming Gifts",    "$upcomingCount in next 7d", StatsYellow),
+        Triple("Pending Purchases", "$pendingCount awaiting",   StatsBrown),
+        Triple("Sent This Month",   "$sentThisMonth gifts",     StatsPurple),
+        Triple("Missed Events",     "$missedCount missed",      StatsOlive)
     )
 
-    // 4) Build upcoming event list
+    // Build upcoming events
     val upcomingEvents = gifts
         .filter { it.eventDate != null && it.eventDate!! > now }
         .sortedBy { it.eventDate }
@@ -113,23 +84,29 @@ fun HomeDashboardScreen(name: String,
         containerColor = BgPink,
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* TODO */ },
+                onClick = {
+                    navController.navigate("addGift") {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
                 containerColor = FabPeach,
-                modifier = Modifier.offset(y = (-100).dp)
-            ) { Icon(Icons.Filled.Add, contentDescription = "Add Gift") }
+                modifier = Modifier.offset(y = (-24).dp)
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = "Add Gift")
+            }
         }
-    ) { innerPadding ->
+    ) { padding ->
         Box(
             Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(padding)
         ) {
             Column(
-                modifier = Modifier
+                Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp, vertical = 24.dp)
             ) {
-                // Greeting
                 Text(
                     text = "HELLO, ${name.uppercase()}!",
                     fontSize = 28.sp,
@@ -141,7 +118,7 @@ fun HomeDashboardScreen(name: String,
                 // Stats grid
                 stats.chunked(2).forEach { row ->
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         row.forEach { (title, subtitle, bg) ->
@@ -151,7 +128,7 @@ fun HomeDashboardScreen(name: String,
                     Spacer(Modifier.height(16.dp))
                 }
 
-                // Upcoming events
+                // Upcoming Gifts header
                 Text(
                     text = "Upcoming Gift Events",
                     fontSize = 20.sp,
@@ -161,16 +138,16 @@ fun HomeDashboardScreen(name: String,
                 Spacer(Modifier.height(8.dp))
 
                 LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
+                    Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(upcomingEvents) { event ->
-                        EventCard(event)
+                    items(upcomingEvents) { ev ->
+                        EventCard(ev)
                     }
                 }
             }
 
-            // Floating, pill-shaped bottom nav
+            // Floating pill-shaped bottom nav
             NavigationBar(
                 containerColor = NavBarBg,
                 tonalElevation = 4.dp,
@@ -184,25 +161,27 @@ fun HomeDashboardScreen(name: String,
             ) {
                 NavigationBarItem(
                     icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
-                    selected = true, onClick = { /* TODO */ }
+                    selected = true,
+                    onClick = { navController.navigate("home") }
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Filled.CardGiftcard, contentDescription = "Gifts") },
-                    selected = false, onClick = { /* TODO */ }
+                    selected = false,
+                    onClick = { navController.navigate("giftList") }
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Filled.Event, contentDescription = "Events") },
-                    selected = false, onClick = { /* TODO */ }
+                    selected = false,
+                    onClick = { navController.navigate("eventList") }
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Filled.Person, contentDescription = "People") },
-                    selected = false, onClick = {
-navController.navigate("person_list") {
-    // optional: popUpTo/saveState so you don’t stack lots of copies
-    launchSingleTop = true
-    restoreState = true
-}
-
+                    selected = false,
+                    onClick = {
+                        navController.navigate("personList") {
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 )
             }
@@ -212,25 +191,22 @@ navController.navigate("person_list") {
 
 @Composable
 private fun StatCard(
-    title: String,
-    subtitle: String,
-    background: Color,
-    modifier: Modifier = Modifier
+    title: String, subtitle: String, background: Color, modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.height(100.dp),
-        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = background),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(16.dp),
+        modifier = modifier.height(100.dp)
     ) {
         Column(
-            modifier = Modifier
+            Modifier
                 .fillMaxSize()
                 .padding(12.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = title, style = MaterialTheme.typography.bodyLarge, color = TextDark)
-            Text(text = subtitle, style = MaterialTheme.typography.bodyMedium, color = TextDark)
+            Text(title, style = MaterialTheme.typography.bodyLarge, color = TextDark)
+            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = TextDark)
         }
     }
 }
@@ -238,25 +214,25 @@ private fun StatCard(
 @Composable
 private fun EventCard(event: GiftEvent) {
     Card(
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .height(56.dp)
     ) {
         Row(
-            modifier = Modifier
+            Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
-                Text(text = event.title, style = MaterialTheme.typography.bodyLarge, color = TextDark)
-                Text(text = event.subtitle, style = MaterialTheme.typography.bodyMedium, color = TextDark)
+                Text(event.title, style = MaterialTheme.typography.bodyLarge, color = TextDark)
+                Text(event.subtitle, style = MaterialTheme.typography.bodyMedium, color = TextDark)
             }
-            IconButton(onClick = { /* TODO */ }) {
+            IconButton(onClick = { /* TODO: event detail */ }) {
                 Icon(Icons.Filled.Event, contentDescription = "Open Event")
             }
         }
@@ -266,16 +242,13 @@ private fun EventCard(event: GiftEvent) {
 private fun sameMonth(ts1: Long, ts2: Long): Boolean {
     val c1 = Calendar.getInstance().apply { timeInMillis = ts1 }
     val c2 = Calendar.getInstance().apply { timeInMillis = ts2 }
-    return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR)
-            && c1.get(Calendar.MONTH) == c2.get(Calendar.MONTH)
+    return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR) &&
+            c1.get(Calendar.MONTH) == c2.get(Calendar.MONTH)
 }
 
 @Preview(showBackground = true)
 @Composable
-fun HomeDashboardFloatingNavPreview() {
+fun HomeDashboardPreview() {
     val navController = rememberNavController()
-    HomeDashboardScreen(
-        name = "Demo",
-        navController = navController
-    )
+    HomeDashboardScreen("Demo User", navController = navController)
 }
