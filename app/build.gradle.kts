@@ -82,6 +82,10 @@ dependencies {
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
+    // In your module-level build.gradle.kts:
+    implementation("androidx.compose.material:material-icons-extended:1.4.3")
+    implementation("androidx.compose.material3:material3:1.1.0")
+
 }
 
 //svgToCompose {

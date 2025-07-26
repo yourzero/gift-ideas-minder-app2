@@ -5,6 +5,15 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
+    <!-- Background (soft blue gradient) -->
+    <path
+        android:pathData="M0,0h108v108h-108z"
+        android:fillColor="#E3F2FD" /> <!-- Start color -->
+    <path
+        android:pathData="M0,0h108v108h-108z"
+        android:fillAlpha="0.5"
+        android:fillColor="#BBDEFB" /> <!-- End color overlay for gradient effect -->
+
     <!-- Gift Box (red) -->
     <path
         android:pathData="M30,50h48v30h-48z"
@@ -12,19 +21,19 @@
     <!-- Box Lid -->
     <path
         android:pathData="M30,50l24,-10l24,10v-10h-48z"
-        android:fillColor="#EF5350" />
+        android:fillColor="#EF5350" /> <!-- Slightly darker red for depth -->
     <!-- Bow -->
     <path
         android:pathData="M54,40c-5,0 -5,-5 0,-5s5,5 0,5zM54,40c5,0 5,-5 0,-5s-5,5 0,5z"
-        android:fillColor="#FFEB3B" />
+        android:fillColor="#FFEB3B" /> <!-- Yellow accent -->
 
-    <!-- Lightbulb (yellow) -->
+    <!-- Lightbulb (yellow, symbolizing idea) -->
     <path
         android:pathData="M54,20c-5,0 -9,4 -9,9v6h18v-6c0,-5 -4,-9 -9,-9z"
         android:fillColor="#FFEB3B" />
     <!-- Bulb base -->
     <path
         android:pathData="M49,35h10v5h-10z"
-        android:fillColor="#FFC107" />
+        android:fillColor="#FFC107" /> <!-- Darker yellow -->
 
-</vector>
+</vector> 

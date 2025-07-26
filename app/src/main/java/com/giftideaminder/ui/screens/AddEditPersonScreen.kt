@@ -25,8 +25,21 @@ import com.giftideaminder.viewmodel.PersonViewModel
 import kotlinx.coroutines.flow.collectLatest
 import java.util.Calendar
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
 
-@Preview
+@Preview(showBackground = true)
+@Composable
+fun AddEditPersonScreenPreview() {
+    // Use a dummy NavController and default/null values
+    val fakeNavController = rememberNavController()
+    AddEditPersonScreen(
+        navController = fakeNavController,
+        personId = null // or use a sample value like 1
+    )
+}
+
+
+//@Preview
 @Composable
 fun AddEditPersonScreen(
     navController: NavController,

@@ -1,10 +1,13 @@
 package com.giftideaminder.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.giftideaminder.ui.screens.AddEditGiftScreen
 import com.giftideaminder.ui.screens.GiftDetailScreen
 import com.giftideaminder.ui.screens.GiftListScreen
@@ -18,8 +21,15 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Preview
 @Composable
-fun Navigation(viewModel: GiftViewModel) {
+fun Navigation(viewModel: GiftViewModel, sharedText: String? = null) {
     val navController = rememberNavController()
+
+    if (sharedText != null) {
+        LaunchedEffect(Unit) {
+            navController.navigate("add_gift_with_share/$sharedText")
+        }
+    }
+
     NavHost(navController = navController, startDestination = "gift_list") {
         composable("gift_list") {
             GiftListScreen(viewModel = viewModel, navController = navController)
@@ -50,6 +60,13 @@ fun Navigation(viewModel: GiftViewModel) {
         }
         composable("budget") {
             BudgetScreen(navController = navController)
+        }
+        composable(
+            "add_gift_with_share/{sharedText}",
+            arguments = listOf(navArgument("sharedText") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val text = backStackEntry.arguments?.getString("sharedText") ?: ""
+            AddEditGiftScreen(viewModel = viewModel, navController = navController, giftId = null, sharedText = text)
         }
     }
 } 

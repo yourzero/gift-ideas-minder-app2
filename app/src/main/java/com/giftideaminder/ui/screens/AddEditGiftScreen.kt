@@ -39,7 +39,8 @@ import java.util.Calendar
 fun AddEditGiftScreen(
     viewModel: GiftViewModel,
     navController: NavController,
-    giftId: Int?
+    giftId: Int?,
+    sharedText: String? = null
 ) {
     val context = LocalContext.current
     val personViewModel: PersonViewModel = hiltViewModel()
@@ -56,6 +57,16 @@ fun AddEditGiftScreen(
     var expanded by remember { mutableStateOf(false) }
     var showAddPersonDialog by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
+
+    if (sharedText != null && giftId == null) {
+        LaunchedEffect(sharedText) {
+            if (sharedText.startsWith("http")) {
+                url = sharedText
+            } else {
+                description = sharedText
+            }
+        }
+    }
 
     if (giftId != null) {
         LaunchedEffect(giftId) {

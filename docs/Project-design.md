@@ -9,7 +9,7 @@
 
 ### Epic 2: Gift Idea Capture
 1. [✓] **2.1 Manual entry screen**
-2. [◻] **2.2 Share-from-other-apps integration**
+2. [✓] **2.2 Share-from-other-apps integration**
 3. [✓] **2.3 OCR from screenshots**
 4. [✓] **2.4 SMS-tap capture**
 5. [✓] **2.5 File import (CSV/PDF/Doc/Spreadsheet)**

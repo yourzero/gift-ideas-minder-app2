@@ -1,5 +1,6 @@
 package com.giftideaminder
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,13 +21,16 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val sharedText = intent?.getStringExtra(Intent.EXTRA_TEXT)
+
         setContent {
             GiftIdeaMinderTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Navigation(viewModel)
+                    Navigation(viewModel, sharedText)
                     //HomeDashboardGenerated(viewmodel)
                 }
             }
