@@ -20,5 +20,6 @@ data class Gift(
     val currentPrice: Double? = null,
     val budget: Double? = null,
     val isPurchased: Boolean = false,
-    val priceHistory: List<Pair<String, Double>>? = null
+    val priceHistory: List<Pair<String, Double>>? = null,
+    val purchaseDate: Long? = null,      // <-- new
 ) 
