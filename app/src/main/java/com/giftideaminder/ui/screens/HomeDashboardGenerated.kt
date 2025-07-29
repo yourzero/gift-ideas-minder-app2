@@ -85,13 +85,13 @@ fun HomeDashboardScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    navController.navigate("addGift") {
+                    navController.navigate("add_gift") {
                         launchSingleTop = true
                         restoreState = true
                     }
                 },
                 containerColor = FabPeach,
-                modifier = Modifier.offset(y = (-24).dp)
+                modifier = Modifier.offset(y = (-60).dp)
             ) {
                 Icon(Icons.Filled.Add, contentDescription = "Add Gift")
             }
@@ -167,18 +167,18 @@ fun HomeDashboardScreen(
                 NavigationBarItem(
                     icon = { Icon(Icons.Filled.CardGiftcard, contentDescription = "Gifts") },
                     selected = false,
-                    onClick = { navController.navigate("giftList") }
+                    onClick = { navController.navigate("gift_list") }
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Filled.Event, contentDescription = "Events") },
                     selected = false,
-                    onClick = { navController.navigate("eventList") }
+                    onClick = { navController.navigate("event_list") }
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Filled.Person, contentDescription = "People") },
                     selected = false,
                     onClick = {
-                        navController.navigate("personList") {
+                        navController.navigate("person_list") {
                             launchSingleTop = true
                             restoreState = true
                         }
