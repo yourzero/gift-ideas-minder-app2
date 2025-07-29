@@ -12,7 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.giftideaminder.ui.navigation.AppScaffold
-import com.giftideaminder.ui.navigation.Navigation
+//import com.giftideaminder.ui.navigation.Navigation
 import com.giftideaminder.ui.screens.HomeDashboardScreen
 import com.giftideaminder.ui.theme.GiftIdeaMinderTheme
 //import com.giftideaminder.ui.screens.HomeDashboardGenerated
