@@ -20,7 +20,7 @@
 //            LaunchedEffect(Unit) {
 //                intent?.takeIf { it.action == Intent.ACTION_SEND }?.getStringExtra(Intent.EXTRA_TEXT)?.let { text ->
 //                    // Navigate to Add/Edit Gift screen with the shared text
-//                    navController.navigate("addGift?sharedText=${Uri.encode(text)}")
+//                    navController.navigate("add_gift?sharedText=${Uri.encode(text)}")
 //                }
 //            }
 //        }

@@ -15,7 +15,7 @@ package com.giftideaminder.ui.navigation//package com.giftideaminder.ui.navigati
 //        // ... other composable routes ...
 //
 //        composable(
-//            route = "addGift?sharedText={sharedText}",
+//            route = "add_gift?sharedText={sharedText}",
 //            arguments = listOf(navArgument("sharedText") {
 //                type = NavType.StringType
 //                nullable = true

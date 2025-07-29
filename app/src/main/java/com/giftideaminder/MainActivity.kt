@@ -46,14 +46,15 @@ class MainActivity : ComponentActivity() {
 //                        navController = navController
 //                    )
 
-                    AppScaffold(navController,
-                        onFabClick = { navController.navigate("addGift") }
+                    AppScaffold(
+                        navController = navController,
+                        onFabClick = { navController.navigate("add_gift") }
                     );
 
-                    Navigation(
-                        viewModel = viewModel,
-                        sharedText = sharedText
-                    )
+//                    Navigation(
+//                        viewModel = viewModel,
+//                        sharedText = sharedText
+//                    )
 
                 }
             }

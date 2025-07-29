@@ -49,18 +49,18 @@ fun AppScaffold(
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.CardGiftcard, contentDescription = "Gifts") },
-                    selected = currentRoute == "giftList",
-                    onClick = { navTo("giftList") }
+                    selected = currentRoute == "gift_list",
+                    onClick = { navTo("gift_list") }
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Event, contentDescription = "Events") },
-                    selected = currentRoute == "eventList",
-                    onClick = { navTo("eventList") }
+                    selected = currentRoute == "event_list",
+                    onClick = { navTo("event_list") }
                 )
                 NavigationBarItem(
                     icon = { Icon(Icons.Default.Person, contentDescription = "People") },
-                    selected = currentRoute == "personList",
-                    onClick = { navTo("personList") }
+                    selected = currentRoute == "person_list",
+                    onClick = { navTo("person_list") }
                 )
             }
         }
@@ -78,23 +78,23 @@ fun AppScaffold(
                 )
             }
 
-            composable("giftList") {
+            composable("gift_list") {
                 // GiftListScreen(navController: NavController)
                 GiftListScreen(navController = navController)
             }
 
-            composable("eventList") {
+            composable("event_list") {
                 // EventListScreen(navController: NavController)
                 EventListScreen(navController = navController)
             }
 
-            composable("personList") {
+            composable("person_list") {
                 // PersonListScreen(navController: NavController)
                 PersonListScreen(navController = navController)
             }
 
             composable(
-                route = "addGift?sharedText={sharedText}",
+                route = "add_gift?sharedText={sharedText}",
                 arguments = listOf(navArgument("sharedText") {
                     type = NavType.StringType
                     nullable = true

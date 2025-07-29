@@ -48,18 +48,18 @@
 //                )
 //                NavigationBarItem(
 //                    icon = { Icon(Icons.Default.CardGiftcard, contentDescription = "Gifts") },
-//                    selected = currentRoute == "giftList",
-//                    onClick = { navTo("giftList") }
+//                    selected = currentRoute == "gift_list",
+//                    onClick = { navTo("gift_list") }
 //                )
 //                NavigationBarItem(
 //                    icon = { Icon(Icons.Default.Event, contentDescription = "Events") },
-//                    selected = currentRoute == "eventList",
-//                    onClick = { navTo("eventList") }
+//                    selected = currentRoute == "event_list",
+//                    onClick = { navTo("event_list") }
 //                )
 //                NavigationBarItem(
 //                    icon = { Icon(Icons.Default.Person, contentDescription = "People") },
-//                    selected = currentRoute == "personList",
-//                    onClick = { navTo("personList") }
+//                    selected = currentRoute == "person_list",
+//                    onClick = { navTo("person_list") }
 //                )
 //            }
 //        }
@@ -70,11 +70,11 @@
 //            modifier = Modifier.padding(innerPadding)
 //        ) {
 //            composable("home")      { HomeDashboardScreen(navController = navController) }
-//            composable("giftList")  { GiftListScreen(navController) }
-//            composable("eventList") { EventListScreen(navController) }
-//            composable("personList"){ PersonListScreen(navController) }
+//            composable("gift_list")  { GiftListScreen(navController) }
+//            composable("event_list") { EventListScreen(navController) }
+//            composable("person_list"){ PersonListScreen(navController) }
 //            composable(
-//                "addGift?sharedText={sharedText}",
+//                "add_gift?sharedText={sharedText}",
 //                arguments = listOf(navArgument("sharedText") {
 //                    type = NavType.StringType; nullable = true; defaultValue = null
 //                })
