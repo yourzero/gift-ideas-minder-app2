@@ -9,7 +9,7 @@ import com.giftideaminder.data.dao.GiftDao
 import com.giftideaminder.data.dao.PersonDao
 import android.content.Context
 
-@Database(entities = [Gift::class, Person::class], version = 4, exportSchema = false)
+@Database(entities = [Gift::class, Person::class], version = 5, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun giftDao(): GiftDao
     abstract fun personDao(): PersonDao
@@ -24,7 +24,7 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "gift_database"
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).build()
                 INSTANCE = instance
                 instance
             }
@@ -47,6 +47,12 @@ abstract class AppDatabase : RoomDatabase() {
         private val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE gifts ADD COLUMN priceHistory TEXT")
+            }
+        }
+
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE gifts ADD COLUMN purchaseDate INTEGER")
             }
         }
     }
