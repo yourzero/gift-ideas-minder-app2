@@ -26,21 +26,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.giftideaminder.ui.theme.*
 import com.giftideaminder.viewmodel.GiftViewModel
 import java.util.Calendar
 
 // Data class for event cards
 data class GiftEvent(val title: String, val subtitle: String)
 
-// Pastel & brand colors
-private val BgPink       = Color(0xFFFFEBEE)
-private val StatsYellow  = Color(0xFFFFF9C4)
-private val StatsBrown   = Color(0xFF6D4C41)
-private val StatsPurple  = Color(0xFFE1BEE7)
-private val StatsOlive   = Color(0xFFCDDC39)
-private val NavBarBg     = Color(0xFFDCEDC8)
-private val FabPeach     = Color(0xFFFFAB91)
-private val TextDark     = Color(0xFF5D4037)
 
 @Composable
 fun HomeDashboardScreen(
@@ -147,44 +139,45 @@ fun HomeDashboardScreen(
                 }
             }
 
-            // Floating pill-shaped bottom nav
-            NavigationBar(
-                containerColor = NavBarBg,
-                tonalElevation = 4.dp,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(horizontal = 16.dp, vertical = 16.dp)
-                    .height(60.dp)
-                    .fillMaxWidth()
-                    .shadow(8.dp, RoundedCornerShape(28.dp))
-                    .clip(RoundedCornerShape(28.dp))
-            ) {
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
-                    selected = true,
-                    onClick = { navController.navigate("home") }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.CardGiftcard, contentDescription = "Gifts") },
-                    selected = false,
-                    onClick = { navController.navigate("gift_list") }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.Event, contentDescription = "Events") },
-                    selected = false,
-                    onClick = { navController.navigate("event_list") }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.Person, contentDescription = "People") },
-                    selected = false,
-                    onClick = {
-                        navController.navigate("person_list") {
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                )
-            }
+//            // TODO - keep around in case I need the styling
+//            // Floating pill-shaped bottom nav
+//            NavigationBar(
+//                containerColor = NavBarBg,
+//                tonalElevation = 4.dp,
+//                modifier = Modifier
+//                    .align(Alignment.BottomCenter)
+//                    .padding(horizontal = 16.dp, vertical = 16.dp)
+//                    .height(60.dp)
+//                    .fillMaxWidth()
+//                    .shadow(8.dp, RoundedCornerShape(28.dp))
+//                    .clip(RoundedCornerShape(28.dp))
+//            ) {
+//                NavigationBarItem(
+//                    icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
+//                    selected = true,
+//                    onClick = { navController.navigate("home") }
+//                )
+//                NavigationBarItem(
+//                    icon = { Icon(Icons.Filled.CardGiftcard, contentDescription = "Gifts") },
+//                    selected = false,
+//                    onClick = { navController.navigate("gift_list") }
+//                )
+//                NavigationBarItem(
+//                    icon = { Icon(Icons.Filled.Event, contentDescription = "Events") },
+//                    selected = false,
+//                    onClick = { navController.navigate("event_list") }
+//                )
+//                NavigationBarItem(
+//                    icon = { Icon(Icons.Filled.Person, contentDescription = "People") },
+//                    selected = false,
+//                    onClick = {
+//                        navController.navigate("person_list") {
+//                            launchSingleTop = true
+//                            restoreState = true
+//                        }
+//                    }
+//                )
+//            }
         }
     }
 }
