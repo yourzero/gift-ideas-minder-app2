@@ -37,9 +37,9 @@ import java.util.Calendar
 @Preview
 @Composable
 fun AddEditGiftScreen(
-    viewModel: GiftViewModel,
+    viewModel: GiftViewModel = hiltViewModel(),
     navController: NavController,
-    giftId: Int?,
+    giftId: Int? = null,
     sharedText: String? = null
 ) {
     val context = LocalContext.current

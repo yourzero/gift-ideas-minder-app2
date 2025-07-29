@@ -41,12 +41,14 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 
 
-
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)@Preview
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@Preview
 @Composable
-fun GiftListScreen(viewModel: GiftViewModel, navController: NavController) {
+fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
+                   navController: NavController) {
     val gifts = viewModel.allGifts.collectAsState(initial = emptyList()).value
     var searchQuery by remember { mutableStateOf("") }
     val filteredGifts = gifts.filter { it.title.contains(searchQuery, ignoreCase = true) }

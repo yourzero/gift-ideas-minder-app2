@@ -25,7 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Preview
 @Composable
-fun GiftDetailScreen(giftId: Int, viewModel: GiftViewModel, navController: NavController) {
+fun GiftDetailScreen(giftId: Int, viewModel: GiftViewModel = hiltViewModel(), navController: NavController) {
     val personViewModel: PersonViewModel = hiltViewModel()
     val gift = viewModel.getGiftById(giftId).collectAsState(initial = null).value ?: return
     val persons = personViewModel.allPersons.collectAsState(initial = emptyList()).value

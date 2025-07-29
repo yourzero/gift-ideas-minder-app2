@@ -11,6 +11,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.giftideaminder.ui.navigation.AppScaffold
 import com.giftideaminder.ui.navigation.Navigation
 import com.giftideaminder.ui.screens.HomeDashboardScreen
 import com.giftideaminder.ui.theme.GiftIdeaMinderTheme
@@ -40,10 +41,20 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     //Navigation(viewModel, sharedText)
-                    HomeDashboardScreen(
-                        name = currentUserNameState.value,
-                        navController = navController
+//                    HomeDashboardScreen(
+//                        name = currentUserNameState.value,
+//                        navController = navController
+//                    )
+
+                    AppScaffold(navController,
+                        onFabClick = { navController.navigate("addGift") }
+                    );
+
+                    Navigation(
+                        viewModel = viewModel,
+                        sharedText = sharedText
                     )
+
                 }
             }
         }
