@@ -170,7 +170,7 @@ fun AddEditGifteeScreen(
                 }
                 Button(onClick = {
                     viewModel.onSave()
-                    onNavigateBack()
+                    //onNavigateBack()
                 }) {
                     Text("Save")
                 }

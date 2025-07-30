@@ -30,6 +30,14 @@ fun AppNavGraph(
         composable("person_list") {
             PersonListScreen(navController)
         }
+        composable("add_person") {
+            AddEditGifteeScreen(onNavigateBack = {}) // TODO - should this take the navController like other navs?
+            // TODO figure out if the onNavigateBack is needed
+        }
+        composable("edit_person") {
+            // TODO - add passing the person in
+            AddEditGifteeScreen(onNavigateBack = {}) // TODO - should this take the navController like other navs?
+        }
         composable(
             "add_gift?sharedText={sharedText}",
             arguments = listOf(navArgument("sharedText") {
