@@ -38,7 +38,7 @@ fun SuggestionsCarousel(
                         Text("[Image Placeholder]")
                         Text(suggestion.title)
                         Text(suggestion.description ?: "")
-                        Text("Est. Price: $${suggestion.price ?: "N/A"}")
+                        Text("Est. Price: $${suggestion.currentPrice ?: "N/A"}")
                         Row {
                             Button(onClick = { onAccept(suggestion) }) { Text("Accept") }
                             Spacer(Modifier.width(8.dp))

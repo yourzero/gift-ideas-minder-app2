@@ -27,7 +27,7 @@ fun BudgetScreen(navController: NavController) {
     val gifts by viewModel.allGifts.collectAsState(emptyList())
 
     val totalBudget = gifts.sumOf { it.budget ?: 0.0 }
-    val totalSpent = gifts.filter { it.isPurchased }.sumOf { it.price ?: 0.0 }
+    val totalSpent = gifts.filter { it.isPurchased }.sumOf { it.purchasePrice ?: 0.0 }
     val remaining = totalBudget - totalSpent
 
     var showAlert by remember { mutableStateOf(remaining < 50.0 && remaining > 0.0) }  // Alert if within $50

@@ -21,7 +21,7 @@ fun GiftItem(gift: Gift, onClick: () -> Unit) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(gift.title)
-            Text("Price: $${gift.price ?: 0.0}")
+            Text("Price: $${gift.currentPrice ?: 0.0}")
         }
     }
 } 

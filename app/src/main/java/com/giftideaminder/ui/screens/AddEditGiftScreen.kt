@@ -75,7 +75,7 @@ fun AddEditGiftScreen(
                     title = gift.title
                     description = gift.description ?: ""
                     url = gift.url ?: ""
-                    price = gift.price?.toString() ?: ""
+                    price = gift.currentPrice?.toString() ?: ""
                     eventDate = gift.eventDate ?: 0L
                     selectedPersonId = gift.personId
                 }
@@ -146,7 +146,7 @@ fun AddEditGiftScreen(
                 title = title,
                 description = description,
                 url = url,
-                price = newPrice,
+                currentPrice = newPrice, // TODO - double check that this is the price we want
                 eventDate = if (eventDate > 0) eventDate else null,
                 personId = selectedPersonId
             )

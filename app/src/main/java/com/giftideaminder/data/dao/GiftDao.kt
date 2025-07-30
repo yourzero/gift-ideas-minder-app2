@@ -1,19 +1,13 @@
 package com.giftideaminder.data.dao
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import com.giftideaminder.data.model.Gift
+import com.giftideaminder.data.model.GiftWithHistory
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface GiftDao {
-    @Query("SELECT * FROM gifts ORDER BY eventDate ASC")
-    fun getAllGifts(): Flow<List<Gift>>
-
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(gift: Gift)
 
     @Update
@@ -22,6 +16,13 @@ interface GiftDao {
     @Delete
     suspend fun delete(gift: Gift)
 
+    @Query("SELECT * FROM gifts")
+    fun getAllGifts(): Flow<List<Gift>>
+
     @Query("SELECT * FROM gifts WHERE id = :id")
     fun getGiftById(id: Int): Flow<Gift>
-} 
+
+    @Transaction
+    @Query("SELECT * FROM gifts WHERE id = :id")
+    fun getGiftWithHistoryById(id: Int): Flow<GiftWithHistory>
+}
