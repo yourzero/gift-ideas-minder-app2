@@ -33,6 +33,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import java.util.Calendar
+import java.util.Locale
 
 @Preview
 @Composable
@@ -71,14 +72,12 @@ fun AddEditGiftScreen(
     if (giftId != null) {
         LaunchedEffect(giftId) {
             viewModel.getGiftById(giftId).collectLatest { gift ->
-                if (gift != null) {
-                    title = gift.title
-                    description = gift.description ?: ""
-                    url = gift.url ?: ""
-                    price = gift.currentPrice?.toString() ?: ""
-                    eventDate = gift.eventDate ?: 0L
-                    selectedPersonId = gift.personId
-                }
+                title = gift.title
+                description = gift.description ?: ""
+                url = gift.url ?: ""
+                price = gift.currentPrice?.toString() ?: ""
+                eventDate = gift.eventDate ?: 0L
+                selectedPersonId = gift.personId
             }
         }
     }
@@ -109,7 +108,7 @@ fun AddEditGiftScreen(
         Button(onClick = { showDatePicker = true }) {
             Text("Pick Event Date")
         }
-        Text("Selected Date: ${if (eventDate > 0) java.text.SimpleDateFormat("dd/MM/yyyy").format(java.util.Date(eventDate)) else "Not set"}")
+        Text("Selected Date: ${if (eventDate > 0) java.text.SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(java.util.Date(eventDate)) else "Not set"}")
 
         Text("Assigned Person")
         Box {

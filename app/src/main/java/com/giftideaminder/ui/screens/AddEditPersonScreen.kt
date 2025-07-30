@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.collectLatest
 import java.util.Calendar
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import java.util.Locale
 
 @Preview(showBackground = true)
 @Composable
@@ -55,10 +56,8 @@ fun AddEditPersonScreen(
     if (personId != null) {
         LaunchedEffect(personId) {
             viewModel.getPersonById(personId).collectLatest { person ->
-                if (person != null) {
-                    name = person.name
-                    birthday = person.birthday ?: 0L
-                }
+                name = person.name
+                birthday = person.birthday ?: 0L
             }
         }
     }
@@ -74,7 +73,7 @@ fun AddEditPersonScreen(
         Button(onClick = { showDatePicker = true }) {
             Text("Pick Birthday")
         }
-        Text("Selected Birthday: ${if (birthday > 0) java.text.SimpleDateFormat("dd/MM/yyyy").format(java.util.Date(birthday)) else "Not set"}")
+        Text("Selected Birthday: ${if (birthday > 0) java.text.SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(java.util.Date(birthday)) else "Not set"}")
         Button(onClick = {
             val newPerson = Person(
                 id = personId ?: 0,

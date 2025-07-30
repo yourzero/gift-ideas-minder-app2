@@ -43,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.giftideaminder.data.model.Gift
+import androidx.compose.material3.HorizontalDivider
 
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
@@ -98,7 +99,7 @@ fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                Divider()
+                HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
             }
             item {
@@ -131,7 +132,7 @@ fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                Divider()
+                HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
             }
             item {

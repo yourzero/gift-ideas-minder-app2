@@ -33,8 +33,8 @@ data class GiftEvent(val title: String, val subtitle: String)
 fun HomeDashboardScreen(
     name: String,
     navController: NavController,
-    viewModel: GiftViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: GiftViewModel = hiltViewModel()
 ) {
     // 1) Collect your gifts
     val gifts by viewModel.allGifts.collectAsState(initial = emptyList<Gift>())

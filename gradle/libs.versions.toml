@@ -24,6 +24,8 @@ material3 = "1.2.1"
 material-icons = "1.6.8"
 compose-material = "1.6.8"
 
+ksp = "2.0.20-1.0.24"
+
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -61,4 +63,5 @@ material-icons-extended = { group = "androidx.compose.material", name = "materia
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 googleDaggerHilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" } 
+kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" } 

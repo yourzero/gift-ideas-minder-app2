@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlinKapt)
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.20"
     id("dev.tonholo.s2c") version "2.1.2"  // ← use this ID and the latest version :contentReference[oaicite:0]{index=0}
+    alias(libs.plugins.ksp) // Add this
 }
 
 android {
@@ -32,11 +33,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -68,7 +69,7 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    kapt(libs.room.compiler)
+    ksp(libs.room.compiler) // Change from kapt to ksp
     //implementation(libs.mlkitVisionText)
     implementation("com.google.mlkit:text-recognition:16.0.1")
     implementation("com.opencsv:opencsv:5.11.2")

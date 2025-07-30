@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.giftideaminder.data.model.Gift
+import java.util.Locale
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,7 +37,7 @@ fun DashboardScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Gift Idea Minder") },
-                colors = TopAppBarDefaults.smallTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
@@ -176,7 +177,7 @@ fun GiftCard(gift: Gift, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = gift.eventDate?.let { java.text.SimpleDateFormat("MMM d, yyyy").format(java.util.Date(it)) }
+                    text = gift.eventDate?.let { java.text.SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).format(java.util.Date(it)) }
                         ?: "No Date",
                     style = MaterialTheme.typography.bodySmall
                 )

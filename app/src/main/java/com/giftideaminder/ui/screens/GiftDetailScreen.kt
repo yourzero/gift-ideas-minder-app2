@@ -19,6 +19,7 @@ import com.giftideaminder.viewmodel.GiftViewModel
 import com.giftideaminder.viewmodel.PersonViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 @Composable
 fun GiftDetailScreen(
@@ -41,7 +42,7 @@ fun GiftDetailScreen(
         Text("URL: ${gift.url ?: "No URL"}")
         Text("Saved Price: $${gift.originalPrice ?: 0.0}")
         Text("Current Price: $${gift.currentPrice ?: "Not fetched"}")
-        Text("Event Date: ${gift.eventDate?.let { SimpleDateFormat("dd/MM/yyyy").format(Date(it)) } ?: "Not set"}")
+        Text("Event Date: ${gift.eventDate?.let { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(it)) } ?: "Not set"}")
         Text("Assigned to: $personName")
 
         TextField(
@@ -68,7 +69,7 @@ fun GiftDetailScreen(
             Text("Price History:")
             LazyColumn {
                 items(items = history) { record: PriceRecord ->
-                    val date = SimpleDateFormat("MM/dd/yyyy").format(Date(record.timestamp))
+                    val date = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(Date(record.timestamp))
                     Text("$date: $${record.price}")
                 }
             }
