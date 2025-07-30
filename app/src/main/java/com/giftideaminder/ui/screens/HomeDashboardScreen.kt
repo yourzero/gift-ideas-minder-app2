@@ -24,6 +24,7 @@ import com.giftideaminder.viewmodel.GiftViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import java.util.Calendar
+import com.giftideaminder.data.model.Gift
 
 // Simple data class for display
 data class GiftEvent(val title: String, val subtitle: String)
@@ -36,27 +37,27 @@ fun HomeDashboardScreen(
     modifier: Modifier = Modifier
 ) {
     // 1) Collect your gifts
-    val gifts by viewModel.allGifts.collectAsState(initial = emptyList())
+    val gifts by viewModel.allGifts.collectAsState(initial = emptyList<Gift>())
 
     // 2) Compute time boundaries
     val now = remember { System.currentTimeMillis() }
     val weekMillis = 7L * 24 * 60 * 60 * 1000
 
     // 3) Compute stats
-    val upcomingCount = gifts.count {
+    val upcomingCount: Int = gifts.count {
         it.eventDate != null &&
                 it.eventDate!! in (now + 1)..(now + weekMillis)
     }
-    val pendingCount = gifts.count { !it.isPurchased }
-    val sentThisMonth = gifts.count { gift ->
+    val pendingCount: Int = gifts.count { it.isPurchased.not() }
+    val sentThisMonth: Int = gifts.count { gift ->
         gift.isPurchased &&
                 gift.purchaseDate != null &&
-                sameMonth(now, gift.purchaseDate)
+                sameMonth(now, gift.purchaseDate!!)
     }
-    val missedCount = gifts.count {
+    val missedCount: Int = gifts.count {
         it.eventDate != null &&
                 it.eventDate!! < now &&
-                !it.isPurchased
+                it.isPurchased.not()
     }
 
     val stats = listOf(
@@ -67,10 +68,10 @@ fun HomeDashboardScreen(
     )
 
     // 4) Build upcoming events list
-    val upcomingEvents = gifts
+    val upcomingGifts: List<Gift> = gifts
         .filter { it.eventDate != null && it.eventDate!! > now }
-        .sortedBy { it.eventDate }
-        .map { GiftEvent(it.title, it.description ?: "") }
+    val sortedUpcoming: List<Gift> = upcomingGifts.sortedBy { it.eventDate }
+    val upcomingEvents: List<GiftEvent> = sortedUpcoming.map { GiftEvent(it.title, it.description ?: "") }
 
     // 5) Render content only (outer Scaffold is in AppScaffold)
     Column(

@@ -11,24 +11,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.giftideaminder.viewmodel.GiftViewModel
 import kotlin.math.abs
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.giftideaminder.data.model.Gift
 
 
 @Preview
 @Composable
 fun BudgetScreen(navController: NavController) {
     val viewModel: GiftViewModel = hiltViewModel()
-    val gifts by viewModel.allGifts.collectAsState(emptyList())
+    val gifts by viewModel.allGifts.collectAsState(initial = emptyList<Gift>())
 
-    val totalBudget = gifts.sumOf { it.budget ?: 0.0 }
-    val totalSpent = gifts.filter { it.isPurchased }.sumOf { it.purchasePrice ?: 0.0 }
-    val remaining = totalBudget - totalSpent
+    val totalBudget: Double = gifts.sumOf { it.budget ?: 0.0 }
+    val totalSpent: Double = gifts.filter { it.isPurchased }.sumOf { it.purchasePrice ?: 0.0 }
+    val remaining: Double = totalBudget - totalSpent
 
     var showAlert by remember { mutableStateOf(remaining < 50.0 && remaining > 0.0) }  // Alert if within $50
 

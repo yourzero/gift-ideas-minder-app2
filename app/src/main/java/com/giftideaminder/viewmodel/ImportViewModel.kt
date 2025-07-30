@@ -30,7 +30,7 @@ class ImportViewModel @Inject constructor(
                         title = parts[0],
                         description = parts.getOrNull(1),
                         url = parts.getOrNull(2),
-                        price = parts.getOrNull(3)?.toDoubleOrNull()
+                        currentPrice = parts.getOrNull(3)?.toDoubleOrNull()
                     )
                     giftRepository.insert(gift)
                 }
@@ -47,7 +47,7 @@ class ImportViewModel @Inject constructor(
                             title = row[0],
                             description = row.getOrNull(1),
                             url = row.getOrNull(2),
-                            price = row.getOrNull(3)?.toDoubleOrNull()
+                            currentPrice = row.getOrNull(3)?.toDoubleOrNull()
                         )
                         giftRepository.insert(gift)
                     }

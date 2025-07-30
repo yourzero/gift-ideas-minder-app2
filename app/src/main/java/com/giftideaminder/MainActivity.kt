@@ -32,30 +32,14 @@ class MainActivity : ComponentActivity() {
             GiftIdeaMinderTheme {
                 val navController = rememberNavController()
 
-                val currentUserNameState =
-                    viewModel.currentUserName.collectAsState(initial = "Guest")
-
-
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    //Navigation(viewModel, sharedText)
-//                    HomeDashboardScreen(
-//                        name = currentUserNameState.value,
-//                        navController = navController
-//                    )
-
                     AppScaffold(
                         navController = navController,
                         onFabClick = { navController.navigate("add_gift") }
                     );
-
-//                    Navigation(
-//                        viewModel = viewModel,
-//                        sharedText = sharedText
-//                    )
-
                 }
             }
         }

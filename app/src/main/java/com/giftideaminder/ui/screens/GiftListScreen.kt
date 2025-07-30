@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.giftideaminder.data.model.Gift
 
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
@@ -49,9 +50,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @Composable
 fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
                    navController: NavController) {
-    val gifts = viewModel.allGifts.collectAsState(initial = emptyList()).value
+    val giftsState = viewModel.allGifts.collectAsState(initial = emptyList<Gift>())
+    val gifts = giftsState.value
     var searchQuery by remember { mutableStateOf("") }
-    val filteredGifts = gifts.filter { it.title.contains(searchQuery, ignoreCase = true) }
+    val filteredGifts: List<Gift> = gifts.filter { it.title.contains(searchQuery, ignoreCase = true) }
 
     Scaffold(
         topBar = {
@@ -135,7 +137,7 @@ fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
             item {
                 Text("Your Gifts", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
             }
-            if (filteredGifts.isEmpty()) {
+            if (filteredGifts.size == 0) {
                 item {
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("No gifts yet. Start adding some!", textAlign = TextAlign.Center)
@@ -148,7 +150,7 @@ fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
             } else {
                 items(
                     items = filteredGifts,
-                    key = { it.id }
+                    key = { giftItem: Gift -> giftItem.id }
                 ) { gift ->
                     GiftItem(gift = gift) {
                         navController.navigate("gift_detail/${gift.id}")
