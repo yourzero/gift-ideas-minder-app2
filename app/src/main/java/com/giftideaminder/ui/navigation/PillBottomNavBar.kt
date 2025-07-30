@@ -1,16 +1,17 @@
 package com.giftideaminder.ui.navigation
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -46,9 +47,40 @@ fun PillBottomNavBar(
             .shadow(8.dp, RoundedCornerShape(40.dp))
             .clip(RoundedCornerShape(40.dp))
     ) {
-        BottomNavItem(Icons.Default.Home, "home", "Home", currentRoute, navTo)
-        BottomNavItem(Icons.Default.CardGiftcard, "gift_list", "Gifts", currentRoute, navTo)
-        BottomNavItem(Icons.Default.Event, "event_list", "Events", currentRoute, navTo)
-        BottomNavItem(Icons.Default.Person, "person_list", "People", currentRoute, navTo)
+        listOf(
+            Triple(Icons.Default.Home, "home", "Home"),
+            Triple(Icons.Default.CardGiftcard, "gift_list", "Gifts"),
+            Triple(Icons.Default.Event, "event_list", "Events"),
+            Triple(Icons.Default.Person, "person_list", "People")
+        ).forEach { (icon, route, label) ->
+            val selected = currentRoute == route
+            NavigationBarItem(
+                selected = selected,
+                onClick = { navTo(route) },
+                icon = {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(RoundedCornerShape(28.dp))
+                            .background(if (selected) Color.White else Color.Transparent)
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = label,
+                            tint = if (selected)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Color.Transparent,
+                    selectedIconColor = Color.Unspecified,
+                    unselectedIconColor = Color.Unspecified
+                )
+            )
+        }
     }
 }

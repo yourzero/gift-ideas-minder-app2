@@ -24,7 +24,7 @@ fun AppScaffold(
             FloatingActionButton(
                 onClick = onFabClick,
                 containerColor = FabPeach,
-                modifier = Modifier.padding(bottom = 64.dp)
+                modifier = Modifier.padding(bottom = 0.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Gift")
             }
