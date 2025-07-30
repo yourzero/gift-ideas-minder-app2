@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.googleDaggerHilt)
     alias(libs.plugins.kotlinKapt)
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.20"
-    id("dev.tonholo.s2c") version "2.1.2"  // ← use this ID and the latest version :contentReference[oaicite:0]{index=0}
+    //id("dev.tonholo.s2c") version "2.1.2"  // ← use this ID and the latest version :contentReference[oaicite:0]{index=0}
     alias(libs.plugins.ksp) // Add this
 }
 
@@ -41,6 +41,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true // Add this
     }
     packaging {
         resources {
