@@ -67,6 +67,32 @@ fun AddEditGifteeScreen(
             )
         }
     ) { padding ->
+        // SMS Scanning Dialog
+        if (uiState.showSmsPrompt && uiState.phoneNumber != null) {
+            AlertDialog(
+                onDismissRequest = { viewModel.onDismissSmsPrompt() },
+                title = { Text("Scan SMS Messages") },
+                text = { 
+                    Text("Would you like to scan SMS messages with ${uiState.name} for gift ideas?") 
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        uiState.phoneNumber?.let { phone ->
+                            viewModel.scanSmsForIdeas(context, phone)
+                        }
+                        viewModel.onDismissSmsPrompt()
+                    }) {
+                        Text("Yes, Scan SMS")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { viewModel.onDismissSmsPrompt() }) {
+                        Text("No, Skip")
+                    }
+                }
+            )
+        }
+        
         Column(
             modifier = Modifier
                 .padding(padding)
@@ -170,7 +196,7 @@ fun AddEditGifteeScreen(
                 }
                 Button(onClick = {
                     viewModel.onSave()
-                    //onNavigateBack()
+                    onNavigateBack()
                 }) {
                     Text("Save")
                 }
