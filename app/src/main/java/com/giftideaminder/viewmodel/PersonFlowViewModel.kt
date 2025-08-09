@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -70,7 +72,10 @@ class PersonFlowViewModel @Inject constructor(
                         )
                     }
                     // Prefill dates for edit mode
-                    importantDateRepo.getForPerson(id).collect { existing ->
+                    importantDateRepo.getForPerson(id)
+                        .debounce(300)
+                        .distinctUntilChanged()
+                        .collect { existing ->
                         val map = existing.associate { it.label to it.date }
                         _uiState.update { it.copy(pickedDates = map) }
                     }
