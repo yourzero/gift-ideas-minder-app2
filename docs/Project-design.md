@@ -19,6 +19,10 @@
 2. [✓] **3.2 Add/Edit Giftee form**
 3. [✓] **3.3 Import from Contacts**
 4. [✓] **3.4 AI message history scan for giftees**
+5. [✓] **3.5 Relationship-first Add/Edit Giftee flow (wizard)**
+   - Relationship → Details → Dates → Review
+   - Important dates prompts driven by `RelationshipType` flags
+   - Custom labeled dates with inline edit/remove
 
 ### Epic 4: Gift Event Management
 1. [◻] **4.1 Dashboard “Upcoming Gift Events”**
@@ -58,6 +62,6 @@
 5. **Sprint 5**: Epic 8 + polish
 
 ### Current Status
-- **Completed**: Full giftee management with contact integration, SMS scanning, LocalDate birthday handling
+- **Completed**: Full giftee management including relationship-first Add/Edit flow, contact integration, SMS scanning, LocalDate handling, and important dates persistence.
 - **In Progress**: Gift event management (Epic 4) - dashboard and event screens pending
-- **Next**: Event management completion, advanced gift organization features  
+- **Next**: Event management completion, Relationship Types settings management, and advanced gift organization features
