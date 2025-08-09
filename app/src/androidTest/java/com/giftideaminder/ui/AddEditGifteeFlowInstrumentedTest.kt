@@ -21,25 +21,40 @@ class AddEditGifteeFlowInstrumentedTest {
 
     @Test
     fun addPerson_flow_showsSnackbarOnSave() {
-        // Open Add Person via FAB menu from home
+        composeRule.onNodeWithContentDescription("Add Options").performClick()
+        composeRule.onNodeWithText("Add Person").performClick()
+        composeRule.onNodeWithText("Friend").performClick()
+        composeRule.onNodeWithText("Next").performClick()
+        composeRule.onNode(hasSetTextAction()).performTextInput("Test User")
+        composeRule.onNodeWithText("Next").performClick()
+        composeRule.onNodeWithText("Next").performClick()
+        composeRule.onNodeWithText("Save").performClick()
+        composeRule.onNodeWithText("Test User was added").assertIsDisplayed()
+    }
+
+    @Test
+    fun datesStep_addCustomLabel_and_remove() {
         composeRule.onNodeWithContentDescription("Add Options").performClick()
         composeRule.onNodeWithText("Add Person").performClick()
 
-        // Step 1: Relationship - pick Friend
+        // Relationship -> Details
         composeRule.onNodeWithText("Friend").performClick()
         composeRule.onNodeWithText("Next").performClick()
-
-        // Step 2: Details - enter name (find the single text field)
-        composeRule.onNode(hasSetTextAction()).performTextInput("Test User")
+        composeRule.onNode(hasSetTextAction()).performTextInput("Custom Date User")
         composeRule.onNodeWithText("Next").performClick()
 
-        // Step 3: Dates - skip optional
-        composeRule.onNodeWithText("Next").performClick()
+        // Dates: add custom label
+        composeRule.onNodeWithText("Custom date label").performTextInput("Graduation")
+        composeRule.onNodeWithText("Pick date & add").performClick()
+        composeRule.onNodeWithText("Done").performClick()
 
-        // Step 4: Review - Save
+        // Header appears when a non-prompt date is present (best-effort)
+        composeRule.onNodeWithText("Other dates").assertIsDisplayed()
+
+        // Remove the custom date and finish
+        composeRule.onNodeWithText("Clear").performClick()
+        composeRule.onNodeWithText("Next").performClick()
         composeRule.onNodeWithText("Save").performClick()
-
-        // Snackbar should show "was added" for Test User
-        composeRule.onNodeWithText("Test User was added").assertIsDisplayed()
+        composeRule.onNodeWithText("Custom Date User was added").assertIsDisplayed()
     }
 }

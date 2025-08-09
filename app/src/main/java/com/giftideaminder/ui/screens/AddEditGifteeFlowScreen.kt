@@ -120,7 +120,9 @@ fun AddEditGifteeFlowScreen(
                     }
 
                     if (openAddPicker) {
-                        val dpState = androidx.compose.material3.rememberDatePickerState()
+                        val dpState = androidx.compose.material3.rememberDatePickerState(
+                            initialSelectedDateMillis = Instant.now().toEpochMilli()
+                        )
                         DatePickerDialog(
                             onDismissRequest = { openAddPicker = false },
                             confirmButton = {
