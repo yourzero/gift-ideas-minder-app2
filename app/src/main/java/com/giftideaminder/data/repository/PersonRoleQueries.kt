@@ -14,17 +14,17 @@ class PersonRoleQueries {
          */
         suspend fun getSampleQueries(personRepository: PersonRepository): Map<String, List<Person>> {
             return mapOf(
-                "All Recipients" to personRepository.getPeopleWithRole(PersonRole.GIFTEE.bit),
+                "All Recipients" to personRepository.getPeopleWithRole(PersonRole.RECIPIENT.bit),
                 "All Gifters" to personRepository.getPeopleWithRole(PersonRole.GIFTER.bit),
                 "Collaborators" to personRepository.getPeopleWithRole(PersonRole.COLLABORATOR.bit),
                 "Contacts Only" to personRepository.getPeopleWithRole(PersonRole.CONTACT_ONLY.bit),
                 "Self" to personRepository.getPeopleWithRole(PersonRole.SELF.bit),
                 // Multiple roles using bitwise OR
                 "Recipients and Gifters" to personRepository.getPeopleWithRole(
-                    PersonRole.GIFTEE.bit or PersonRole.GIFTER.bit
+                    PersonRole.RECIPIENT.bit or PersonRole.GIFTER.bit
                 ),
                 "Active participants (Recipients, Gifters, Collaborators)" to personRepository.getPeopleWithRole(
-                    PersonRole.GIFTEE.bit or PersonRole.GIFTER.bit or PersonRole.COLLABORATOR.bit
+                    PersonRole.RECIPIENT.bit or PersonRole.GIFTER.bit or PersonRole.COLLABORATOR.bit
                 )
             )
         }
@@ -33,7 +33,7 @@ class PersonRoleQueries {
          * Helper functions for working with roles in business logic
          */
         fun isRecipient(person: Person): Boolean {
-            return PersonRole.Companion.run { person.roles.hasRole(PersonRole.GIFTEE) }
+            return PersonRole.Companion.run { person.roles.hasRole(PersonRole.RECIPIENT) }
         }
         
         fun isGifter(person: Person): Boolean {
@@ -49,21 +49,21 @@ class PersonRoleQueries {
         
         fun addRecipientRole(person: Person): Person {
             return PersonRole.Companion.run {
-                person.copy(roles = person.roles.plusRole(PersonRole.GIFTEE))
+                person.copy(roles = person.roles.plusRole(PersonRole.RECIPIENT))
             }
         }
         
         fun removeRecipientRole(person: Person): Person {
             return PersonRole.Companion.run {
-                person.copy(roles = person.roles.minusRole(PersonRole.GIFTEE))
+                person.copy(roles = person.roles.minusRole(PersonRole.RECIPIENT))
             }
         }
         
         /**
-         * Get people who can receive gifts (have GIFTEE role)
+         * Get people who can receive gifts (have RECIPIENT role)
          */
         suspend fun getPotentialGiftRecipients(personRepository: PersonRepository): List<Person> {
-            return personRepository.getPeopleWithRole(PersonRole.GIFTEE.bit)
+            return personRepository.getPeopleWithRole(PersonRole.RECIPIENT.bit)
         }
         
         /**

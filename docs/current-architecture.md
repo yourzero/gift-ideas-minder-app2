@@ -211,7 +211,7 @@ gift-idea-minder-android--cursor/
 
 ### Enhanced Recipient Management
 - **AddEditRecipientScreen**: Full-featured person management with photo, birthday, relationships, notes, and contact integration.
-- **Contact Picker Integration**: Users can import giftee data directly from device contacts.
+- **Contact Picker Integration**: Users can import recipient data directly from device contacts.
 - **SMS Scanning**: Optional AI-powered scanning of SMS history with selected contacts for gift ideas.
 - **Relationship Management**: Multi-select dropdown for relationship categorization (Family, Friend, Coworker).
 

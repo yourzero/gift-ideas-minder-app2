@@ -2,7 +2,7 @@ package com.giftideaminder.data.model
 
 enum class PersonRole(val bit: Int) {
     SELF(1),
-    GIFTEE(2),
+    RECIPIENT(2),
     GIFTER(4),
     COLLABORATOR(8),
     CONTACT_ONLY(16);

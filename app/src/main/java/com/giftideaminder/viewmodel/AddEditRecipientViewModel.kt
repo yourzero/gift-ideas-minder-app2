@@ -29,7 +29,7 @@ data class RecipientUiState(
     val notes: String = "",
     val phoneNumber: String? = null,
     val showSmsPrompt: Boolean = false,
-    val roles: Int = PersonRole.GIFTEE.bit
+    val roles: Int = PersonRole.RECIPIENT.bit
 )
 
 sealed class RecipientEvent {
@@ -52,7 +52,7 @@ class AddEditRecipientViewModel @Inject constructor(
     val relationshipOptions: List<String> = listOf("Family", "Friend", "Coworker")
 
     init {
-        savedStateHandle.get<Int>("gifteeId")?.let { id ->
+        savedStateHandle.get<Int>("recipientId")?.let { id ->
             loadPerson(id)
         }
     }
@@ -129,7 +129,7 @@ class AddEditRecipientViewModel @Inject constructor(
             notes = "",
             phoneNumber = null,
             showSmsPrompt = false,
-            roles = PersonRole.GIFTEE.bit
+            roles = PersonRole.RECIPIENT.bit
         )
     }
 

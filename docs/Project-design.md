@@ -18,7 +18,7 @@
 1. [✓] **3.1 Manage Recipients screen**
 2. [✓] **3.2 Add/Edit Recipient form**
 3. [✓] **3.3 Import from Contacts**
-4. [✓] **3.4 AI message history scan for giftees**
+4. [✓] **3.4 AI message history scan for recipients**
 
 ### Epic 4: Gift Event Management
 1. [◻] **4.1 Dashboard “Upcoming Gift Events”**
@@ -58,6 +58,6 @@
 5. **Sprint 5**: Epic 8 + polish
 
 ### Current Status
-- **Completed**: Full giftee management with contact integration, SMS scanning, LocalDate birthday handling
+- **Completed**: Full recipient management with contact integration, SMS scanning, LocalDate birthday handling
 - **In Progress**: Gift event management (Epic 4) - dashboard and event screens pending
 - **Next**: Event management completion, advanced gift organization features  

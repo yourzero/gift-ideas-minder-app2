@@ -15,7 +15,7 @@ description: Gift Minder Project Development Rules
   - **Dates**: Use `LocalDate` stored as epochDay with a Room `TypeConverter`.
   - **Lists**: Use a `TypeConverter` for `List<String>` with a rare delimiter.
   - **Person roles**:
-    - Roles: `SELF`, `GIFTEE`, `GIFTER`, `COLLABORATOR`, `CONTACT_ONLY`
+    - Roles: `SELF`, `RECIPIENT`, `GIFTER`, `COLLABORATOR`, `CONTACT_ONLY`
     - Store roles as an `Int` bitmask with a `PersonRole` enum and helper functions (`has`, `plus`, `minus`).
 
   ## Feature Considerations

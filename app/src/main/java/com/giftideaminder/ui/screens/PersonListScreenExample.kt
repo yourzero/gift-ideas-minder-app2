@@ -77,13 +77,13 @@ fun YourNavHost() {
             composable("person_list") {
                 PersonListScreen(
                     onNavigateToAddEdit = { personId ->
-                        navController.navigate("add_edit_giftee/${personId ?: "new"}")
+                        navController.navigate("add_edit_recipient/${personId ?: "new"}")
                     }
                 )
             }
             
             composable(
-                "add_edit_giftee/{personId}",
+                "add_edit_recipient/{personId}",
                 arguments = listOf(navArgument("personId") { 
                     type = NavType.StringType 
                     nullable = true 
