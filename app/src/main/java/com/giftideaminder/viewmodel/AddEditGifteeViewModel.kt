@@ -120,6 +120,41 @@ class AddEditGifteeViewModel @Inject constructor(
         }
     }
 
+    fun startNew() {
+        _uiState.value = GifteeUiState(
+            isEditing = false,
+            id = null,
+            photoUri = null,
+            name = "",
+            eventDate = null,
+            isDatePickerOpen = false,
+            relationships = emptyList(),
+            isRelationshipDropdownOpen = false,
+            notes = "",
+            phoneNumber = null,
+            showSmsPrompt = false
+        )
+    }
+
+    fun loadPerson(personId: Int) {
+        viewModelScope.launch {
+            personRepo.getPersonById(personId).firstOrNull()?.let { person ->
+                _uiState.update { s ->
+                    s.copy(
+                        isEditing = true,
+                        id = person.id,
+                        photoUri = person.photoUri?.let(Uri::parse),
+                        name = person.name,
+                        eventDate = person.birthday,
+                        relationships = person.relationships,
+                        notes = person.notes ?: "",
+                        phoneNumber = person.contactInfo
+                    )
+                }
+            }
+        }
+    }
+
     fun loadContact(ctx: Context, contactUri: Uri) {
         viewModelScope.launch {
             ctx.contentResolver.query(contactUri, null, null, null, null)?.use { cursor ->

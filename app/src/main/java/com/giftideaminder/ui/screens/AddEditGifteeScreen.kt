@@ -40,10 +40,21 @@ import java.util.*
 @Composable
 fun AddEditGifteeScreen(
     viewModel: AddEditGifteeViewModel = hiltViewModel(),
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    personId: Int? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+
+    // 🔗 Load existing person when editing
+    LaunchedEffect(personId) {
+        if (personId != null) {
+            viewModel.loadPerson(personId)   // ← update to your actual VM method name
+        } else {
+            // Optional: ensure a clean slate when adding
+            viewModel.startNew()             // ← if you have a reset method
+        }
+    }
 
     // Contact picker launcher
     val contactPicker = rememberLauncherForActivityResult(
@@ -52,8 +63,11 @@ fun AddEditGifteeScreen(
         uri?.let { viewModel.loadContact(context, it) }
     }
 
-    // Date picker state
-    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = uiState.eventDate)
+    // Date picker state (keep it synced with uiState after load)
+    val datePickerState = remember { rememberDatePickerState(initialSelectedDateMillis = uiState.eventDate) }
+    LaunchedEffect(uiState.eventDate) {
+        datePickerState.selectedDateMillis = uiState.eventDate
+    }
 
     Scaffold(
         topBar = {
@@ -72,8 +86,8 @@ fun AddEditGifteeScreen(
             AlertDialog(
                 onDismissRequest = { viewModel.onDismissSmsPrompt() },
                 title = { Text("Scan SMS Messages") },
-                text = { 
-                    Text("Would you like to scan SMS messages with ${uiState.name} for gift ideas?") 
+                text = {
+                    Text("Would you like to scan SMS messages with ${uiState.name} for gift ideas?")
                 },
                 confirmButton = {
                     Button(onClick = {
@@ -92,7 +106,7 @@ fun AddEditGifteeScreen(
                 }
             )
         }
-        
+
         Column(
             modifier = Modifier
                 .padding(padding)
@@ -198,7 +212,7 @@ fun AddEditGifteeScreen(
                     viewModel.onSave()
                     onNavigateBack()
                 }) {
-                    Text("Save")
+                    Text("Savex")
                 }
             }
         }

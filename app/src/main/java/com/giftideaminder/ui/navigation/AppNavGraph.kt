@@ -12,7 +12,8 @@ import com.giftideaminder.ui.screens.*
 fun AppNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier
-) {
+)
+{
     NavHost(
         navController = navController,
         startDestination = "home",
@@ -31,25 +32,36 @@ fun AppNavGraph(
             PersonListScreen(navController)
         }
         composable("add_person") {
-            AddEditGifteeScreen(onNavigateBack = {}) // TODO - should this take the navController like other navs?
+            AddEditGifteeScreen(onNavigateBack = { navController.popBackStack() }) // TODO - should this take the navController like other navs?
             // TODO figure out if the onNavigateBack is needed
         }
-        composable("edit_person") {
-            // TODO - add passing the person in
-            AddEditGifteeScreen(onNavigateBack = {}) // TODO - should this take the navController like other navs?
-        }
         composable(
-            "add_gift?sharedText={sharedText}",
-            arguments = listOf(navArgument("sharedText") {
-                type = NavType.StringType; nullable = true; defaultValue = null
-            })
-        ) { back ->
-            AddEditGiftScreen(
-                navController = navController,
-                sharedText = back.arguments?.getString("sharedText")
-                //prefillText = back.arguments?.getString("sharedText")
+            route = "edit_person/{personId}",
+            arguments = listOf(
+                navArgument("personId") {
+                    type = NavType.IntType
+                }
             )
-        }
-        // … other routes …
+        ) { backStackEntry ->
+            var personId = backStackEntry.arguments!!.getInt("personId")
+        // TODO - add passing the person in
+        AddEditGifteeScreen(
+            personId = personId,
+            onNavigateBack = { navController.popBackStack() }
+        ) // TODO - should this take the navController like other navs?
     }
+    composable(
+        "add_gift?sharedText={sharedText}",
+        arguments = listOf(navArgument("sharedText") {
+            type = NavType.StringType; nullable = true; defaultValue = null
+        })
+    ) { back ->
+        AddEditGiftScreen(
+            navController = navController,
+            sharedText = back.arguments?.getString("sharedText")
+            //prefillText = back.arguments?.getString("sharedText")
+        )
+    }
+    // … other routes …
+}
 }
