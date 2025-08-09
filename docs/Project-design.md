@@ -14,9 +14,9 @@
 4. [✓] **2.4 SMS-tap capture**
 5. [✓] **2.5 File import (CSV/PDF/Doc/Spreadsheet)**
 
-### Epic 3: Giftee Management
-1. [✓] **3.1 Manage Giftees screen**
-2. [✓] **3.2 Add/Edit Giftee form**
+### Epic 3: Recipient Management
+1. [✓] **3.1 Manage Recipients screen**
+2. [✓] **3.2 Add/Edit Recipient form**
 3. [✓] **3.3 Import from Contacts**
 4. [✓] **3.4 AI message history scan for giftees**
 
@@ -50,7 +50,7 @@
 
 ### Completed Sprints
 1. **Sprint 1**: ✅ Epics 1 + 2 - UI foundations and gift idea capture complete
-2. **Sprint 2**: ✅ Epic 3 - Giftee management complete (Epic 4 pending)
+2. **Sprint 2**: ✅ Epic 3 - Recipient management complete (Epic 4 pending)
 
 ### Next Prioritized Sprints
 3. **Sprint 3**: Epic 4 + remaining Epic 5 items

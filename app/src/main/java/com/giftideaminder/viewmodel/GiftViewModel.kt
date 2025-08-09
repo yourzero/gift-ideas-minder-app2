@@ -24,7 +24,7 @@ class GiftViewModel @Inject constructor(
     /** Returns a Flow of Gift with its price history. */
     fun getGiftWithHistoryById(id: Int): Flow<GiftWithHistory> = giftDao.getGiftWithHistoryById(id)
 
-    // ---------- UI State (SSOT like AddEditGifteeViewModel) ----------
+    // ---------- UI State (SSOT like AddEditRecipientViewModel) ----------
     data class GiftUiState(
         val id: Int? = null,
         val title: String = "",
@@ -67,7 +67,7 @@ class GiftViewModel @Inject constructor(
     fun onEventDateChanged(millis: Long) = _uiState.update { it.copy(eventDateMillis = millis) }
     fun onPersonSelected(id: Int?) = _uiState.update { it.copy(personId = id) }
 
-    // ---------- Save (mirrors AddEditGifteeViewModel.onSave) ----------
+    // ---------- Save (mirrors AddEditRecipientViewModel.onSave) ----------
     fun onSave() {
         val s = _uiState.value
 

@@ -5,7 +5,7 @@ import androidx.compose.runtime.*
 import kotlinx.coroutines.launch
 
 /**
- * Example of how to handle the success message from AddEditGifteeScreen
+ * Example of how to handle the success message from AddEditRecipientScreen
  * in a parent screen like PersonListScreen
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -17,7 +17,7 @@ fun PersonListScreenExample() {
     // This would be your navigation state/logic
     var showAddEditScreen by remember { mutableStateOf(false) }
     
-    // Handle success message from AddEditGifteeScreen
+    // Handle success message from AddEditRecipientScreen
     LaunchedEffect(Unit) {
         // This is where you'd collect the message when navigating back
         // In a real app, this would come from your navigation system
@@ -92,7 +92,7 @@ fun YourNavHost() {
                 val personIdString = backStackEntry.arguments?.getString("personId")
                 val personId = if (personIdString == "new") null else personIdString?.toIntOrNull()
                 
-                AddEditGifteeScreen(
+                AddEditRecipientScreen(
                     personId = personId,
                     onNavigateBack = { successMessage ->
                         navController.popBackStack()

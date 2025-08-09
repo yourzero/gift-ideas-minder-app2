@@ -3,7 +3,7 @@
   <rect width="375" height="726" fill="#e8eddb"></rect>
   <g opacity="100%">
     <text x="63" y="60.5" font-family="Open Sans" font-size="20" fill="#030303" letter-spacing="0" font-weight="500" font-style="normal">
-      <tspan x="140">Edit Giftee</tspan>
+      <tspan x="140">Edit Recipient</tspan>
     </text>
   </g>
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="24" height="24" fill="#030303" x="24" y="41" opacity="100%">

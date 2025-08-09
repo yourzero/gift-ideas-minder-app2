@@ -1,4 +1,4 @@
-// File: app/src/main/java/com/giftideaminder/ui/screens/AddEditGifteeScreen.kt
+// File: app/src/main/java/com/giftideaminder/ui/screens/AddEditRecipientScreen.kt
 package com.giftideaminder.ui.screens
 
 import android.net.Uri
@@ -95,7 +95,7 @@ fun AddEditRecipientScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (uiState.isEditing) "Edit Giftee" else "Add Giftee") },
+                title = { Text(if (uiState.isEditing) "Edit Recipient" else "Add Recipient") },
                 navigationIcon = {
                     IconButton(onClick = { onNavigateBack(null) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -151,7 +151,7 @@ fun AddEditRecipientScreen(
                 uiState.photoUri?.let { uri ->
                     AsyncImage(
                         model = uri,
-                        contentDescription = "Giftee photo",
+                        contentDescription = "Recipient photo",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )

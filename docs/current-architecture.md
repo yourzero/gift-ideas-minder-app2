@@ -23,11 +23,11 @@ Key features include gift management (Epic 1), person management (Epic 2), basic
 - Manages UI and user interactions using Jetpack Compose.
 - Located in `app/src/main/java/com/giftideaminder/ui/` and `viewmodel/`.
 - Components:
-  - **Screens**: Composable functions for main views, e.g., `GiftListScreen.kt`, `AddEditGiftScreen.kt`, `PersonListScreen.kt`, `AddEditGifteeScreen.kt` (enhanced person management), `ImportScreen.kt` (for Epic 4 imports), `BudgetScreen.kt` (for Epic 5 budgeting), `GiftDetailScreen.kt`, dashboard variants like `DashboardScreenMock.kt`, `HomeDashboardGenerated.kt`, `HomeDashboardGenerated_Chatgpt.kt`.
+  - **Screens**: Composable functions for main views, e.g., `GiftListScreen.kt`, `AddEditGiftScreen.kt`, `PersonListScreen.kt`, `AddEditRecipientScreen.kt` (enhanced person management), `ImportScreen.kt` (for Epic 4 imports), `BudgetScreen.kt` (for Epic 5 budgeting), `GiftDetailScreen.kt`, dashboard variants like `DashboardScreenMock.kt`, `HomeDashboardGenerated.kt`, `HomeDashboardGenerated_Chatgpt.kt`.
   - **Components**: Reusable UI elements, e.g., `GiftItem.kt`, `PersonItem.kt`, `SuggestionsCarousel.kt` (for Epic 6 AI suggestions).
   - **Navigation**: Multiple navigation files including `AppNavHost.kt`, `AppNavGraph.kt`, `AppScaffold.kt`, `Navigation.kt` for app routing, including routes for import, budget, etc.
   - **Theme**: Material Design theming in `theme/` (Color.kt, Shape.kt, Theme.kt, Type.kt).
-  - **ViewModels**: Manage UI state, e.g., `GiftViewModel.kt` (handles AI suggestions and price updates), `PersonViewModel.kt`, `AddEditGifteeViewModel.kt` (enhanced person management with contact integration and SMS scanning), `ImportViewModel.kt` (for Epic 4 parsing/insertion).
+  - **ViewModels**: Manage UI state, e.g., `GiftViewModel.kt` (handles AI suggestions and price updates), `PersonViewModel.kt`, `AddEditRecipientViewModel.kt` (enhanced person management with contact integration and SMS scanning), `ImportViewModel.kt` (for Epic 4 parsing/insertion).
 
 ### Dependency Injection
 - Uses Hilt for DI.
@@ -122,11 +122,11 @@ gift-idea-minder-android--cursor/
         - svg/
           - Edit Gift - Select Occasions Modal.svg
           - Edit Gift B.svg
-          - Edit Giftee A.svg
-          - Edit Giftee B.svg
-          - Edit Giftee C.svg
+          - Edit Recipient A.svg
+          - Edit Recipient B.svg
+          - Edit Recipient C.svg
           - Event Details.svg
-          - Giftees.svg
+          - Recipients.svg
           - Home-Dashboard.svg
           - myiconpack/
             - src/
@@ -206,11 +206,11 @@ gift-idea-minder-android--cursor/
 - **Migrated Person.birthday from Long to LocalDate**: Eliminates timezone issues and off-by-one errors common with epoch milliseconds.
 - **Room Type Converters**: Added `Converters.kt` with `LocalDate` ↔ `Long` (epoch days) conversion for efficient storage.
 - **UTC Date Picker Integration**: Fixed Material3 DatePicker timezone handling by using UTC consistently in conversions.
-- **Enhanced UI Components**: Updated `PersonItem.kt`, `AddEditGifteeScreen.kt`, and related components to use `LocalDate` and `DateTimeFormatter`.
-- **Contact Integration**: `AddEditGifteeViewModel` includes contacts import, SMS scanning, and birthday parsing from contact data.
+- **Enhanced UI Components**: Updated `PersonItem.kt`, `AddEditRecipientScreen.kt`, and related components to use `LocalDate` and `DateTimeFormatter`.
+- **Contact Integration**: `AddEditRecipientViewModel` includes contacts import, SMS scanning, and birthday parsing from contact data.
 
-### Enhanced Giftee Management
-- **AddEditGifteeScreen**: Full-featured person management with photo, birthday, relationships, notes, and contact integration.
+### Enhanced Recipient Management
+- **AddEditRecipientScreen**: Full-featured person management with photo, birthday, relationships, notes, and contact integration.
 - **Contact Picker Integration**: Users can import giftee data directly from device contacts.
 - **SMS Scanning**: Optional AI-powered scanning of SMS history with selected contacts for gift ideas.
 - **Relationship Management**: Multi-select dropdown for relationship categorization (Family, Friend, Coworker).

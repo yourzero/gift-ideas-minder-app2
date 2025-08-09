@@ -45,7 +45,7 @@ fun AddEditRecipientFlowScreen(
 
     @OptIn(ExperimentalMaterial3Api::class)
     Scaffold(
-        topBar = { TopAppBar(title = { Text(if (state.isEditing) "Edit Giftee" else "Add Giftee") }) }
+        topBar = { TopAppBar(title = { Text(if (state.isEditing) "Edit Recipient" else "Add Recipient") }) }
     ) { padding ->
         Column(
             modifier = Modifier
