@@ -15,11 +15,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import javax.inject.Inject
 import android.provider.ContactsContract
-import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.util.Locale
 
-data class GifteeUiState(
+data class RecipientUiState(
     val isEditing: Boolean = false,
     val id: Int? = null,
     val photoUri: Uri? = null,
@@ -34,20 +32,20 @@ data class GifteeUiState(
     val roles: Int = PersonRole.GIFTEE.bit
 )
 
-sealed class GifteeEvent {
-    data class PersonSaved(val personName: String, val isEdit: Boolean) : GifteeEvent()
+sealed class RecipientEvent {
+    data class PersonSaved(val personName: String, val isEdit: Boolean) : RecipientEvent()
 }
 
 @HiltViewModel
-class AddEditGifteeViewModel @Inject constructor(
+class AddEditRecipientViewModel @Inject constructor(
     private val personRepo: PersonRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(GifteeUiState())
-    val uiState: StateFlow<GifteeUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(RecipientUiState())
+    val uiState: StateFlow<RecipientUiState> = _uiState.asStateFlow()
 
-    private val _events = Channel<GifteeEvent>()
+    private val _events = Channel<RecipientEvent>()
     val events = _events.receiveAsFlow()
 
     // Expose relationship options publicly
@@ -119,7 +117,7 @@ class AddEditGifteeViewModel @Inject constructor(
     }
 
     fun startNew() {
-        _uiState.value = GifteeUiState(
+        _uiState.value = RecipientUiState(
             isEditing = false,
             id = null,
             photoUri = null,
@@ -226,10 +224,10 @@ class AddEditGifteeViewModel @Inject constructor(
             
             if (s.isEditing) {
                 personRepo.update(person)
-                _events.send(GifteeEvent.PersonSaved(s.name, isEdit = true))
+                _events.send(RecipientEvent.PersonSaved(s.name, isEdit = true))
             } else {
                 personRepo.insert(person)
-                _events.send(GifteeEvent.PersonSaved(s.name, isEdit = false))
+                _events.send(RecipientEvent.PersonSaved(s.name, isEdit = false))
             }
         }
     }

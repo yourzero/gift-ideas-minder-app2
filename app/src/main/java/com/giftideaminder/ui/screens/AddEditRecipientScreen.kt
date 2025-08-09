@@ -9,11 +9,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -28,24 +26,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.giftideaminder.viewmodel.AddEditGifteeViewModel
-import com.giftideaminder.viewmodel.GifteeEvent
+import com.giftideaminder.viewmodel.AddEditRecipientViewModel
+import com.giftideaminder.viewmodel.RecipientEvent
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.TextButton
-import java.text.SimpleDateFormat
 import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddEditGifteeScreen(
-    viewModel: AddEditGifteeViewModel = hiltViewModel(),
+fun AddEditRecipientScreen(
+    viewModel: AddEditRecipientViewModel = hiltViewModel(),
     onNavigateBack: (String?) -> Unit,
     personId: Int? = null
 ) {
@@ -66,7 +60,7 @@ fun AddEditGifteeScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                is GifteeEvent.PersonSaved -> {
+                is RecipientEvent.PersonSaved -> {
                     val message = if (event.isEdit) {
                         "${event.personName} was updated"
                     } else {

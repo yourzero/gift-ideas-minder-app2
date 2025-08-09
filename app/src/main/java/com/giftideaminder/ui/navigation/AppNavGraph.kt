@@ -48,7 +48,7 @@ fun AppNavGraph(
             PersonListScreen(navController)
         }
         composable("add_person") {
-            AddEditGifteeFlowScreen(onNavigateBack = ::showSnackbarAndPopBackStack)
+            AddEditRecipientFlowScreen(onNavigateBack = ::showSnackbarAndPopBackStack)
         }
         composable(
             route = "edit_person/{personId}",
@@ -60,7 +60,7 @@ fun AppNavGraph(
         ) { backStackEntry ->
             var personId = backStackEntry.arguments!!.getInt("personId")
         // TODO - add passing the person in
-        AddEditGifteeFlowScreen(
+        AddEditRecipientFlowScreen(
             personId = personId,
             onNavigateBack = ::showSnackbarAndPopBackStack
         )
