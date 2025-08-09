@@ -16,6 +16,21 @@
   - Review step presents relationship, name, and formatted dates before Save.
   - Success snackbar and navigation handled centrally via `AppNavGraph` using a shared `SnackbarHostState` from `AppScaffold`.
 
+#### UX Walkthrough and Screenshots
+- Relationship → Details → Dates → Review
+- Place screenshots under `docs/images/add-edit-giftee/` and name them:
+  - `step1-relationship.png`
+  - `step2-details.png`
+  - `step3-dates-prompts.png`
+  - `step3-dates-custom.png`
+  - `step4-review.png`
+- Example embedding:
+  - Relationship: `![Relationship](images/add-edit-giftee/step1-relationship.png)`
+  - Details: `![Details](images/add-edit-giftee/step2-details.png)`
+  - Dates (prompts): `![Dates - prompts](images/add-edit-giftee/step3-dates-prompts.png)`
+  - Dates (custom): `![Dates - custom](images/add-edit-giftee/step3-dates-custom.png)`
+  - Review: `![Review](images/add-edit-giftee/step4-review.png)`
+
 ## Data Layer
 - Use Room for local database storage
 - Implement Repository pattern for data access

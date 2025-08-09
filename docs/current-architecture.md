@@ -211,6 +211,32 @@ gift-idea-minder-android--cursor/
 - Shared snackbar handling via `AppScaffold` and `AppNavGraph` on success.
 - Dates step supports custom labeled dates with inline edit/remove and a reusable `DatePickerRow` with initial value and clear.
 
+## Flow UI / UX Walkthrough
+
+Below is a short walkthrough of the relationship-first Add/Edit Giftee flow. Place screenshots under `docs/images/add-edit-giftee/` with the given filenames to render inline.
+
+- Relationship step
+  - Pick a relationship from chips; default prompts are derived from `RelationshipType` flags.
+  - Screenshot: ![Relationship step](images/add-edit-giftee/step1-relationship.png)
+
+- Details step
+  - Enter the giftee's name (and future fields when added).
+  - Screenshot: ![Details step](images/add-edit-giftee/step2-details.png)
+
+- Dates step
+  - Shows prompted date rows (e.g., Birthday, Anniversary). Each row opens a date picker and supports clearing.
+  - Add custom labeled dates via a text field + date picker; custom entries appear under “Other dates”.
+  - Screenshot: ![Dates step - prompts](images/add-edit-giftee/step3-dates-prompts.png)
+  - Screenshot: ![Dates step - custom](images/add-edit-giftee/step3-dates-custom.png)
+
+- Review step
+  - Summarizes relationship, name, and all dates. Save persists the person and replaces their important dates transactionally, then shows a snackbar and navigates back.
+  - Screenshot: ![Review step](images/add-edit-giftee/step4-review.png)
+
+Notes
+- Success snackbar is shown by `AppNavGraph` using the `SnackbarHostState` owned by `AppScaffold`.
+- In debug builds, Room destructive migrations are enabled, so wiping occurs when schema changes.
+
 ### Data model additions
 - Entities: `RelationshipType` (seeded at first run), `ImportantDate`.
 - DAOs: `RelationshipTypeDao`, `ImportantDateDao` with transactional replace.

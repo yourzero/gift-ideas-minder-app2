@@ -24,6 +24,13 @@
    - Important dates prompts driven by `RelationshipType` flags
    - Custom labeled dates with inline edit/remove
 
+Screenshots (place under `docs/images/add-edit-giftee/`):
+- `step1-relationship.png`
+- `step2-details.png`
+- `step3-dates-prompts.png`
+- `step3-dates-custom.png`
+- `step4-review.png`
+
 ### Epic 4: Gift Event Management
 1. [◻] **4.1 Dashboard “Upcoming Gift Events”**
 2. [◻] **4.2 Event Detail screen**
