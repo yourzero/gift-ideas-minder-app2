@@ -34,6 +34,10 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.TextButton
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,9 +68,15 @@ fun AddEditGifteeScreen(
     }
 
     // Date picker state (keep it synced with uiState after load)
-    val datePickerState = remember { rememberDatePickerState(initialSelectedDateMillis = uiState.eventDate) }
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = uiState.eventDate?.let { date ->
+            date.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
+        }
+    )
     LaunchedEffect(uiState.eventDate) {
-        datePickerState.selectedDateMillis = uiState.eventDate
+        datePickerState.selectedDateMillis = uiState.eventDate?.let { date ->
+            date.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
+        }
     }
 
     Scaffold(
@@ -161,9 +171,9 @@ fun AddEditGifteeScreen(
             )
 
             // Birthday / Anniversary
-            val sdf = remember { SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()) }
+            val dateFormatter = remember { DateTimeFormatter.ofPattern("MM/dd/yyyy") }
             OutlinedTextField(
-                value = uiState.eventDate?.let { sdf.format(Date(it)) } ?: "",
+                value = uiState.eventDate?.format(dateFormatter) ?: "",
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Birthday / Anniversary") },
@@ -212,7 +222,7 @@ fun AddEditGifteeScreen(
                     viewModel.onSave()
                     onNavigateBack()
                 }) {
-                    Text("Savex")
+                    Text("Save")
                 }
             }
         }
@@ -223,7 +233,12 @@ fun AddEditGifteeScreen(
                 onDismissRequest = { viewModel.onShowDatePicker(false) },
                 confirmButton = {
                     TextButton(onClick = {
-                        viewModel.onEventDateChange(datePickerState.selectedDateMillis ?: 0L)
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val localDate = Instant.ofEpochMilli(millis)
+                                .atZone(ZoneId.of("UTC"))
+                                .toLocalDate()
+                            viewModel.onEventDateChange(localDate)
+                        }
                         viewModel.onShowDatePicker(false)
                     }) {
                         Text("OK")

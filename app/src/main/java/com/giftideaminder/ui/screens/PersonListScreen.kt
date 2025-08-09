@@ -12,6 +12,7 @@ import com.giftideaminder.ui.components.PersonItem
 import com.giftideaminder.viewmodel.PersonViewModel
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.ui.tooling.preview.Preview
+import java.time.LocalDate
 
 
 
@@ -24,7 +25,9 @@ fun PersonListScreen(navController: NavController) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var personToDelete by remember { mutableStateOf<Person?>(null) }
 
-    val sortedPersons = persons.sortedBy { calculateNextBirthday(it.birthday) ?: Long.MAX_VALUE }
+    val sortedPersons = persons.sortedBy { person ->
+        person.birthday?.let { calculateNextBirthday(it).toEpochDay() } ?: Long.MAX_VALUE
+    }
 
     LazyColumn {
         item {
@@ -66,17 +69,12 @@ fun PersonListScreen(navController: NavController) {
     }
 }
 
-private fun calculateNextBirthday(birthday: Long?): Long? {
-    if (birthday == null) return null
-    val birthCal = java.util.Calendar.getInstance().apply { timeInMillis = birthday }
-    val currentCal = java.util.Calendar.getInstance()
-    val nextCal = java.util.Calendar.getInstance().apply {
-        set(java.util.Calendar.YEAR, currentCal.get(java.util.Calendar.YEAR))
-        set(java.util.Calendar.MONTH, birthCal.get(java.util.Calendar.MONTH))
-        set(java.util.Calendar.DAY_OF_MONTH, birthCal.get(java.util.Calendar.DAY_OF_MONTH))
+private fun calculateNextBirthday(birthday: LocalDate): LocalDate {
+    val today = LocalDate.now()
+    val thisYearBirthday = birthday.withYear(today.year)
+    return if (thisYearBirthday.isBefore(today) || thisYearBirthday.isEqual(today)) {
+        thisYearBirthday.plusYears(1)
+    } else {
+        thisYearBirthday
     }
-    if (nextCal.before(currentCal)) {
-        nextCal.add(java.util.Calendar.YEAR, 1)
-    }
-    return nextCal.timeInMillis
 } 

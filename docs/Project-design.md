@@ -17,8 +17,8 @@
 ### Epic 3: Giftee Management
 1. [✓] **3.1 Manage Giftees screen**
 2. [✓] **3.2 Add/Edit Giftee form**
-3. [◻] **3.3 Import from Contacts**
-4. [◻] **3.4 AI message history scan for giftees**
+3. [✓] **3.3 Import from Contacts**
+4. [✓] **3.4 AI message history scan for giftees**
 
 ### Epic 4: Gift Event Management
 1. [◻] **4.1 Dashboard “Upcoming Gift Events”**
@@ -33,7 +33,7 @@
 ### Epic 6: AI-Driven Features
 1. [✓] **6.1 AI-generated gift suggestions**
 2. [◻] **6.2 AI gift picker by budget**
-3. [◻] **6.3 Scan existing conversations (opt-in)**
+3. [✓] **6.3 Scan existing conversations (opt-in)**
 
 ### Epic 7: Price Tracking & Comparison
 1. [◻] **7.1 Sale alert detection**
@@ -46,10 +46,18 @@
 
 ---
 
-## Next Prioritized Sprints
+## Sprint Progress
 
-1. **Sprint 1**: Epics 1 + 2
-2. **Sprint 2**: Epics 3 + 4
-3. **Sprint 3**: Epic 5
-4. **Sprint 4**: Epics 6 + 7
-5. **Sprint 5**: Epic 8 + polish  
+### Completed Sprints
+1. **Sprint 1**: ✅ Epics 1 + 2 - UI foundations and gift idea capture complete
+2. **Sprint 2**: ✅ Epic 3 - Giftee management complete (Epic 4 pending)
+
+### Next Prioritized Sprints
+3. **Sprint 3**: Epic 4 + remaining Epic 5 items
+4. **Sprint 4**: Epics 6 + 7 completion
+5. **Sprint 5**: Epic 8 + polish
+
+### Current Status
+- **Completed**: Full giftee management with contact integration, SMS scanning, LocalDate birthday handling
+- **In Progress**: Gift event management (Epic 4) - dashboard and event screens pending
+- **Next**: Event management completion, advanced gift organization features  

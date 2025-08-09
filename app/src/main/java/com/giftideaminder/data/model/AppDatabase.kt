@@ -11,7 +11,7 @@ import com.giftideaminder.data.dao.SettingsDao
 
 @Database(
     entities = [Gift::class, Person::class, PriceRecord::class, Suggestion::class, Settings::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

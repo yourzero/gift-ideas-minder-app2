@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import android.provider.ContactsContract
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.Locale
 
 data class GifteeUiState(
@@ -20,7 +21,7 @@ data class GifteeUiState(
     val id: Int? = null,
     val photoUri: Uri? = null,
     val name: String = "",
-    val eventDate: Long? = null,
+    val eventDate: LocalDate? = null,
     val isDatePickerOpen: Boolean = false,
     val relationships: List<String> = emptyList(),
     val isRelationshipDropdownOpen: Boolean = false,
@@ -62,7 +63,7 @@ class AddEditGifteeViewModel @Inject constructor(
     }
 
     fun onNameChange(new: String) = _uiState.update { it.copy(name = new) }
-    fun onEventDateChange(ts: Long) = _uiState.update { it.copy(eventDate = ts) }
+    fun onEventDateChange(date: LocalDate) = _uiState.update { it.copy(eventDate = date) }
     fun onNotesChange(new: String) = _uiState.update { it.copy(notes = new) }
     fun onShowDatePicker(open: Boolean) =
         _uiState.update { it.copy(isDatePickerOpen = open) }
@@ -179,7 +180,7 @@ class AddEditGifteeViewModel @Inject constructor(
         }
     }
 
-    private fun getBirthday(ctx: Context, contactId: Long): Long? {
+    private fun getBirthday(ctx: Context, contactId: Long): LocalDate? {
         val uri = ContactsContract.Data.CONTENT_URI
         val projection = arrayOf(ContactsContract.CommonDataKinds.Event.START_DATE)
         val selection = "${ContactsContract.Data.CONTACT_ID} = ? AND ${ContactsContract.Data.MIMETYPE} = ? AND ${ContactsContract.CommonDataKinds.Event.TYPE} = ?"
@@ -187,7 +188,11 @@ class AddEditGifteeViewModel @Inject constructor(
         ctx.contentResolver.query(uri, projection, selection, selectionArgs, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val dateStr = cursor.getString(0)
-                return SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(dateStr)?.time
+                return try {
+                    LocalDate.parse(dateStr)
+                } catch (e: Exception) {
+                    null
+                }
             }
         }
         return null

@@ -8,6 +8,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.giftideaminder.data.model.Person
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
 @Preview
 @Composable
@@ -29,11 +31,11 @@ fun PersonItem(
                 text = person.name,
                 style = MaterialTheme.typography.titleMedium
             )
-            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-            person.birthday?.let { birthdayMillis ->
-                Text("Birthday: ${dateFormat.format(Date(birthdayMillis))}")
-                val upcoming = calculateNextBirthday(birthdayMillis)
-                Text("Upcoming: ${dateFormat.format(Date(upcoming))}")
+            val dateFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy")
+            person.birthday?.let { birthday ->
+                Text("Birthday: ${birthday.format(dateFormatter)}")
+                val upcoming = calculateNextBirthday(birthday)
+                Text("Upcoming: ${upcoming.format(dateFormatter)}")
             } ?: Text("No birthday set")
             Row(
                 modifier = Modifier
@@ -53,20 +55,12 @@ fun PersonItem(
     }
 }
 
-private fun calculateNextBirthday(birthdayMillis: Long): Long {
-    val birthCal = Calendar.getInstance().apply { timeInMillis = birthdayMillis }
-    val currentCal = Calendar.getInstance()
-    val nextCal = Calendar.getInstance().apply {
-        set(Calendar.YEAR, currentCal.get(Calendar.YEAR))
-        set(Calendar.MONTH, birthCal.get(Calendar.MONTH))
-        set(Calendar.DAY_OF_MONTH, birthCal.get(Calendar.DAY_OF_MONTH))
-        set(Calendar.HOUR_OF_DAY, 0)
-        set(Calendar.MINUTE, 0)
-        set(Calendar.SECOND, 0)
-        set(Calendar.MILLISECOND, 0)
+private fun calculateNextBirthday(birthday: LocalDate): LocalDate {
+    val today = LocalDate.now()
+    val thisYearBirthday = birthday.withYear(today.year)
+    return if (thisYearBirthday.isBefore(today) || thisYearBirthday.isEqual(today)) {
+        thisYearBirthday.plusYears(1)
+    } else {
+        thisYearBirthday
     }
-    if (nextCal.timeInMillis < currentCal.timeInMillis) {
-        nextCal.add(Calendar.YEAR, 1)
-    }
-    return nextCal.timeInMillis
 } 
