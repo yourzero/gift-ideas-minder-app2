@@ -20,4 +20,10 @@ interface PersonDao {
 
     @Query("SELECT * FROM persons WHERE id = :id")
     fun getPersonById(id: Int): Flow<Person>
+
+    @Query("SELECT * FROM persons WHERE id = :personId LIMIT 1")
+    suspend fun getPersonByIdSuspend(personId: Int): Person?
+
+    @Query("SELECT * FROM persons WHERE (roles & :roleBit) != 0 ORDER BY name ASC")
+    suspend fun getPeopleWithRole(roleBit: Int): List<Person>
 }

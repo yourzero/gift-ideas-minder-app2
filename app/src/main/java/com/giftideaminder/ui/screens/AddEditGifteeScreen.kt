@@ -37,6 +37,7 @@ import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
 
@@ -70,12 +71,12 @@ fun AddEditGifteeScreen(
     // Date picker state (keep it synced with uiState after load)
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = uiState.eventDate?.let { date ->
-            date.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
+            date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
         }
     )
     LaunchedEffect(uiState.eventDate) {
         datePickerState.selectedDateMillis = uiState.eventDate?.let { date ->
-            date.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
+            date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
         }
     }
 
@@ -235,7 +236,7 @@ fun AddEditGifteeScreen(
                     TextButton(onClick = {
                         datePickerState.selectedDateMillis?.let { millis ->
                             val localDate = Instant.ofEpochMilli(millis)
-                                .atZone(ZoneId.of("UTC"))
+                                .atZone(ZoneOffset.UTC)
                                 .toLocalDate()
                             viewModel.onEventDateChange(localDate)
                         }

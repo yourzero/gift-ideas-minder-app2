@@ -16,5 +16,6 @@ data class Person(
     val notes: String? = null,
     val contactInfo: String? = null,
     val autoAssignFromSMS: Boolean = false,
-    val defaultBudget: Double? = null
+    val defaultBudget: Double? = null,
+    val roles: Int = PersonRole.GIFTEE.bit
 )

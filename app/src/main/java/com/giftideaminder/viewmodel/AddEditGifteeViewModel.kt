@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.giftideaminder.data.model.Person
+import com.giftideaminder.data.model.PersonRole
 import com.giftideaminder.data.repository.PersonRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -27,7 +28,8 @@ data class GifteeUiState(
     val isRelationshipDropdownOpen: Boolean = false,
     val notes: String = "",
     val phoneNumber: String? = null,
-    val showSmsPrompt: Boolean = false
+    val showSmsPrompt: Boolean = false,
+    val roles: Int = PersonRole.GIFTEE.bit
 )
 
 @HiltViewModel
@@ -44,21 +46,7 @@ class AddEditGifteeViewModel @Inject constructor(
 
     init {
         savedStateHandle.get<Int>("gifteeId")?.let { id ->
-            viewModelScope.launch {
-                personRepo.getPersonById(id).firstOrNull()?.let { person ->
-                    _uiState.update { s ->
-                        s.copy(
-                            isEditing = true,
-                            id = person.id,
-                            photoUri = person.photoUri?.let(Uri::parse),
-                            name = person.name,
-                            eventDate = person.birthday,
-                            relationships = person.relationships,
-                            notes = person.notes ?: ""
-                        )
-                    }
-                }
-            }
+            loadPerson(id)
         }
     }
 
@@ -133,13 +121,14 @@ class AddEditGifteeViewModel @Inject constructor(
             isRelationshipDropdownOpen = false,
             notes = "",
             phoneNumber = null,
-            showSmsPrompt = false
+            showSmsPrompt = false,
+            roles = PersonRole.GIFTEE.bit
         )
     }
 
     fun loadPerson(personId: Int) {
         viewModelScope.launch {
-            personRepo.getPersonById(personId).firstOrNull()?.let { person ->
+            personRepo.getPersonByIdSuspend(personId)?.let { person ->
                 _uiState.update { s ->
                     s.copy(
                         isEditing = true,
@@ -149,7 +138,8 @@ class AddEditGifteeViewModel @Inject constructor(
                         eventDate = person.birthday,
                         relationships = person.relationships,
                         notes = person.notes ?: "",
-                        phoneNumber = person.contactInfo
+                        phoneNumber = person.contactInfo,
+                        roles = person.roles
                     )
                 }
             }
@@ -221,7 +211,8 @@ class AddEditGifteeViewModel @Inject constructor(
                 birthday = s.eventDate,
                 relationships = s.relationships,
                 notes = s.notes,
-                contactInfo = s.phoneNumber
+                contactInfo = s.phoneNumber,
+                roles = s.roles
             )
             
             if (s.isEditing) {

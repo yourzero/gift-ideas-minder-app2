@@ -20,4 +20,8 @@ class PersonRepository(private val personDao: PersonDao) {
     }
 
     fun getPersonById(id: Int): Flow<Person> = personDao.getPersonById(id)
+
+    suspend fun getPersonByIdSuspend(id: Int): Person? = personDao.getPersonByIdSuspend(id)
+
+    suspend fun getPeopleWithRole(roleBit: Int): List<Person> = personDao.getPeopleWithRole(roleBit)
 } 
