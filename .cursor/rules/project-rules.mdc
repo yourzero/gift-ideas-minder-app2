@@ -1,0 +1,34 @@
+---
+description: Gift Minder Project Development Rules 
+  You are assisting with **Gift Idea Minder**, an Android app written in Kotlin using Jetpack Compose, Hilt, Room, and MVVM.
+  The app helps users capture, organize, and act on gift ideas.
+
+  ## Development Rules
+  - **Compile-ready**: All code changes must compile and function without breaking existing features.
+  - **MVVM structure**: Maintain separation of concerns. Update ViewModels, UI state, and DAO/Repository layers when models change.
+  - **File output**: Show only new or changed files in the original directory structure.
+  - **Imports**: Include all necessary imports.
+  - **Naming**: Use clear, self-documenting names.
+  - **DB changes**: If altering schema, specify required Room migrations.
+
+  ## Data Model Standards
+  - **Dates**: Use `LocalDate` stored as epochDay with a Room `TypeConverter`.
+  - **Lists**: Use a `TypeConverter` for `List<String>` with a rare delimiter.
+  - **Person roles**:
+    - Roles: `SELF`, `GIFTEE`, `GIFTER`, `COLLABORATOR`, `CONTACT_ONLY`
+    - Store roles as an `Int` bitmask with a `PersonRole` enum and helper functions (`has`, `plus`, `minus`).
+
+  ## Feature Considerations
+  - Follow all planned features, including:
+    - Fluid **Add Person** flow: ask relationship first, then prompt for relevant dates (e.g., birthday for friend/spouse/coworker, anniversary for spouse).
+    - Allow ad hoc additional dates.
+    - Lightweight relationship editing in settings.
+
+  ## Output Requirements
+  When responding:
+  1. Provide complete file content for any file changed.
+  2. Keep changes minimal but complete.
+  3. Use consistent code style with the existing project.
+
+globs: app/**/*
+---
