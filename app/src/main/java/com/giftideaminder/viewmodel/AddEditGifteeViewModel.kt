@@ -11,6 +11,8 @@ import com.giftideaminder.data.repository.PersonRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import javax.inject.Inject
 import android.provider.ContactsContract
 import java.text.SimpleDateFormat
@@ -32,6 +34,10 @@ data class GifteeUiState(
     val roles: Int = PersonRole.GIFTEE.bit
 )
 
+sealed class GifteeEvent {
+    data class PersonSaved(val personName: String, val isEdit: Boolean) : GifteeEvent()
+}
+
 @HiltViewModel
 class AddEditGifteeViewModel @Inject constructor(
     private val personRepo: PersonRepository,
@@ -40,6 +46,9 @@ class AddEditGifteeViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(GifteeUiState())
     val uiState: StateFlow<GifteeUiState> = _uiState.asStateFlow()
+
+    private val _events = Channel<GifteeEvent>()
+    val events = _events.receiveAsFlow()
 
     // Expose relationship options publicly
     val relationshipOptions: List<String> = listOf("Family", "Friend", "Coworker")
@@ -217,8 +226,10 @@ class AddEditGifteeViewModel @Inject constructor(
             
             if (s.isEditing) {
                 personRepo.update(person)
+                _events.send(GifteeEvent.PersonSaved(s.name, isEdit = true))
             } else {
                 personRepo.insert(person)
+                _events.send(GifteeEvent.PersonSaved(s.name, isEdit = false))
             }
         }
     }

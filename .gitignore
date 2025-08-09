@@ -123,3 +123,4 @@ lint/tmp/
 apikey.properties
 
 app/src/*.zip
+.kotlin/

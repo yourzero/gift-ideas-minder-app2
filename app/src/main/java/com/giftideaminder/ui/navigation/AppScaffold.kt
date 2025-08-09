@@ -29,6 +29,7 @@ fun AppScaffold(
     navController: NavHostController,
     onFabClick: () -> Unit
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
     // Track current route
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     
@@ -67,6 +68,7 @@ fun AppScaffold(
     Box {
         Scaffold(
             containerColor = BgPink,
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             floatingActionButton = {
                 if (shouldShowFab) {
                     FloatingActionButton(
@@ -93,6 +95,7 @@ fun AppScaffold(
         ) { innerPadding ->
             AppNavGraph(
                 navController = navController,
+                snackbarHostState = snackbarHostState,
                 modifier = Modifier.padding(innerPadding)
             )
         }

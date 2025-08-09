@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.giftideaminder.viewmodel.AddEditGifteeViewModel
+import com.giftideaminder.viewmodel.GifteeEvent
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePicker
@@ -45,7 +46,7 @@ import java.util.*
 @Composable
 fun AddEditGifteeScreen(
     viewModel: AddEditGifteeViewModel = hiltViewModel(),
-    onNavigateBack: () -> Unit,
+    onNavigateBack: (String?) -> Unit,
     personId: Int? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -58,6 +59,23 @@ fun AddEditGifteeScreen(
         } else {
             // Optional: ensure a clean slate when adding
             viewModel.startNew()             // ← if you have a reset method
+        }
+    }
+
+    // Handle events like person saved
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is GifteeEvent.PersonSaved -> {
+                    val message = if (event.isEdit) {
+                        "${event.personName} was updated"
+                    } else {
+                        "${event.personName} was added"
+                    }
+                    // Navigate back immediately with the success message
+                    onNavigateBack(message)
+                }
+            }
         }
     }
 
@@ -85,7 +103,7 @@ fun AddEditGifteeScreen(
             TopAppBar(
                 title = { Text(if (uiState.isEditing) "Edit Giftee" else "Add Giftee") },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = { onNavigateBack(null) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
@@ -214,14 +232,14 @@ fun AddEditGifteeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 OutlinedButton(
-                    onClick = onNavigateBack,
+                    onClick = { onNavigateBack(null) },
                     colors = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
                 ) {
                     Text("Cancel")
                 }
                 Button(onClick = {
                     viewModel.onSave()
-                    onNavigateBack()
+                    // Navigation will happen after the snackbar is shown
                 }) {
                     Text("Save")
                 }

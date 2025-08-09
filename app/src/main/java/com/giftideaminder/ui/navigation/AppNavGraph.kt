@@ -1,19 +1,35 @@
 package com.giftideaminder.ui.navigation
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.giftideaminder.ui.screens.*
+import androidx.compose.material3.SnackbarHostState
+import kotlinx.coroutines.launch
 
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier
 )
 {
+    val snackbarScope = rememberCoroutineScope()
+
+    fun showSnackbarAndPopBackStack(successMessage: String?) {
+        successMessage?.let { message ->
+            snackbarScope.launch {
+                snackbarHostState.showSnackbar(message = message, duration = SnackbarDuration.Short)
+            }
+        }
+        navController.popBackStack()
+    }
+
     NavHost(
         navController = navController,
         startDestination = "home",
@@ -32,8 +48,7 @@ fun AppNavGraph(
             PersonListScreen(navController)
         }
         composable("add_person") {
-            AddEditGifteeScreen(onNavigateBack = { navController.popBackStack() }) // TODO - should this take the navController like other navs?
-            // TODO figure out if the onNavigateBack is needed
+            AddEditGifteeScreen(onNavigateBack = ::showSnackbarAndPopBackStack)
         }
         composable(
             route = "edit_person/{personId}",
@@ -47,8 +62,8 @@ fun AppNavGraph(
         // TODO - add passing the person in
         AddEditGifteeScreen(
             personId = personId,
-            onNavigateBack = { navController.popBackStack() }
-        ) // TODO - should this take the navController like other navs?
+            onNavigateBack = ::showSnackbarAndPopBackStack
+        )
     }
     composable(
         "add_gift?sharedText={sharedText}",
