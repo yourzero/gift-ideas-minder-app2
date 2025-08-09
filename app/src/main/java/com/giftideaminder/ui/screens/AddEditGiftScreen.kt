@@ -95,10 +95,10 @@ fun AddEditGiftScreen(
         viewModel.events.collectLatest { ev ->
             when (ev) {
                 is GiftViewModel.GiftEvent.Saved -> {
-                    snackbarHostState.showSnackbar("Saved")
+                    //snackbarHostState.showSnackbar("Saved")
                     // Navigate back after snackbar
-                    navController.popBackStack()
-                    onNavigateBack(null)
+                    //navController.popBackStack()
+                    onNavigateBack("Saved")
                 }
             }
         }

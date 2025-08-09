@@ -17,8 +17,7 @@ fun AppNavGraph(
     navController: NavHostController,
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier
-)
-{
+) {
     val snackbarScope = rememberCoroutineScope()
 
     fun showSnackbarAndPopBackStack(successMessage: String?) {
@@ -59,24 +58,24 @@ fun AppNavGraph(
             )
         ) { backStackEntry ->
             var personId = backStackEntry.arguments!!.getInt("personId")
-        // TODO - add passing the person in
-        AddEditRecipientFlowScreen(
-            personId = personId,
-            onNavigateBack = ::showSnackbarAndPopBackStack
-        )
+            // TODO - add passing the person in
+            AddEditRecipientFlowScreen(
+                personId = personId,
+                onNavigateBack = ::showSnackbarAndPopBackStack
+            )
+        }
+        composable(
+            "add_gift?sharedText={sharedText}",
+            arguments = listOf(navArgument("sharedText") {
+                type = NavType.StringType; nullable = true; defaultValue = null
+            })
+        ) { back ->
+            AddEditGiftScreen(
+                onNavigateBack = ::showSnackbarAndPopBackStack,
+                navController = navController,
+                sharedText = back.arguments?.getString("sharedText")
+            )
+        }
+        // … other routes …
     }
-    composable(
-        "add_gift?sharedText={sharedText}",
-        arguments = listOf(navArgument("sharedText") {
-            type = NavType.StringType; nullable = true; defaultValue = null
-        })
-    ) { back ->
-        AddEditGiftScreen(
-            onNavigateBack = { /* Gift handles back via navController + snackbar */ },
-            navController = navController,
-            sharedText = back.arguments?.getString("sharedText")
-        )
-    }
-    // … other routes …
-}
 }
