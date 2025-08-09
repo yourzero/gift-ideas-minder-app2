@@ -1,6 +1,9 @@
 package com.threekidsinatrenchcoat.giftideaminder.ui.screens
 
 import androidx.compose.material3.*
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import kotlinx.coroutines.launch
 
@@ -8,10 +11,13 @@ import kotlinx.coroutines.launch
  * Example of how to handle the success message from AddEditRecipientScreen
  * in a parent screen like PersonListScreen
  */
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun PersonListScreenExample() {
     val snackbarHostState = remember { SnackbarHostState() }
+        CenterAlignedTopAppBar(
+            title = { Text("Recipient List Example", style = MaterialTheme.typography.titleLarge) }
+        )
     val coroutineScope = rememberCoroutineScope()
     
     // This would be your navigation state/logic
@@ -65,6 +71,9 @@ fun PersonListScreenExample() {
 fun YourNavHost() {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
+        CenterAlignedTopAppBar(
+            title = { Text("Recipient List Example", style = MaterialTheme.typography.titleLarge) }
+        )
     
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }

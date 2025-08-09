@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -106,3 +108,19 @@ dependencies {
 ////    inputDirectory.set(file("src/main/svg"))
 ////    outputPackage.set("com.threekidsinatrenchcoat.ui.icons")
 ////}
+
+
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions {
+        // keep your existing args, just add the opt-ins
+        freeCompilerArgs = freeCompilerArgs + listOf(
+            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
+            "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi"
+            // add more if needed:
+            // "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+            // "-opt-in=kotlinx.coroutines.FlowPreview",
+        )
+        // keep whatever jvmTarget you already use
+        // jvmTarget = "17"
+    }
+}

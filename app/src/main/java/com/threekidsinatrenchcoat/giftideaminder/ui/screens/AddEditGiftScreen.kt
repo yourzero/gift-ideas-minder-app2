@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.collectLatest
 import java.util.Calendar
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun AddEditGiftScreen(
     viewModel: GiftViewModel = hiltViewModel(),

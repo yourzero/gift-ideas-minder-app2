@@ -19,7 +19,7 @@ import com.threekidsinatrenchcoat.giftideaminder.data.model.Gift
 import java.util.Locale
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Preview(showBackground = true, widthDp = 360, heightDp = 640)@Preview
 @Composable
 fun DashboardScreen(

@@ -44,7 +44,6 @@ import com.threekidsinatrenchcoat.giftideaminder.data.model.Gift
 import androidx.compose.material3.HorizontalDivider
 
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),

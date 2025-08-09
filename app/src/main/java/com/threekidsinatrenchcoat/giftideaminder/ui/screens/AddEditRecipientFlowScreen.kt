@@ -43,7 +43,7 @@ fun AddEditRecipientFlowScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    
     Scaffold(
         topBar = { TopAppBar(title = { Text(if (state.isEditing) "Edit Recipient" else "Add Recipient") }) }
     ) { padding ->
@@ -121,7 +121,7 @@ fun RelationshipChips(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 private fun DatePickerRow(label: String, onPicked: (LocalDate) -> Unit) {
     var open by remember { mutableStateOf(false) }
