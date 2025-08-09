@@ -9,11 +9,11 @@ plugins {
 }
 
 android {
-    namespace = "com.giftideaminder"
+    namespace = "com.threekidsinatrenchcoat.giftideaminder"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.giftideaminder"
+        applicationId = "com.threekidsinatrenchcoat.giftideaminder"
         //minSdk = 24
         minSdk = 26
         targetSdk = 34
