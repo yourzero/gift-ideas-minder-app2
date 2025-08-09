@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.giftideaminder.data.model.Person
+import com.giftideaminder.data.model.RelationshipType
 import com.giftideaminder.data.repository.PersonRepository
 import com.giftideaminder.data.repository.ImportantDateRepository
 import com.giftideaminder.data.model.ImportantDate
@@ -34,7 +35,8 @@ class PersonFlowViewModel @Inject constructor(
         val selectedRelationship: String? = null,
         val name: String = "",
         val datePrompts: List<String> = emptyList(),
-        val pickedDates: Map<String, java.time.LocalDate> = emptyMap()
+        val pickedDates: Map<String, java.time.LocalDate> = emptyMap(),
+        val relationshipTypes: Map<String, RelationshipType> = emptyMap()
     )
 
     data class NavResult(val navigateBack: Boolean = false, val saved: Boolean = false, val successMessage: String? = null)
@@ -44,6 +46,17 @@ class PersonFlowViewModel @Inject constructor(
 
     init {
         viewModelScope.launch { relRepo.ensureSeeded() }
+        // Observe relationship types to populate available list
+        viewModelScope.launch {
+            relRepo.getAll().collect { types ->
+                val names = types.map { it.name }
+                val typeMap = types.associateBy { it.name }
+                _uiState.update { it.copy(
+                    availableRelationships = if (names.isEmpty()) it.availableRelationships else names,
+                    relationshipTypes = typeMap
+                ) }
+            }
+        }
         savedStateHandle.get<Int>("personId")?.let { id ->
             viewModelScope.launch {
                 personRepo.getPersonByIdSuspend(id)?.let { person ->
@@ -55,6 +68,11 @@ class PersonFlowViewModel @Inject constructor(
                             name = person.name,
                             step = Step.Relationship
                         )
+                    }
+                    // Prefill dates for edit mode
+                    importantDateRepo.getForPerson(id).collect { existing ->
+                        val map = existing.associate { it.label to it.date }
+                        _uiState.update { it.copy(pickedDates = map) }
                     }
                 }
             }
@@ -85,9 +103,20 @@ class PersonFlowViewModel @Inject constructor(
         val current = _uiState.value
         return when (current.step) {
             Step.Relationship -> {
-                val prompts = when (current.selectedRelationship) {
-                    "Spouse", "Partner" -> listOf("Birthday", "Anniversary")
-                    else -> listOf("Birthday")
+                val relation = current.selectedRelationship
+                val prompts = if (relation == null) emptyList() else {
+                    val rt = _uiState.value.relationshipTypes[relation]
+                    if (rt != null) {
+                        buildList {
+                            if (rt.hasBirthday) add("Birthday")
+                            if (rt.hasAnniversary) add("Anniversary")
+                        }
+                    } else {
+                        when (relation) {
+                            "Spouse", "Partner" -> listOf("Birthday", "Anniversary")
+                            else -> listOf("Birthday")
+                        }
+                    }
                 }
                 _uiState.update { it.copy(step = Step.Details, datePrompts = prompts) }
                 NavResult()
@@ -110,6 +139,10 @@ class PersonFlowViewModel @Inject constructor(
 
     fun onDatePicked(label: String, date: java.time.LocalDate) {
         _uiState.update { it.copy(pickedDates = it.pickedDates + (label to date)) }
+    }
+
+    fun onRemoveDate(label: String) {
+        _uiState.update { it.copy(pickedDates = it.pickedDates - label) }
     }
 
     private suspend fun persistPersonAndDates() {

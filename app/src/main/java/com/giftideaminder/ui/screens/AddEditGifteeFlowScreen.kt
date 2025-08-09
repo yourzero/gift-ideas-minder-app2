@@ -35,6 +35,7 @@ import com.giftideaminder.viewmodel.PersonFlowViewModel
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun AddEditGifteeFlowScreen(
@@ -75,18 +76,84 @@ fun AddEditGifteeFlowScreen(
                 PersonFlowViewModel.Step.Dates -> {
                     Text("Important dates", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))
+                    // Prompted dates (e.g., Birthday, Anniversary)
                     state.datePrompts.forEach { label ->
-                        DatePickerRow(label = label) { picked ->
-                            viewModel.onDatePicked(label, picked)
+                        DatePickerRow(
+                            label = label,
+                            date = state.pickedDates[label],
+                            onPicked = { picked -> viewModel.onDatePicked(label, picked) },
+                            onRemove = { viewModel.onRemoveDate(label) }
+                        )
+                    }
+
+                    // Custom dates list (non-prompt labels)
+                    val nonPromptDates = state.pickedDates.filterKeys { it !in state.datePrompts }
+                    if (nonPromptDates.isNotEmpty()) {
+                        Spacer(Modifier.height(12.dp))
+                        Text("Other dates", style = MaterialTheme.typography.titleSmall)
+                        Spacer(Modifier.height(4.dp))
+                        nonPromptDates.forEach { (label, date) ->
+                            DatePickerRow(
+                                label = label,
+                                date = date,
+                                onPicked = { picked -> viewModel.onDatePicked(label, picked) },
+                                onRemove = { viewModel.onRemoveDate(label) }
+                            )
                         }
                     }
+
+                    // Add custom labeled date
+                    Spacer(Modifier.height(12.dp))
+                    var customLabel by remember { mutableStateOf("") }
+                    var openAddPicker by remember { mutableStateOf(false) }
+                    OutlinedTextField(
+                        value = customLabel,
+                        onValueChange = { customLabel = it },
+                        label = { Text("Custom date label") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     Spacer(Modifier.height(8.dp))
-                    // Simple ad-hoc date add placeholder could be added later
+                    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                        OutlinedButton(onClick = { openAddPicker = true }, enabled = customLabel.isNotBlank()) {
+                            Text("Pick date & add")
+                        }
+                    }
+
+                    if (openAddPicker) {
+                        val dpState = androidx.compose.material3.rememberDatePickerState()
+                        DatePickerDialog(
+                            onDismissRequest = { openAddPicker = false },
+                            confirmButton = {
+                                TextButton(onClick = {
+                                    dpState.selectedDateMillis?.let { millis ->
+                                        val date = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
+                                        val trimmed = customLabel.trim()
+                                        if (trimmed.isNotEmpty()) {
+                                            viewModel.onDatePicked(trimmed, date)
+                                            customLabel = ""
+                                        }
+                                    }
+                                    openAddPicker = false
+                                }) { Text("Done") }
+                            },
+                            dismissButton = { TextButton(onClick = { openAddPicker = false }) { Text("Cancel") } }
+                        ) {
+                            DatePicker(state = dpState)
+                        }
+                    }
                 }
                 PersonFlowViewModel.Step.Review -> {
                     Text("Review", style = MaterialTheme.typography.titleMedium)
                     Text("Relationship: ${state.selectedRelationship ?: "None"}")
                     Text("Name: ${state.name}")
+                    val formatter = remember { DateTimeFormatter.ofPattern("MMM d, yyyy") }
+                    if (state.pickedDates.isNotEmpty()) {
+                        Spacer(Modifier.height(8.dp))
+                        Text("Dates:")
+                        state.pickedDates.entries.sortedBy { it.key }.forEach { (label, date) ->
+                            Text("- $label: ${date.format(formatter)}")
+                        }
+                    }
                 }
             }
 
@@ -124,9 +191,14 @@ fun RelationshipChips(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DatePickerRow(label: String, onPicked: (LocalDate) -> Unit) {
+private fun DatePickerRow(
+    label: String,
+    date: LocalDate?,
+    onPicked: (LocalDate) -> Unit,
+    onRemove: (() -> Unit)? = null
+) {
     var open by remember { mutableStateOf(false) }
-    var display by remember { mutableStateOf<String?>(null) }
+    val formatter = remember { DateTimeFormatter.ofPattern("MMM d, yyyy") }
     Card(
         colors = CardDefaults.cardColors(),
         modifier = Modifier
@@ -134,20 +206,29 @@ private fun DatePickerRow(label: String, onPicked: (LocalDate) -> Unit) {
             .padding(vertical = 4.dp)
     ) {
         Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(if (display != null) "$label: $display" else label)
-            OutlinedButton(onClick = { open = true }) { Text("Pick") }
+            Text(if (date != null) "$label: ${date.format(formatter)}" else label)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (date != null && onRemove != null) {
+                    OutlinedButton(onClick = { onRemove() }) { Text("Clear") }
+                }
+                OutlinedButton(onClick = { open = true }) { Text("Pick") }
+            }
         }
     }
     if (open) {
-        val state = androidx.compose.material3.rememberDatePickerState()
+        val initialMillis = date?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
+        val state = if (initialMillis != null) {
+            androidx.compose.material3.rememberDatePickerState(initialSelectedDateMillis = initialMillis)
+        } else {
+            androidx.compose.material3.rememberDatePickerState()
+        }
         DatePickerDialog(
             onDismissRequest = { open = false },
             confirmButton = {
                 TextButton(onClick = {
                     state.selectedDateMillis?.let { millis ->
-                        val date = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
-                        display = date.toString()
-                        onPicked(date)
+                        val picked = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
+                        onPicked(picked)
                     }
                     open = false
                 }) { Text("Done") }
