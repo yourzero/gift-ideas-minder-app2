@@ -26,6 +26,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
+import com.threekidsinatrenchcoat.giftideaminder.ui.components.AppTopBar
 
 @Composable
 fun PersonListScreen(
@@ -42,27 +43,7 @@ fun PersonListScreen(
     }
 
     Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                modifier = Modifier.height(48.dp),
-                title = {
-                    Box(
-                        modifier = Modifier.height(48.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "Recipients",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFF546E7A),
-                    titleContentColor = Color.White
-                )
-            )
-        }
+        topBar = { AppTopBar("Recipients") }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             LazyColumn {

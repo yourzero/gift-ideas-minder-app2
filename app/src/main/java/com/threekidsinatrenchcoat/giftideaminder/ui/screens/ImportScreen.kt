@@ -26,6 +26,7 @@ import androidx.navigation.NavController
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import com.threekidsinatrenchcoat.giftideaminder.ui.components.AppTopBar
 import com.threekidsinatrenchcoat.giftideaminder.viewmodel.ImportViewModel
 import java.io.IOException
 
@@ -65,27 +66,7 @@ fun ImportScreen(
     }
 
     Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                modifier = Modifier.height(48.dp),
-                title = {
-                    Box(
-                        modifier = Modifier.height(48.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "Import Ideas",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFF546E7A),
-                    titleContentColor = Color.White
-                )
-            )
-        }
+        topBar = { AppTopBar("Import Ideas") }
     ) { innerPadding ->
         ImportScreenContent(
             modifier = Modifier
@@ -125,27 +106,7 @@ private fun ImportScreenContent(
 @Composable
 private fun ImportScreenPreview() {
     Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                modifier = Modifier.height(48.dp),
-                title = {
-                    Box(
-                        modifier = Modifier.height(48.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "Import Ideas",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFF546E7A),
-                    titleContentColor = Color.White
-                )
-            )
-        }
+        topBar = { AppTopBar("Import Ideas") }
     ) { innerPadding ->
         ImportScreenContent(
             modifier = Modifier

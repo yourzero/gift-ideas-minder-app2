@@ -29,6 +29,7 @@ import com.threekidsinatrenchcoat.giftideaminder.viewmodel.PersonViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.threekidsinatrenchcoat.giftideaminder.ui.components.AppTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,27 +45,7 @@ fun GiftDetailScreen(
         .value
 
     Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                modifier = Modifier.height(48.dp),
-                title = {
-                    Box(
-                        modifier = Modifier.height(48.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "Gift Details",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFF546E7A), // blue-gray
-                    titleContentColor = Color.White
-                )
-            )
-        }
+        topBar = { AppTopBar("Gift Details") }
     ) { innerPadding ->
         if (giftWithHistory == null) {
             // Loading/empty state instead of 'return' inside the Scaffold content lambda

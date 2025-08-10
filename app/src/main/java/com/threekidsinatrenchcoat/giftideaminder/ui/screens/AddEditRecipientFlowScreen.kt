@@ -36,11 +36,17 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.ui.Alignment
+import androidx.navigation.NavController
 
 @Composable
 fun AddEditRecipientFlowScreen(
     onNavigateBack: (String?) -> Unit,
+    navController: NavController,
     personId: Int? = null,
     viewModel: PersonFlowViewModel = hiltViewModel()
 ) {
@@ -48,7 +54,17 @@ val state by viewModel.uiState.collectAsState()
 
     
     Scaffold(
-        topBar = { TopAppBar(title = { Text(if (state.isEditing) "Edit Recipient" else "Add Recipient") }) }
+        topBar = {
+            TopAppBar(
+                title = { Text(if (state.isEditing) "Edit Recipient" else "Add Recipient") },
+                        navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+
+        }
     ) { padding ->
         Column(
             modifier = Modifier

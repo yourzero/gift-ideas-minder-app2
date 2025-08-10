@@ -27,30 +27,14 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Alignment
-
+import com.threekidsinatrenchcoat.giftideaminder.ui.components.AppTopBar
 
 
 @Preview
 @Composable
 fun BudgetScreen(navController: NavController) {
 Scaffold(
-    topBar = {
-CenterAlignedTopAppBar(
-    modifier = Modifier.height(48.dp),
-    title = {
-        Box(
-            modifier = Modifier.height(48.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Gift Budget", style = MaterialTheme.typography.titleMedium)
-        }
-    },
-    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-    )
-)
-    }
+    topBar = { AppTopBar("Gift Budget") }
 ) { innerPadding ->
     Column(modifier = Modifier.padding(innerPadding)) {
 val viewModel: GiftViewModel = hiltViewModel()

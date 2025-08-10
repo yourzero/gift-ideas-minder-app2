@@ -44,6 +44,7 @@ import com.threekidsinatrenchcoat.giftideaminder.data.model.Gift
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.foundation.layout.Box
+import com.threekidsinatrenchcoat.giftideaminder.ui.components.AppTopBar
 
 
 @Preview
@@ -56,16 +57,7 @@ val giftsState = viewModel.allGifts.collectAsState(initial = emptyList<Gift>())
     val filteredGifts: List<Gift> = gifts.filter { it.title.contains(searchQuery, ignoreCase = true) }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Gift Idea Minder") },
-                actions = {
-                    IconButton(onClick = { /* TODO: Settings */ }) {
-                        //Icon(Icons.Filled.Settings, contentDescription = "Settings")
-                    }
-                }
-            )
-        },
+        topBar = { AppTopBar("Gift Idea Minder") },
         floatingActionButton = {
             FloatingActionButton(onClick = { navController.navigate("add_gift") }) {
                 //Icon(Icons.Filled.Add, contentDescription = "Add New Gift")
