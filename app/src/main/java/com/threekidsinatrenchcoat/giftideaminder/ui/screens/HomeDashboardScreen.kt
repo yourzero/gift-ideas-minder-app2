@@ -43,23 +43,7 @@ fun HomeDashboardScreen(
     viewModel: GiftViewModel = hiltViewModel()
 ) {
 Scaffold(
-    topBar = {
-CenterAlignedTopAppBar(
-    modifier = Modifier.height(48.dp),
-    title = {
-        Box(
-            modifier = Modifier.height(48.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Home Dashboard", style = MaterialTheme.typography.titleMedium)
-        }
-    },
-    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-    )
-)
-    }
+
 ) { innerPadding ->
     Column(modifier = Modifier.padding(innerPadding)) {
 // 1) Collect your gifts
