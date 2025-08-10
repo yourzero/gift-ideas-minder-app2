@@ -2,8 +2,10 @@ package com.threekidsinatrenchcoat.giftideaminder.ui.screens
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -11,8 +13,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,7 +28,6 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.threekidsinatrenchcoat.giftideaminder.viewmodel.ImportViewModel
 import java.io.IOException
-
 
 @Composable
 fun ImportScreen(
@@ -43,7 +47,6 @@ fun ImportScreen(
                     .addOnSuccessListener { visionText ->
                         viewModel.parseOcrTextToGifts(visionText.text)
                     }
-                // You might also want to handle addOnFailureListener here if desired
             } catch (e: IOException) {
                 // Handle error (log, snackbar, etc.)
             }
@@ -64,7 +67,23 @@ fun ImportScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Import Ideas", style = MaterialTheme.typography.titleLarge) }
+                modifier = Modifier.height(48.dp),
+                title = {
+                    Box(
+                        modifier = Modifier.height(48.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Import Ideas",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.White
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color(0xFF546E7A),
+                    titleContentColor = Color.White
+                )
             )
         }
     ) { innerPadding ->
@@ -102,18 +121,29 @@ private fun ImportScreenContent(
     }
 }
 
-/**
- * Preview that doesn't require NavController or Hilt.
- * Renders the same UI using the shared content function.
- */
-
 @Preview(showBackground = true)
 @Composable
 private fun ImportScreenPreview() {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Import Ideas", style = MaterialTheme.typography.titleLarge) }
+                modifier = Modifier.height(48.dp),
+                title = {
+                    Box(
+                        modifier = Modifier.height(48.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Import Ideas",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.White
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color(0xFF546E7A),
+                    titleContentColor = Color.White
+                )
             )
         }
     ) { innerPadding ->

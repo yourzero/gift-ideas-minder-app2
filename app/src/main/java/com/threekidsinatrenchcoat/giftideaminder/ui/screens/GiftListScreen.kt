@@ -42,13 +42,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.threekidsinatrenchcoat.giftideaminder.data.model.Gift
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.foundation.layout.Box
 
 
 @Preview
 @Composable
 fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
                    navController: NavController) {
-    val giftsState = viewModel.allGifts.collectAsState(initial = emptyList<Gift>())
+val giftsState = viewModel.allGifts.collectAsState(initial = emptyList<Gift>())
     val gifts = giftsState.value
     var searchQuery by remember { mutableStateOf("") }
     val filteredGifts: List<Gift> = gifts.filter { it.title.contains(searchQuery, ignoreCase = true) }
@@ -156,5 +158,5 @@ fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
                 }
             }
         }
-    }
+}
 } 

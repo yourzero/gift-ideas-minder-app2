@@ -25,6 +25,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import java.util.Calendar
 import com.threekidsinatrenchcoat.giftideaminder.data.model.Gift
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 
 // Simple data class for display
 data class GiftEvent(val title: String, val subtitle: String)
@@ -36,7 +42,27 @@ fun HomeDashboardScreen(
     modifier: Modifier = Modifier,
     viewModel: GiftViewModel = hiltViewModel()
 ) {
-    // 1) Collect your gifts
+Scaffold(
+    topBar = {
+CenterAlignedTopAppBar(
+    modifier = Modifier.height(48.dp),
+    title = {
+        Box(
+            modifier = Modifier.height(48.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Home Dashboard", style = MaterialTheme.typography.titleMedium)
+        }
+    },
+    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+)
+    }
+) { innerPadding ->
+    Column(modifier = Modifier.padding(innerPadding)) {
+// 1) Collect your gifts
     val gifts by viewModel.allGifts.collectAsState(initial = emptyList<Gift>())
 
     // 2) Compute time boundaries
@@ -119,6 +145,8 @@ fun HomeDashboardScreen(
             }
         }
     }
+    }
+}
 }
 
 @Composable

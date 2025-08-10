@@ -35,6 +35,12 @@ import androidx.compose.material3.TextButton
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 
 
 @Composable
@@ -43,7 +49,7 @@ fun AddEditRecipientScreen(
     onNavigateBack: (String?) -> Unit,
     personId: Int? = null
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
     // 🔗 Load existing person when editing

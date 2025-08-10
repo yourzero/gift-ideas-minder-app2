@@ -34,6 +34,9 @@ import com.threekidsinatrenchcoat.giftideaminder.viewmodel.PersonFlowViewModel
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
 
 @Composable
 fun AddEditRecipientFlowScreen(
@@ -41,7 +44,7 @@ fun AddEditRecipientFlowScreen(
     personId: Int? = null,
     viewModel: PersonFlowViewModel = hiltViewModel()
 ) {
-    val state by viewModel.uiState.collectAsState()
+val state by viewModel.uiState.collectAsState()
 
     
     Scaffold(
@@ -157,4 +160,3 @@ private fun DatePickerRow(label: String, onPicked: (LocalDate) -> Unit) {
         }
     }
 }
-

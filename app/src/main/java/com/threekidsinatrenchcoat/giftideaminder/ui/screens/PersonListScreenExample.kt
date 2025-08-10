@@ -6,6 +6,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import kotlinx.coroutines.launch
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
 /**
  * Example of how to handle the success message from AddEditRecipientScreen
@@ -14,10 +23,23 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun PersonListScreenExample() {
-    val snackbarHostState = remember { SnackbarHostState() }
+val snackbarHostState = remember { SnackbarHostState() }
         CenterAlignedTopAppBar(
-            title = { Text("Recipient List Example", style = MaterialTheme.typography.titleLarge) }
-        )
+    modifier = Modifier.height(48.dp),
+    title = {
+        Box(
+            modifier = Modifier.height(48.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Recipient List Example", style = MaterialTheme.typography.titleMedium)
+        }
+    },
+    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+)
+
     val coroutineScope = rememberCoroutineScope()
     
     // This would be your navigation state/logic
