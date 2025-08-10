@@ -1,13 +1,16 @@
 package com.giftideaminder.di
 
+import com.giftideaminder.data.api.AIService
 import com.giftideaminder.data.dao.GiftDao
 import com.giftideaminder.data.dao.PersonDao
 import com.giftideaminder.data.dao.ImportantDateDao
 import com.giftideaminder.data.dao.RelationshipTypeDao
+import com.giftideaminder.data.dao.SuggestionDismissalDao
 import com.giftideaminder.data.repository.GiftRepository
 import com.giftideaminder.data.repository.PersonRepository
 import com.giftideaminder.data.repository.ImportantDateRepository
 import com.giftideaminder.data.repository.RelationshipTypeRepository
+import com.giftideaminder.data.repository.AISuggestionRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,4 +36,13 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideRelationshipTypeRepository(dao: RelationshipTypeDao): RelationshipTypeRepository = RelationshipTypeRepository(dao)
-} 
+
+    @Provides
+    @Singleton
+    fun provideAISuggestionRepository(
+        aiService: AIService,
+        giftDao: GiftDao,
+        personDao: PersonDao,
+        dismissalDao: SuggestionDismissalDao
+    ): AISuggestionRepository = AISuggestionRepository(aiService, giftDao, personDao, dismissalDao)
+}

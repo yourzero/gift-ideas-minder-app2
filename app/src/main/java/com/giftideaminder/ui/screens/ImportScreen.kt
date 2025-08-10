@@ -63,5 +63,8 @@ fun ImportScreen(navController: NavController) {
         Button(onClick = { viewModel.extractFromSms() }) {
             Text("Extract from SMS")
         }
+        Button(onClick = { viewModel.summarizeSmsToInsightsFromPersons() }) {
+            Text("AI summarize SMS to insights")
+        }
     }
 } 

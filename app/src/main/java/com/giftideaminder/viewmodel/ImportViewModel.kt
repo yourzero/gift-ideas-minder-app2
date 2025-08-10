@@ -6,10 +6,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.giftideaminder.data.model.Gift
 import com.giftideaminder.data.repository.GiftRepository
+import com.giftideaminder.data.api.AIService
+import com.giftideaminder.data.api.MessagePayload
+import com.giftideaminder.data.api.PersonHint
+import com.giftideaminder.data.api.SummarizeMessagesRequest
+import com.giftideaminder.data.repository.PersonRepository
 import com.opencsv.CSVReader
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import java.io.File
 import java.io.StringReader
 import javax.inject.Inject
@@ -17,6 +23,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ImportViewModel @Inject constructor(
     private val giftRepository: GiftRepository,
+    private val personRepository: PersonRepository,
+    private val aiService: AIService,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -66,12 +74,59 @@ class ImportViewModel @Inject constructor(
                 while (it.moveToNext()) {
                     val body = it.getString(it.getColumnIndexOrThrow(Telephony.Sms.BODY))
                     if (body.contains("gift", ignoreCase = true)) {
-                        // Simple extraction: use body as description
                         val gift = Gift(title = "From SMS", description = body)
                         giftRepository.insert(gift)
                     }
                 }
             }
+        }
+    }
+
+    fun summarizeSmsToInsights(personNames: List<String>) {
+        viewModelScope.launch {
+            val messages = mutableListOf<MessagePayload>()
+            val cursor = context.contentResolver.query(
+                Telephony.Sms.CONTENT_URI,
+                arrayOf(Telephony.Sms.BODY, Telephony.Sms.DATE), null, null, null
+            )
+            cursor?.use {
+                while (it.moveToNext()) {
+                    val body = it.getString(it.getColumnIndexOrThrow(Telephony.Sms.BODY))
+                    val ts = it.getLong(it.getColumnIndexOrThrow(Telephony.Sms.DATE))
+                    messages.add(MessagePayload(text = body, timestamp = ts))
+                }
+            }
+            val hints = personNames.map { PersonHint(name = it) }
+            try {
+                val resp = aiService.summarizeMessages(
+                    SummarizeMessagesRequest(messages = messages, persons = hints)
+                )
+                // Simple persistence: append insights to matching person's notes
+                val people = personRepository.allPersons.first()
+                people.forEach { person ->
+                    val match = resp.insights.firstOrNull { it.name.equals(person.name, ignoreCase = true) }
+                    if (match != null) {
+                        val sb = StringBuilder(person.notes.orEmpty())
+                        if (sb.isNotEmpty()) sb.append('\n')
+                        if (match.interests.isNotEmpty()) sb.append("Interests: ").append(match.interests.joinToString()).append('\n')
+                        if (match.avoid.isNotEmpty()) sb.append("Avoid: ").append(match.avoid.joinToString()).append('\n')
+                        match.sizes?.let { sb.append("Sizes: ").append(it).append('\n') }
+                        match.notes?.let { sb.append(it).append('\n') }
+                        if (match.specialDates.isNotEmpty()) sb.append("Dates: ").append(match.specialDates.joinToString()).append('\n')
+                        personRepository.update(person.copy(notes = sb.toString().trim()))
+                    }
+                }
+            } catch (_: Throwable) {
+                // Swallow for now; surface errors to UI if needed
+            }
+        }
+    }
+
+    fun summarizeSmsToInsightsFromPersons() {
+        viewModelScope.launch {
+            // Load person names from repo and call summarize
+            val names = personRepository.allPersons.first().map { it.name }
+            summarizeSmsToInsights(names)
         }
     }
 } 

@@ -6,6 +6,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavController
 import com.giftideaminder.ui.components.GiftItem
 import com.giftideaminder.ui.components.SuggestionsCarousel
@@ -47,10 +48,12 @@ import androidx.compose.material3.HorizontalDivider
 
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
-@Preview
 @Composable
-fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
-                   navController: NavController) {
+fun GiftListScreen(
+    viewModel: GiftViewModel = hiltViewModel(),
+    navController: NavController
+) {
+    LaunchedEffect(Unit) { viewModel.fetchSuggestions() }
     val giftsState = viewModel.allGifts.collectAsState(initial = emptyList<Gift>())
     val gifts = giftsState.value
     var searchQuery by remember { mutableStateOf("") }
@@ -97,6 +100,9 @@ fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
                     Button(onClick = { navController.navigate("budget") }) {
                         Text("Budget")
                     }
+                    Button(onClick = { viewModel.fetchSuggestions() }) {
+                        Text("Refresh AI Suggestions")
+                    }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
@@ -128,7 +134,9 @@ fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
                         },
                         onDismiss = { suggestion ->
                             viewModel.dismissSuggestion(suggestion)
-                        }
+                        },
+                        isLoading = viewModel.isLoadingSuggestions,
+                        error = viewModel.suggestionsError
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
