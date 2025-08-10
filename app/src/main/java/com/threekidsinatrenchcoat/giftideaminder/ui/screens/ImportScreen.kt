@@ -2,7 +2,6 @@ package com.threekidsinatrenchcoat.giftideaminder.ui.screens
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -19,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -29,7 +27,11 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.threekidsinatrenchcoat.giftideaminder.ui.components.AppTopBar
 import com.threekidsinatrenchcoat.giftideaminder.viewmodel.ImportViewModel
 import java.io.IOException
+import androidx.compose.ui.tooling.preview.Preview
 
+
+
+@Preview
 @Composable
 fun ImportScreen(
     navController: NavController,

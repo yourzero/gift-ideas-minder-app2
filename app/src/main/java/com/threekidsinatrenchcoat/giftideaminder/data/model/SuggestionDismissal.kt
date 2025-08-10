@@ -1,4 +1,4 @@
-package com.giftideaminder.data.model
+package com.threekidsinatrenchcoat.giftideaminder.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

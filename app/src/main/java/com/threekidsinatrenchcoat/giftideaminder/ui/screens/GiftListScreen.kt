@@ -54,10 +54,9 @@ import com.threekidsinatrenchcoat.giftideaminder.ui.components.AppTopBar
 @Composable
 fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
                    navController: NavController) {
-val giftsState = viewModel.allGifts.collectAsState(initial = emptyList<Gift>())
+    val giftsState = viewModel.allGifts.collectAsState(initial = emptyList<Gift>())
 
     LaunchedEffect(Unit) { viewModel.fetchSuggestions() }
-    val giftsState = viewModel.allGifts.collectAsState(initial = emptyList<Gift>())
     val gifts = giftsState.value
     var searchQuery by remember { mutableStateOf("") }
     val filteredGifts: List<Gift> = gifts.filter { it.title.contains(searchQuery, ignoreCase = true) }

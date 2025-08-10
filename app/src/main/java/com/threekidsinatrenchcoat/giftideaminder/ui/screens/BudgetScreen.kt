@@ -28,12 +28,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Alignment
 import com.threekidsinatrenchcoat.giftideaminder.ui.components.AppTopBar
-import com.giftideaminder.data.model.Gift
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.HorizontalDivider
-import com.giftideaminder.ui.components.SuggestionsCarousel
+import com.threekidsinatrenchcoat.giftideaminder.ui.components.SuggestionsCarousel
 
 
 @Preview

@@ -1,13 +1,13 @@
-package com.giftideaminder.data.repository
+package com.threekidsinatrenchcoat.giftideaminder.data.repository
 
-import com.giftideaminder.data.api.AIRequest
-import com.giftideaminder.data.api.AIService
-import com.giftideaminder.data.dao.GiftDao
-import com.giftideaminder.data.dao.PersonDao
-import com.giftideaminder.data.dao.SuggestionDismissalDao
-import com.giftideaminder.data.model.Gift
-import com.giftideaminder.data.model.Person
-import com.giftideaminder.data.model.SuggestionDismissal
+import com.threekidsinatrenchcoat.giftideaminder.data.api.AIRequest
+import com.threekidsinatrenchcoat.giftideaminder.data.api.AIService
+import com.threekidsinatrenchcoat.giftideaminder.data.dao.GiftDao
+import com.threekidsinatrenchcoat.giftideaminder.data.dao.PersonDao
+import com.threekidsinatrenchcoat.giftideaminder.data.dao.SuggestionDismissalDao
+import com.threekidsinatrenchcoat.giftideaminder.data.model.Gift
+import com.threekidsinatrenchcoat.giftideaminder.data.model.Person
+import com.threekidsinatrenchcoat.giftideaminder.data.model.SuggestionDismissal
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map

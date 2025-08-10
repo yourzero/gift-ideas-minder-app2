@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class GiftViewModel @Inject constructor(
     private val giftDao: GiftDao,
-    private val aiRepo: com.giftideaminder.data.repository.AISuggestionRepository
+    private val aiRepo: com.threekidsinatrenchcoat.giftideaminder.data.repository.AISuggestionRepository
 ) : ViewModel() {
 
     // ---------- Public DAO-backed streams ----------

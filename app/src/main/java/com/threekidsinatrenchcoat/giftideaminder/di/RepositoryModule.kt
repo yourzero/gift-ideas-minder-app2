@@ -1,24 +1,16 @@
 package com.threekidsinatrenchcoat.giftideaminder.di
 
+import com.threekidsinatrenchcoat.giftideaminder.data.api.AIService
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.GiftDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.PersonDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.ImportantDateDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.RelationshipTypeDao
+import com.threekidsinatrenchcoat.giftideaminder.data.dao.SuggestionDismissalDao
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.GiftRepository
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.PersonRepository
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.ImportantDateRepository
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.RelationshipTypeRepository
-import com.giftideaminder.data.api.AIService
-import com.giftideaminder.data.dao.GiftDao
-import com.giftideaminder.data.dao.PersonDao
-import com.giftideaminder.data.dao.ImportantDateDao
-import com.giftideaminder.data.dao.RelationshipTypeDao
-import com.giftideaminder.data.dao.SuggestionDismissalDao
-import com.giftideaminder.data.repository.GiftRepository
-import com.giftideaminder.data.repository.PersonRepository
-import com.giftideaminder.data.repository.ImportantDateRepository
-import com.giftideaminder.data.repository.RelationshipTypeRepository
-import com.giftideaminder.data.repository.AISuggestionRepository
+import com.threekidsinatrenchcoat.giftideaminder.data.repository.AISuggestionRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

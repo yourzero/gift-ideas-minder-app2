@@ -1,4 +1,4 @@
-package com.giftideaminder.data.api
+package com.threekidsinatrenchcoat.giftideaminder.data.api
 
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient

@@ -12,6 +12,7 @@ import com.threekidsinatrenchcoat.giftideaminder.data.dao.GiftDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.PersonDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.ImportantDateDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.RelationshipTypeDao
+import com.threekidsinatrenchcoat.giftideaminder.data.dao.SuggestionDismissalDao
 import com.threekidsinatrenchcoat.giftideaminder.data.model.AppDatabase
 import dagger.Module
 import dagger.Provides

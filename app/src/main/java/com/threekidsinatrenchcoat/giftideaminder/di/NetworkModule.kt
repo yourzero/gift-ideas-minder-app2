@@ -4,6 +4,7 @@ import com.threekidsinatrenchcoat.giftideaminder.data.api.PriceApi
 import com.threekidsinatrenchcoat.giftideaminder.data.api.PriceService
 import com.threekidsinatrenchcoat.giftideaminder.data.api.AIApi
 import com.threekidsinatrenchcoat.giftideaminder.data.api.AIService
+import com.threekidsinatrenchcoat.giftideaminder.data.api.NetworkClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

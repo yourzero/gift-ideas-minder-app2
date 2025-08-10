@@ -1,11 +1,11 @@
-package com.giftideaminder.viewmodel
+package com.threekidsinatrenchcoat.giftideaminder.viewmodel
 
-import com.giftideaminder.data.model.ImportantDate
-import com.giftideaminder.data.model.Person
-import com.giftideaminder.data.model.RelationshipType
-import com.giftideaminder.data.repository.ImportantDateRepository
-import com.giftideaminder.data.repository.PersonRepository
-import com.giftideaminder.data.repository.RelationshipTypeRepository
+import com.threekidsinatrenchcoat.giftideaminder.data.model.ImportantDate
+import com.threekidsinatrenchcoat.giftideaminder.data.model.Person
+import com.threekidsinatrenchcoat.giftideaminder.data.model.RelationshipType
+import com.threekidsinatrenchcoat.giftideaminder.data.repository.ImportantDateRepository
+import com.threekidsinatrenchcoat.giftideaminder.data.repository.PersonRepository
+import com.threekidsinatrenchcoat.giftideaminder.data.repository.RelationshipTypeRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
