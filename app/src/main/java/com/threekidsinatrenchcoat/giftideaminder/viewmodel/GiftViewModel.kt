@@ -2,6 +2,7 @@ package com.threekidsinatrenchcoat.giftideaminder.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.threekidsinatrenchcoat.giftideaminder.BuildConfig
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.GiftDao
 import com.threekidsinatrenchcoat.giftideaminder.data.model.Gift
 import com.threekidsinatrenchcoat.giftideaminder.data.model.GiftWithHistory
@@ -132,9 +133,21 @@ class GiftViewModel @Inject constructor(
     val isLoadingSuggestions: StateFlow<Boolean> = _isLoadingSuggestions.asStateFlow()
     private val _suggestionsError = MutableStateFlow<String?>(null)
     val suggestionsError: StateFlow<String?> = _suggestionsError.asStateFlow()
+    private var lastSuggestionsFetchMs: Long = 0L
 
     fun fetchSuggestions() {
         viewModelScope.launch {
+            if (!BuildConfig.AI_ENABLED) {
+                _suggestions.value = emptyList()
+                _suggestionsError.value = "AI disabled"
+                return@launch
+            }
+            val now = System.currentTimeMillis()
+            if (now - lastSuggestionsFetchMs < 10_000) {
+                // Debounce fast refresh taps
+                return@launch
+            }
+            lastSuggestionsFetchMs = now
             _isLoadingSuggestions.value = true
             _suggestionsError.value = null
             try {
@@ -160,6 +173,11 @@ class GiftViewModel @Inject constructor(
 
     fun fetchSuggestionsByBudget(min: Double, max: Double, personId: Int? = null) {
         viewModelScope.launch {
+            if (!BuildConfig.AI_ENABLED) {
+                _suggestions.value = emptyList()
+                _suggestionsError.value = "AI disabled"
+                return@launch
+            }
             _isLoadingSuggestions.value = true
             _suggestionsError.value = null
             try {

@@ -4,6 +4,7 @@ import android.content.Context
 import android.provider.Telephony
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.threekidsinatrenchcoat.giftideaminder.BuildConfig
 import com.threekidsinatrenchcoat.giftideaminder.data.model.Gift
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.GiftRepository
 import com.threekidsinatrenchcoat.giftideaminder.data.api.AIService
@@ -84,6 +85,7 @@ class ImportViewModel @Inject constructor(
 
     fun summarizeSmsToInsights(personNames: List<String>) {
         viewModelScope.launch {
+            if (!BuildConfig.AI_ENABLED) return@launch
             val messages = mutableListOf<MessagePayload>()
             val cursor = context.contentResolver.query(
                 Telephony.Sms.CONTENT_URI,

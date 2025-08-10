@@ -2,9 +2,9 @@ package com.threekidsinatrenchcoat.giftideaminder.di
 
 import com.threekidsinatrenchcoat.giftideaminder.data.api.PriceApi
 import com.threekidsinatrenchcoat.giftideaminder.data.api.PriceService
-import com.threekidsinatrenchcoat.giftideaminder.data.api.AIApi
 import com.threekidsinatrenchcoat.giftideaminder.data.api.AIService
-import com.threekidsinatrenchcoat.giftideaminder.data.api.NetworkClient
+import com.threekidsinatrenchcoat.giftideaminder.data.api.GeminiAIService
+import com.threekidsinatrenchcoat.giftideaminder.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,8 +23,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideAIService(): AIService {
-        // In a real app, fetch from secure config. For now, empty apiKey means no auth header.
-        val retrofit = NetworkClient.createRetrofit(apiKey = "")
-        return retrofit.create(AIService::class.java)
+        val apiKey: String = BuildConfig.GEMINI_API_KEY
+        return GeminiAIService(apiKey = apiKey)
     }
 } 

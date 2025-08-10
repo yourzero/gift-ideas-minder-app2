@@ -2,8 +2,6 @@ package com.threekidsinatrenchcoat.giftideaminder.data.api
 
 import com.threekidsinatrenchcoat.giftideaminder.data.model.Gift
 import com.threekidsinatrenchcoat.giftideaminder.data.model.Person
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
 
@@ -47,14 +45,3 @@ interface AIService {
     @POST("summarize/messages")
     suspend fun summarizeMessages(@Body request: SummarizeMessagesRequest): SummarizeMessagesResponse
 }
-
-object AIApi {
-    private const val BASE_URL = "https://your-ai-backend.com/api/"  // Replace with actual URL
-
-    val retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    val service: AIService = retrofit.create(AIService::class.java)
-} 

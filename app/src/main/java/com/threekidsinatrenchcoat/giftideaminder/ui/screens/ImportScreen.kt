@@ -2,6 +2,9 @@ package com.threekidsinatrenchcoat.giftideaminder.ui.screens
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -67,6 +70,18 @@ fun ImportScreen(
         }
     }
 
+    val requestSmsPermissionForExtract = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) viewModel.extractFromSms()
+    }
+
+    val requestSmsPermissionForSummarize = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) viewModel.summarizeSmsToInsightsFromPersons()
+    }
+
     Scaffold(
         topBar = { AppTopBar("Import Ideas") }
     ) { innerPadding ->
@@ -76,7 +91,20 @@ fun ImportScreen(
                 .padding(16.dp),
             onPickImage = { imagePicker.launch("image/*") },
             onPickCsv = { csvPicker.launch("text/csv") },
-            onExtractSms = { viewModel.extractFromSms() }
+            onExtractSms = {
+                val hasPermission = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.READ_SMS
+                ) == PackageManager.PERMISSION_GRANTED
+                if (hasPermission) viewModel.extractFromSms() else requestSmsPermissionForExtract.launch(Manifest.permission.READ_SMS)
+            },
+            onSummarizeSms = {
+                val hasPermission = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.READ_SMS
+                ) == PackageManager.PERMISSION_GRANTED
+                if (hasPermission) viewModel.summarizeSmsToInsightsFromPersons() else requestSmsPermissionForSummarize.launch(Manifest.permission.READ_SMS)
+            }
         )
     }
 }
@@ -86,7 +114,8 @@ private fun ImportScreenContent(
     modifier: Modifier = Modifier,
     onPickImage: () -> Unit,
     onPickCsv: () -> Unit,
-    onExtractSms: () -> Unit
+    onExtractSms: () -> Unit,
+    onSummarizeSms: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -100,6 +129,9 @@ private fun ImportScreenContent(
         }
         Button(onClick = onExtractSms, modifier = Modifier.padding(top = 12.dp)) {
             Text("Extract from SMS")
+        }
+        Button(onClick = onSummarizeSms, modifier = Modifier.padding(top = 12.dp)) {
+            Text("Summarize SMS to Insights (AI)")
         }
     }
 }
@@ -116,7 +148,8 @@ private fun ImportScreenPreview() {
                 .padding(16.dp),
             onPickImage = {},
             onPickCsv = {},
-            onExtractSms = {}
+            onExtractSms = {},
+            onSummarizeSms = {}
         )
     }
 }
