@@ -6,6 +6,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavController
 import com.threekidsinatrenchcoat.giftideaminder.ui.components.GiftItem
 import com.threekidsinatrenchcoat.giftideaminder.ui.components.SuggestionsCarousel
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TextField
@@ -32,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Column
@@ -52,6 +55,9 @@ import com.threekidsinatrenchcoat.giftideaminder.ui.components.AppTopBar
 fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
                    navController: NavController) {
 val giftsState = viewModel.allGifts.collectAsState(initial = emptyList<Gift>())
+
+    LaunchedEffect(Unit) { viewModel.fetchSuggestions() }
+    val giftsState = viewModel.allGifts.collectAsState(initial = emptyList<Gift>())
     val gifts = giftsState.value
     var searchQuery by remember { mutableStateOf("") }
     val filteredGifts: List<Gift> = gifts.filter { it.title.contains(searchQuery, ignoreCase = true) }
@@ -88,6 +94,9 @@ val giftsState = viewModel.allGifts.collectAsState(initial = emptyList<Gift>())
                     Button(onClick = { navController.navigate("budget") }) {
                         Text("Budget")
                     }
+                    Button(onClick = { viewModel.fetchSuggestions() }) {
+                        Text("Refresh AI Suggestions")
+                    }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
@@ -119,7 +128,9 @@ val giftsState = viewModel.allGifts.collectAsState(initial = emptyList<Gift>())
                         },
                         onDismiss = { suggestion ->
                             viewModel.dismissSuggestion(suggestion)
-                        }
+                        },
+                        isLoading = viewModel.isLoadingSuggestions,
+                        error = viewModel.suggestionsError
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))

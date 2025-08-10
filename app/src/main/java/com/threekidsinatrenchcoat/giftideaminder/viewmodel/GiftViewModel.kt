@@ -12,7 +12,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class GiftViewModel @Inject constructor(
-    private val giftDao: GiftDao
+    private val giftDao: GiftDao,
+    private val aiRepo: com.giftideaminder.data.repository.AISuggestionRepository
 ) : ViewModel() {
 
     // ---------- Public DAO-backed streams ----------
@@ -127,8 +128,50 @@ class GiftViewModel @Inject constructor(
 
     private val _suggestions = MutableStateFlow<List<Gift>>(emptyList())
     val suggestions: StateFlow<List<Gift>> = _suggestions.asStateFlow()
-    fun fetchSuggestions() { /* no-op placeholder; keep empty */ }
-    fun dismissSuggestion(@Suppress("UNUSED_PARAMETER") suggestion: Gift) { /* no-op placeholder */ }
+    private val _isLoadingSuggestions = MutableStateFlow(false)
+    val isLoadingSuggestions: StateFlow<Boolean> = _isLoadingSuggestions.asStateFlow()
+    private val _suggestionsError = MutableStateFlow<String?>(null)
+    val suggestionsError: StateFlow<String?> = _suggestionsError.asStateFlow()
+
+    fun fetchSuggestions() {
+        viewModelScope.launch {
+            _isLoadingSuggestions.value = true
+            _suggestionsError.value = null
+            try {
+                val ideas = aiRepo.fetchSuggestions()
+                _suggestions.value = ideas
+            } catch (t: Throwable) {
+                _suggestionsError.value = t.message ?: "Failed to load suggestions"
+            } finally {
+                _isLoadingSuggestions.value = false
+            }
+        }
+    }
+
+    fun dismissSuggestion(suggestion: Gift) {
+        viewModelScope.launch {
+            try {
+                aiRepo.dismissSuggestion(suggestion)
+            } finally {
+                _suggestions.update { list -> list.filterNot { it.title == suggestion.title && it.url == suggestion.url } }
+            }
+        }
+    }
+
+    fun fetchSuggestionsByBudget(min: Double, max: Double, personId: Int? = null) {
+        viewModelScope.launch {
+            _isLoadingSuggestions.value = true
+            _suggestionsError.value = null
+            try {
+                val ideas = aiRepo.fetchSuggestionsByBudget(min, max, personId)
+                _suggestions.value = ideas
+            } catch (t: Throwable) {
+                _suggestionsError.value = t.message ?: "Failed to load budget ideas"
+            } finally {
+                _isLoadingSuggestions.value = false
+            }
+        }
+    }
 
     // ---------- Transitional: maintain signature used by your screen ----------
     /** Transitional convenience — funnels into state + onSave(). */

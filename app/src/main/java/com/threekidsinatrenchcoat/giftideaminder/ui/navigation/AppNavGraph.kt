@@ -46,6 +46,12 @@ fun AppNavGraph(
         composable("person_list") {
             PersonListScreen(navController)
         }
+        composable("budget") {
+            BudgetScreen(navController = navController)
+        }
+        composable("import") {
+            ImportScreen(navController = navController)
+        }
         composable("add_person") {
             AddEditRecipientFlowScreen(onNavigateBack = ::showSnackbarAndPopBackStack, navController = navController)
         }

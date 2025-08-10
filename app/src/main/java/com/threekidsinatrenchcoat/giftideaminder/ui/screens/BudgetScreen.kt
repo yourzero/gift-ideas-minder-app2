@@ -28,6 +28,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Alignment
 import com.threekidsinatrenchcoat.giftideaminder.ui.components.AppTopBar
+import com.giftideaminder.data.model.Gift
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.HorizontalDivider
+import com.giftideaminder.ui.components.SuggestionsCarousel
 
 
 @Preview
@@ -53,6 +59,31 @@ val viewModel: GiftViewModel = hiltViewModel()
         Text("Total Budget: $$totalBudget")
         Text("Total Spent: $$totalSpent")
         Text("Remaining: $$remaining")
+
+        Spacer(Modifier.height(16.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(16.dp))
+
+        var min by remember { mutableStateOf("25") }
+        var max by remember { mutableStateOf("100") }
+        OutlinedTextField(value = min, onValueChange = { min = it }, label = { Text("Min budget ($)") })
+        Spacer(Modifier.height(8.dp))
+        OutlinedTextField(value = max, onValueChange = { max = it }, label = { Text("Max budget ($)") })
+        Spacer(Modifier.height(8.dp))
+        Button(onClick = {
+            val minV = min.toDoubleOrNull() ?: 0.0
+            val maxV = max.toDoubleOrNull() ?: minV
+            viewModel.fetchSuggestionsByBudget(minV, maxV, personId = null)
+        }) { Text("Find AI ideas") }
+
+        Spacer(Modifier.height(16.dp))
+        SuggestionsCarousel(
+            suggestions = viewModel.suggestions,
+            onAccept = { suggestion -> viewModel.insertGift(suggestion.copy(id = 0)) },
+            onDismiss = { suggestion -> viewModel.dismissSuggestion(suggestion) },
+            isLoading = viewModel.isLoadingSuggestions,
+            error = viewModel.suggestionsError
+        )
     }
 
     if (showAlert) {
@@ -69,4 +100,4 @@ val viewModel: GiftViewModel = hiltViewModel()
     }
     }
 }
-} 
+}

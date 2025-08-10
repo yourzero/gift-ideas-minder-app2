@@ -1,4 +1,4 @@
-package com.threekidsinatrenchcoat.giftideaminder.data.model
+package com.giftideaminder.data.model
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -12,8 +12,8 @@ import com.threekidsinatrenchcoat.giftideaminder.data.dao.ImportantDateDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.RelationshipTypeDao
 
 @Database(
-    entities = [Gift::class, Person::class, PriceRecord::class, Suggestion::class, Settings::class, RelationshipType::class, ImportantDate::class],
-    version = 4,
+    entities = [Gift::class, Person::class, PriceRecord::class, Suggestion::class, Settings::class, RelationshipType::class, ImportantDate::class, SuggestionDismissal::class],
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -22,6 +22,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun personDao(): PersonDao
     abstract fun priceRecordDao(): PriceRecordDao
     abstract fun suggestionDao(): SuggestionDao
+    abstract fun suggestionDismissalDao(): SuggestionDismissalDao
     abstract fun settingsDao(): SettingsDao
     abstract fun relationshipTypeDao(): RelationshipTypeDao
     abstract fun importantDateDao(): ImportantDateDao

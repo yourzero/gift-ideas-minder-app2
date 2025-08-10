@@ -22,6 +22,8 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideAIService(): AIService {
-        return AIApi.service
+        // In a real app, fetch from secure config. For now, empty apiKey means no auth header.
+        val retrofit = NetworkClient.createRetrofit(apiKey = "")
+        return retrofit.create(AIService::class.java)
     }
 } 

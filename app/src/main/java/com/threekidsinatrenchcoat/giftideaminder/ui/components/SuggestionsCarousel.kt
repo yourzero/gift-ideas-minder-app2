@@ -19,16 +19,28 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Arrangement
 
-@Preview
 @Composable
 fun SuggestionsCarousel(
     suggestions: StateFlow<List<Gift>>,
     onAccept: (Gift) -> Unit,
-    onDismiss: (Gift) -> Unit
+    onDismiss: (Gift) -> Unit,
+    isLoading: StateFlow<Boolean>? = null,
+    error: StateFlow<String?>? = null
 ) {
     val suggestionList = suggestions.collectAsState().value
-    if (suggestionList.isNotEmpty()) {
+    val loading = isLoading?.collectAsState()?.value ?: false
+    val err = error?.collectAsState()?.value
+    if (loading) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            CircularProgressIndicator()
+        }
+    } else if (!err.isNullOrBlank()) {
+        Text("Failed to load suggestions: $err")
+    } else if (suggestionList.isNotEmpty()) {
         Text("Today’s Suggestions")
         LazyRow(modifier = Modifier.semantics { contentDescription = "Suggestions carousel" }) {
             items(suggestionList) { suggestion: Gift ->

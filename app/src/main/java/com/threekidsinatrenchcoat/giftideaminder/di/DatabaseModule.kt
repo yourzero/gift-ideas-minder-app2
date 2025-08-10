@@ -63,4 +63,7 @@ object DatabaseModule {
 
     @Provides
     fun provideRelationshipTypeDao(db: AppDatabase): RelationshipTypeDao = db.relationshipTypeDao()
+
+    @Provides
+    fun provideSuggestionDismissalDao(db: AppDatabase): SuggestionDismissalDao = db.suggestionDismissalDao()
 }
