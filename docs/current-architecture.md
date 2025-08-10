@@ -6,28 +6,30 @@ The Gift Idea Minder Android app uses Jetpack Compose for UI, Room for persisten
 
 Key features include gift management (Epic 1), person management (Epic 2), basic reminders (Epic 3), integrations/import (Epic 4), budgeting (Epic 5), AI-driven suggestions (Epic 6), and partial price tracking (Epic 7), with navigation handled via Compose Navigation.
 
+Recent addition: a relationship-first Add/Edit Giftee flow (4-step wizard: Relationship → Details → Dates → Review) driven by `PersonFlowViewModel`, with important date prompts and shared snackbar handling.
+
 ## Architecture Layers
 
 ### Data Layer
 - Handles data persistence and retrieval using Room, plus network APIs for AI and price tracking.
 - Located in `app/src/main/java/com/giftideaminder/data/`.
 - Components:
-  - **Models**: Entity classes like `Gift.kt` (with reminderOffset, currentPrice, budget, isPurchased, priceHistory) and `Person.kt` (with LocalDate birthday support).
-  - **DAO**: Interfaces for database operations, e.g., `GiftDao.kt`, `PersonDao.kt`.
-  - **Repository**: Abstraction over data sources, e.g., `GiftRepository.kt`, `PersonRepository.kt`.
-  - **Database**: `AppDatabase.kt` for Room database setup (version 2 with LocalDate support for Person birthdays via type converters).
-  - **API**: Services like `AIService.kt` for AI suggestions and `PriceService.kt` for CamelCamelCamel price history.
-  - **Converter**: `Converters.kt` for handling LocalDate and List<String> type conversions in Room, `PriceHistoryConverter.kt` for handling price history lists in Room.
+  - **Models**: `Gift.kt`, `Person.kt`, and new entities `RelationshipType.kt` (flags `hasBirthday`, `hasAnniversary`) and `ImportantDate.kt` (label + `LocalDate`).
+  - **DAO**: `GiftDao.kt`, `PersonDao.kt`, plus new `RelationshipTypeDao.kt` and `ImportantDateDao.kt` with a transactional `replaceForPerson(personId, dates)` API.
+  - **Repository**: `GiftRepository.kt`, `PersonRepository.kt`, plus new `RelationshipTypeRepository.kt` (with `ensureSeeded()`) and `ImportantDateRepository.kt`.
+  - **Database**: `AppDatabase.kt` for Room setup (schema version 4). In dev builds we enable destructive migrations; proper migrations should be restored for release builds.
+  - **API**: Services like `AIService.kt` and `PriceService.kt`.
+  - **Converter**: `Converters.kt` for `LocalDate` and `List<String>`, `PriceHistoryConverter.kt` for price history.
 
 ### Presentation Layer
 - Manages UI and user interactions using Jetpack Compose.
 - Located in `app/src/main/java/com/giftideaminder/ui/` and `viewmodel/`.
 - Components:
-  - **Screens**: Composable functions for main views, e.g., `GiftListScreen.kt`, `AddEditGiftScreen.kt`, `PersonListScreen.kt`, `AddEditRecipientScreen.kt` (enhanced person management), `ImportScreen.kt` (for Epic 4 imports), `BudgetScreen.kt` (for Epic 5 budgeting), `GiftDetailScreen.kt`, dashboard variants like `DashboardScreenMock.kt`, `HomeDashboardGenerated.kt`, `HomeDashboardGenerated_Chatgpt.kt`.
-  - **Components**: Reusable UI elements, e.g., `GiftItem.kt`, `PersonItem.kt`, `SuggestionsCarousel.kt` (for Epic 6 AI suggestions).
-  - **Navigation**: Multiple navigation files including `AppNavHost.kt`, `AppNavGraph.kt`, `AppScaffold.kt`, `Navigation.kt` for app routing, including routes for import, budget, etc.
-  - **Theme**: Material Design theming in `theme/` (Color.kt, Shape.kt, Theme.kt, Type.kt).
-  - **ViewModels**: Manage UI state, e.g., `GiftViewModel.kt` (handles AI suggestions and price updates), `PersonViewModel.kt`, `AddEditRecipientViewModel.kt` (enhanced person management with contact integration and SMS scanning), `ImportViewModel.kt` (for Epic 4 parsing/insertion).
+  - **Screens**: `GiftListScreen.kt`, `AddEditGiftScreen.kt`, `PersonListScreen.kt`, and new `AddEditGifteeFlowScreen.kt` (relationship-first 4-step wizard). Other screens: `ImportScreen.kt`, `BudgetScreen.kt`, `GiftDetailScreen.kt`, dashboards.
+  - **Components**: `GiftItem.kt`, `PersonItem.kt`, `SuggestionsCarousel.kt`.
+  - **Navigation**: `AppNavGraph.kt` routes `add_person` and `edit_person/{personId}` to `AddEditGifteeFlowScreen`. `AppScaffold.kt` owns a shared `SnackbarHostState` passed to `AppNavGraph`, with a central `showSnackbarAndPopBackStack(message)` util used by the flow.
+  - **Theme**: Material3 theming in `theme/`.
+  - **ViewModels**: `GiftViewModel.kt`, `PersonViewModel.kt`, and new `PersonFlowViewModel.kt` (manages steps, prompts, picked dates, and persistence). `PersonFlowViewModel` seeds relationship types and derives prompts from flags.
 
 ### Dependency Injection
 - Uses Hilt for DI.
@@ -40,7 +42,8 @@ Key features include gift management (Epic 1), person management (Epic 2), basic
 
 ### Additional Configurations
 - **Permissions**: Added READ_SMS and READ_EXTERNAL_STORAGE in AndroidManifest.xml for Epic 4.
-- **Dependencies**: Added ML Kit Text Recognition and OpenCSV for Epic 4 imports, Retrofit and Gson for network APIs (via libs.versions.toml).
+- **Dependencies**: ML Kit Text Recognition and OpenCSV for Epic 4 imports, Retrofit and Gson for network APIs (via libs.versions.toml).
+- **Database dev setup**: Destructive migrations enabled only for debug builds; restore proper migrations for production.
 
 ## Folder Structure
 
@@ -122,11 +125,11 @@ gift-idea-minder-android--cursor/
         - svg/
           - Edit Gift - Select Occasions Modal.svg
           - Edit Gift B.svg
-          - Edit Recipient A.svg
-          - Edit Recipient B.svg
-          - Edit Recipient C.svg
+          - Edit Giftee A.svg
+          - Edit Giftee B.svg
+          - Edit Giftee C.svg
           - Event Details.svg
-          - Recipients.svg
+          - Giftees.svg
           - Home-Dashboard.svg
           - myiconpack/
             - src/
@@ -202,6 +205,13 @@ gift-idea-minder-android--cursor/
 
 ## Recent Improvements
 
+### Relationship-first Add/Edit Giftee Flow (Wizard)
+- New `AddEditGifteeFlowScreen` with steps: Relationship → Details → Dates → Review.
+- `PersonFlowViewModel` handles step transitions, derives date prompts from `RelationshipType` flags, tracks `pickedDates`, and persists via `ImportantDateRepository.replaceForPerson`.
+- Shared snackbar handling via `AppScaffold` and `AppNavGraph` on success.
+- Dates step supports custom labeled dates with inline edit/remove and a reusable `DatePickerRow` with initial value and clear.
+
+## Flow UI / UX Walkthrough
 ### LocalDate Migration (Database v2)
 - **Migrated Person.birthday from Long to LocalDate**: Eliminates timezone issues and off-by-one errors common with epoch milliseconds.
 - **Room Type Converters**: Added `Converters.kt` with `LocalDate` ↔ `Long` (epoch days) conversion for efficient storage.
@@ -209,6 +219,42 @@ gift-idea-minder-android--cursor/
 - **Enhanced UI Components**: Updated `PersonItem.kt`, `AddEditRecipientScreen.kt`, and related components to use `LocalDate` and `DateTimeFormatter`.
 - **Contact Integration**: `AddEditRecipientViewModel` includes contacts import, SMS scanning, and birthday parsing from contact data.
 
+Below is a short walkthrough of the relationship-first Add/Edit Giftee flow. Place screenshots under `docs/images/add-edit-giftee/` with the given filenames to render inline.
+
+- Relationship step
+  - Pick a relationship from chips; default prompts are derived from `RelationshipType` flags.
+  - Screenshot: ![Relationship step](images/add-edit-giftee/step1-relationship.png)
+
+- Details step
+  - Enter the giftee's name (and future fields when added).
+  - Screenshot: ![Details step](images/add-edit-giftee/step2-details.png)
+
+- Dates step
+  - Shows prompted date rows (e.g., Birthday, Anniversary). Each row opens a date picker and supports clearing.
+  - Add custom labeled dates via a text field + date picker; custom entries appear under “Other dates”.
+  - Screenshot: ![Dates step - prompts](images/add-edit-giftee/step3-dates-prompts.png)
+  - Screenshot: ![Dates step - custom](images/add-edit-giftee/step3-dates-custom.png)
+
+- Review step
+  - Summarizes relationship, name, and all dates. Save persists the person and replaces their important dates transactionally, then shows a snackbar and navigates back.
+  - Screenshot: ![Review step](images/add-edit-giftee/step4-review.png)
+
+Notes
+- Success snackbar is shown by `AppNavGraph` using the `SnackbarHostState` owned by `AppScaffold`.
+- In debug builds, Room destructive migrations are enabled, so wiping occurs when schema changes.
+
+### Data model additions
+- Entities: `RelationshipType` (seeded at first run), `ImportantDate`.
+- DAOs: `RelationshipTypeDao`, `ImportantDateDao` with transactional replace.
+- Repositories: `RelationshipTypeRepository`, `ImportantDateRepository`.
+
+### Stability and dev setup
+- Enabled destructive migrations in debug; bumped Room schema to v4.
+- Minor `GiftViewModel` stubs to satisfy screen references.
+
+### Testing
+- Unit tests for `PersonFlowViewModel` (date pick/remove, prompt derivation, persistence orchestration).
+- Instrumentation tests for the new flow (add person and custom date add/remove scenarios).
 ### Enhanced Recipient Management
 - **AddEditRecipientScreen**: Full-featured person management with photo, birthday, relationships, notes, and contact integration.
 - **Contact Picker Integration**: Users can import recipient data directly from device contacts.
