@@ -7,6 +7,7 @@ import com.threekidsinatrenchcoat.giftideaminder.data.model.Person
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.PersonRepository
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.ImportantDateRepository
 import com.threekidsinatrenchcoat.giftideaminder.data.model.ImportantDate
+import com.threekidsinatrenchcoat.giftideaminder.data.model.RelationshipType
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.RelationshipTypeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
