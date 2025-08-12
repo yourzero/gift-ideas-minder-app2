@@ -27,6 +27,7 @@ data class RecipientUiState(
     val relationships: List<String> = emptyList(),
     val isRelationshipDropdownOpen: Boolean = false,
     val notes: String = "",
+    val preferences: List<String> = emptyList(),
     val phoneNumber: String? = null,
     val showSmsPrompt: Boolean = false,
     val roles: Int = PersonRole.RECIPIENT.bit
@@ -60,6 +61,13 @@ class AddEditRecipientViewModel @Inject constructor(
     fun onNameChange(new: String) = _uiState.update { it.copy(name = new) }
     fun onEventDateChange(date: LocalDate) = _uiState.update { it.copy(eventDate = date) }
     fun onNotesChange(new: String) = _uiState.update { it.copy(notes = new) }
+    fun addPreference(item: String) {
+        val trimmed = item.trim()
+        if (trimmed.isNotEmpty()) _uiState.update { it.copy(preferences = it.preferences + trimmed) }
+    }
+    fun removePreference(item: String) {
+        _uiState.update { it.copy(preferences = it.preferences - item) }
+    }
     fun onShowDatePicker(open: Boolean) =
         _uiState.update { it.copy(isDatePickerOpen = open) }
     fun onShowRelationshipDropdown(open: Boolean) =
@@ -127,6 +135,7 @@ class AddEditRecipientViewModel @Inject constructor(
             relationships = emptyList(),
             isRelationshipDropdownOpen = false,
             notes = "",
+            preferences = emptyList(),
             phoneNumber = null,
             showSmsPrompt = false,
             roles = PersonRole.RECIPIENT.bit
@@ -145,6 +154,7 @@ class AddEditRecipientViewModel @Inject constructor(
                         eventDate = person.birthday,
                         relationships = person.relationships,
                         notes = person.notes ?: "",
+                        preferences = person.preferences,
                         phoneNumber = person.contactInfo,
                         roles = person.roles
                     )
@@ -218,6 +228,7 @@ class AddEditRecipientViewModel @Inject constructor(
                 birthday = s.eventDate,
                 relationships = s.relationships,
                 notes = s.notes,
+                preferences = s.preferences,
                 contactInfo = s.phoneNumber,
                 roles = s.roles
             )

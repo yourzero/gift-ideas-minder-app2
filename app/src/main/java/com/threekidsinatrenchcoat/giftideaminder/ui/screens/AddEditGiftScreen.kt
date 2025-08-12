@@ -88,11 +88,15 @@ val context = LocalContext.current
         }
     }
 
-    // Edit mode: load gift and push into VM state
-    if (giftId != null) {
-        LaunchedEffect(giftId) {
+    // Edit mode: load gift once and push into VM state. Avoid overwriting user's in-progress edits.
+    LaunchedEffect(giftId) {
+        if (giftId != null) {
             viewModel.getGiftById(giftId).collectLatest { gift ->
-                viewModel.loadForEdit(gift)
+                // Only load if state is still blank or matching id
+                val uiState = viewModel.uiState.value
+                if (uiState.id == null || uiState.id == giftId) {
+                    viewModel.loadForEdit(gift)
+                }
             }
         }
     }

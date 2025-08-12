@@ -32,6 +32,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -136,6 +137,7 @@ val uiState by viewModel.uiState.collectAsState()
             )
         }
 
+        var showPreferencesDialog by remember { mutableStateOf(false) }
         Column(
             modifier = Modifier
                 .padding(padding)
@@ -216,15 +218,10 @@ val uiState by viewModel.uiState.collectAsState()
             )
 
             // Notes
-            OutlinedTextField(
-                value = uiState.notes,
-                onValueChange = viewModel::onNotesChange,
-                label = { Text("Notes") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp),
-                maxLines = 5
-            )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                OutlinedButton(onClick = { /* could navigate to a dedicated notes screen if desired */ }) { Text("Notes") }
+                OutlinedButton(onClick = { showPreferencesDialog = true }) { Text("Preferences") }
+            }
 
             // Actions
             Row(
@@ -245,6 +242,15 @@ val uiState by viewModel.uiState.collectAsState()
                 }
             }
         }
+
+        // Preferences Dialog
+        PreferencesDialog(
+            visible = showPreferencesDialog,
+            current = uiState.preferences,
+            onAdd = { viewModel.addPreference(it) },
+            onRemove = { viewModel.removePreference(it) },
+            onDismiss = { showPreferencesDialog = false }
+        )
 
         // Date Picker Dialog
         if (uiState.isDatePickerOpen) {
@@ -273,6 +279,40 @@ val uiState by viewModel.uiState.collectAsState()
             }
         }
     }
+}
+
+@Composable
+private fun PreferencesDialog(
+    visible: Boolean,
+    current: List<String>,
+    onAdd: (String) -> Unit,
+    onRemove: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    if (!visible) return
+    var input by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Preferences") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(value = input, onValueChange = { input = it }, label = { Text("Add item") })
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = {
+                        onAdd(input)
+                        input = ""
+                    }, enabled = input.isNotBlank()) { Text("Add") }
+                }
+                current.forEach { item ->
+                    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                        Text(item)
+                        TextButton(onClick = { onRemove(item) }) { Text("Remove") }
+                    }
+                }
+            }
+        },
+        confirmButton = { Button(onClick = onDismiss) { Text("Done") } }
+    )
 }
 
 @Composable

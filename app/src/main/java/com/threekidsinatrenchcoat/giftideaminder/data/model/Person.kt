@@ -14,6 +14,7 @@ data class Person(
     val photoUri: String? = null,
     val relationships: List<String> = emptyList(),
     val notes: String? = null,
+    val preferences: List<String> = emptyList(),
     val contactInfo: String? = null,
     val autoAssignFromSMS: Boolean = false,
     val defaultBudget: Double? = null,

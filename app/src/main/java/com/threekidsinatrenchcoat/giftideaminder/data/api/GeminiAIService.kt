@@ -62,6 +62,7 @@ class GeminiAIService(
                 if (title.isBlank()) return@runCatching
                 val description: String? = obj.get("description")?.takeIf { !it.isJsonNull }?.asString
                 val url: String? = obj.get("url")?.takeIf { !it.isJsonNull }?.asString
+                val imageUrl: String? = obj.get("imageUrl")?.takeIf { !it.isJsonNull }?.asString
                 val estimatedPrice: Double? = obj.get("estimatedPrice")?.takeIf { !it.isJsonNull }?.let {
                     runCatching { it.asDouble }.getOrNull()
                 }
@@ -75,7 +76,7 @@ class GeminiAIService(
                 val gift = Gift(
                     title = title,
                     description = description,
-                    url = url,
+                    url = imageUrl ?: url,
                     currentPrice = estimatedPrice,
                     personId = personId,
                     tags = tags
@@ -167,6 +168,7 @@ class GeminiAIService(
                 "name" to p.name,
                 "relationships" to p.relationships,
                 "notes" to (p.notes ?: ""),
+                "preferences" to p.preferences,
                 "defaultBudget" to (p.defaultBudget ?: 0.0)
             )
         })
@@ -175,7 +177,7 @@ class GeminiAIService(
             appendLine("You are an assistant generating thoughtful gift suggestions.")
             appendLine("Input gifts (existing and recent):")
             appendLine(giftsJson)
-            appendLine("People context:")
+            appendLine("People context (include preferences to tailor suggestions):")
             appendLine(personsJson)
             appendLine()
             appendLine("Return ONLY a strict JSON array (no code fences, no extra text). Each element object must include:")

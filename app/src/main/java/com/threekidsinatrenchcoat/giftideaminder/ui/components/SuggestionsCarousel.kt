@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Arrangement
+import coil.compose.AsyncImage
 
 @Composable
 fun SuggestionsCarousel(
@@ -46,8 +47,15 @@ fun SuggestionsCarousel(
             items(suggestionList) { suggestion: Gift ->
                 Card(modifier = Modifier.padding(8.dp).semantics { contentDescription = "Suggestion: ${suggestion.title}" }) {
                     Column(modifier = Modifier.padding(8.dp)) {
-                        // Placeholder for image: Text("[Image]")
-                        Text("[Image Placeholder]")
+                        if (!suggestion.url.isNullOrBlank()) {
+                            AsyncImage(
+                                model = suggestion.url,
+                                contentDescription = suggestion.title,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        } else {
+                            Text("[Image Placeholder]")
+                        }
                         Text(suggestion.title)
                         Text(suggestion.description ?: "")
                         Text("Est. Price: $${suggestion.currentPrice ?: "N/A"}")

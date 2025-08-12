@@ -3,6 +3,8 @@ package com.threekidsinatrenchcoat.giftideaminder.data.model
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.GiftDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.ImportantDateDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.PersonDao
@@ -15,7 +17,7 @@ import com.threekidsinatrenchcoat.giftideaminder.data.model.SuggestionDismissal
 
 @Database(
     entities = [Gift::class, Person::class, PriceRecord::class, Suggestion::class, Settings::class, RelationshipType::class, ImportantDate::class, SuggestionDismissal::class],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -30,4 +32,12 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun importantDateDao(): ImportantDateDao
 
     // For development: no explicit migrations. Use fallbackToDestructiveMigration in builder.
+    companion object {
+        val MIGRATION_5_6: Migration = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Add preferences TEXT column with default [] for existing rows
+                db.execSQL("ALTER TABLE persons ADD COLUMN preferences TEXT NOT NULL DEFAULT '[]'")
+            }
+        }
+    }
 }
