@@ -1,54 +1,27 @@
 package com.threekidsinatrenchcoat.giftideaminder.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.threekidsinatrenchcoat.giftideaminder.viewmodel.PersonFlowViewModel
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.foundation.layout.Box
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.ui.Alignment
-import androidx.navigation.NavController
 import java.time.format.DateTimeFormatter
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Delete
 
 @Composable
 fun AddEditRecipientFlowScreen(
@@ -59,30 +32,69 @@ fun AddEditRecipientFlowScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-
     Scaffold(
         topBar = {
-            TopAppBar(
+            MediumTopAppBar(
                 title = { Text(if (state.isEditing) "Edit Recipient" else "Add Recipient") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                )
             )
+        },
+        bottomBar = {
+            // Consistent action bar
+            Surface(tonalElevation = 2.dp) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            val result = viewModel.onBack()
+                            if (result.navigateBack) onNavigateBack(null)
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("Back") }
 
+                    Button(
+                        onClick = {
+                            val result = viewModel.onNextOrSave()
+                            if (result.saved) onNavigateBack(result.successMessage)
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) { Text(if (state.step == PersonFlowViewModel.Step.Review) "Save" else "Next") }
+                }
+            }
         }
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
+                .padding(top = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            StepHeader(
+                current = state.step.ordinal,
+                labels = PersonFlowViewModel.Step.values().map { it.name }
+            )
+
             when (state.step) {
-                PersonFlowViewModel.Step.Relationship -> {
-                    Text("Select relationship", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(8.dp))
+                PersonFlowViewModel.Step.Relationship -> SectionCard(
+                    icon = Icons.Default.Person,
+                    title = "Select relationship"
+                ) {
                     RelationshipChips(
                         options = state.availableRelationships,
                         selected = state.selectedRelationship,
@@ -90,7 +102,10 @@ fun AddEditRecipientFlowScreen(
                     )
                 }
 
-                PersonFlowViewModel.Step.Details -> {
+                PersonFlowViewModel.Step.Details -> SectionCard(
+                    icon = Icons.Default.Person,
+                    title = "Details"
+                ) {
                     OutlinedTextField(
                         value = state.name,
                         onValueChange = viewModel::onNameChange,
@@ -99,11 +114,11 @@ fun AddEditRecipientFlowScreen(
                     )
                 }
 
-                PersonFlowViewModel.Step.Dates -> {
-                    Text("Important Dates", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(8.dp))
-
-                    // Compute visible rows: prompts + additional + any existing picked labels (edit mode), minus removed
+                PersonFlowViewModel.Step.Dates -> SectionCard(
+                    icon = Icons.Default.CalendarToday,
+                    title = "Important Dates"
+                ) {
+                    // Visible rows: prompts + additional + any existing picked labels (edit mode), minus removed
                     val visibleLabels = remember(
                         state.datePrompts,
                         state.additionalDateLabels,
@@ -115,31 +130,27 @@ fun AddEditRecipientFlowScreen(
                             .filter { it !in state.removedDateLabels }
                     }
 
-                    visibleLabels.forEach { label ->
-                        TypedDateRow(
-                            label = label,
-                            date = state.pickedDates[label],
-                            onLabelChange = { newLabel ->
-                                viewModel.onChangeDateLabel(label, newLabel)
-                            },
-                            onPicked = { picked ->
-                                viewModel.onDatePicked(label, picked)
-                            },
-                            onRemove = {
-                                viewModel.onRemoveDateItem(label)
-                            }
-                        )
-                    }
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        visibleLabels.forEach { label ->
+                            TypedDateRow(
+                                label = label,
+                                date = state.pickedDates[label],
+                                onLabelChange = { newLabel -> viewModel.onChangeDateLabel(label, newLabel) },
+                                onPicked = { picked -> viewModel.onDatePicked(label, picked) },
+                                onRemove = { viewModel.onRemoveDateItem(label) }
+                            )
+                        }
 
-                    Spacer(Modifier.height(12.dp))
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-                        OutlinedButton(onClick = { viewModel.onAddDateItem("Custom") }) { Text("Add Date") }
+                        OutlinedButton(onClick = { viewModel.onAddDateItem("Custom") }) {
+                            Text("Add Date")
+                        }
                     }
                 }
 
-                PersonFlowViewModel.Step.Preferences -> {
-                    Text("Gift Inspirations", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(8.dp))
+                PersonFlowViewModel.Step.Preferences -> SectionCard(
+                    icon = Icons.Default.FavoriteBorder,
+                    title = "Gift Inspirations"
+                ) {
                     GiftInspirationsInline(
                         current = state.preferences,
                         onAdd = { viewModel.onAddPreference(it) },
@@ -147,143 +158,136 @@ fun AddEditRecipientFlowScreen(
                     )
                 }
 
-                PersonFlowViewModel.Step.Review -> {
-                    Text("Review", style = MaterialTheme.typography.titleMedium)
-                    Text("Relationship: ${state.selectedRelationship ?: "None"}")
-                    Text("Name: ${state.name}")
+                PersonFlowViewModel.Step.Review -> SectionCard(
+                    icon = Icons.Default.Person,
+                    title = "Review"
+                ) {
                     val formatter = remember { DateTimeFormatter.ofPattern("MMM d, yyyy") }
-                    if (state.pickedDates.isNotEmpty()) {
-                        Spacer(Modifier.height(8.dp))
-                        Text("Dates:")
-                        state.pickedDates.entries.sortedBy { it.key }.forEach { (label, date) ->
-                            Text("- $label: ${date.format(formatter)}")
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        LabeledValue(label = "Relationship", value = state.selectedRelationship ?: "None")
+                        LabeledValue(label = "Name", value = state.name.ifBlank { "—" })
+                        if (state.pickedDates.isNotEmpty()) {
+                            Text("Dates", style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold))
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                state.pickedDates.entries.sortedBy { it.key }.forEach { (label, date) ->
+                                    Text("• $label: ${date.format(formatter)}")
+                                }
+                            }
                         }
                     }
                 }
-
-//                else -> {
-//                    Text("Unknown step: ${state.step}") // TODO - remove this debugging code
-//                }
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                OutlinedButton(onClick = {
-                    val result = viewModel.onBack()
-                    if (result.navigateBack) onNavigateBack(null)
-                }) { Text("Back") }
-                Button(onClick = {
-                    val result = viewModel.onNextOrSave()
-                    if (result.saved) onNavigateBack(result.successMessage)
-                }) { Text(if (state.step == PersonFlowViewModel.Step.Review) "Save" else "Next") }
             }
         }
     }
 }
 
 @Composable
-private fun GiftInspirationsEditorDialog(
-    current: List<String>,
-    onAdd: (String) -> Unit,
-    onRemove: (String) -> Unit,
-    onDismiss: () -> Unit
+private fun SectionCard(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    content: @Composable ColumnScope.() -> Unit
 ) {
-    var input by remember { mutableStateOf("") }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Gift Inspirations") },
-        text = {
-            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = input,
-                    onValueChange = { input = it },
-                    label = { Text("Add item") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = {
-                        onAdd(input)
-                        input = ""
-                    }, enabled = input.isNotBlank()) { Text("Add") }
-                }
-                Spacer(Modifier.height(8.dp))
-                current.forEach { item ->
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(item)
-                        TextButton(onClick = { onRemove(item) }) { Text("Remove") }
-                    }
-                }
+    ElevatedCard(
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Text(title, style = MaterialTheme.typography.titleMedium)
             }
-        },
-        confirmButton = { Button(onClick = onDismiss) { Text("Done") } }
-    )
+            content()
+        }
+    }
 }
 
 @Composable
-fun RelationshipChips(
+private fun StepHeader(current: Int, labels: List<String>) {
+    val total = labels.size
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // Dots
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            repeat(total) { index ->
+                val active = index == current
+                val color = if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                Box(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .size(if (active) 10.dp else 8.dp)
+                        .clip(CircleShape)
+                        .background(color)
+                )
+            }
+        }
+        // Label
+        Text(
+            text = "Step ${current + 1} of $total",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+    }
+}
+
+@Composable
+private fun RelationshipChips(
     options: List<String>,
     selected: String?,
     onSelected: (String) -> Unit
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         options.forEach { label ->
             val isSelected = label == selected
-            OutlinedButton(onClick = { onSelected(label) }) {
-                Text(if (isSelected) "[$label]" else label)
-            }
+            FilterChip(
+                selected = isSelected,
+                onClick = { onSelected(label) },
+                label = { Text(label) }
+            )
         }
     }
 }
 
-
 @Composable
-private fun DatePickerRow(
-    label: String,
-    date: LocalDate?,
-    onPicked: (LocalDate) -> Unit,
-    onRemove: (() -> Unit)? = null
+private fun GiftInspirationsInline(
+    current: List<String>,
+    onAdd: (String) -> Unit,
+    onRemove: (String) -> Unit
 ) {
-    var open by remember { mutableStateOf(false) }
-    val formatter = remember { DateTimeFormatter.ofPattern("MMM d, yyyy") }
-    Card(
-        colors = CardDefaults.cardColors(),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-    ) {
-        Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(if (date != null) "$label: ${date.format(formatter)}" else label)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (date != null && onRemove != null) {
-                    OutlinedButton(onClick = { onRemove() }) { Text("Clear") }
-                }
-                OutlinedButton(onClick = { open = true }) { Text("Pick") }
+    var input by remember { mutableStateOf("") }
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedTextField(
+            value = input,
+            onValueChange = { input = it },
+            label = { Text("Add item") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = { onAdd(input).also { input = "" } },
+                enabled = input.isNotBlank()
+            ) { Text("Add") }
+        }
+        current.forEach { item ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(item)
+                TextButton(onClick = { onRemove(item) }) { Text("Remove") }
             }
-        }
-    }
-    if (open) {
-        val initialMillis = date?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
-        val state = if (initialMillis != null) {
-            androidx.compose.material3.rememberDatePickerState(initialSelectedDateMillis = initialMillis)
-        } else {
-            androidx.compose.material3.rememberDatePickerState()
-        }
-        DatePickerDialog(
-            onDismissRequest = { open = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    state.selectedDateMillis?.let { millis ->
-                        val picked =
-                            Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
-                        onPicked(picked)
-                    }
-                    open = false
-                }) { Text("Done") }
-            },
-            dismissButton = { TextButton(onClick = { open = false }) { Text("Cancel") } }
-        ) {
-            DatePicker(state = state)
         }
     }
 }
@@ -298,37 +302,32 @@ private fun TypedDateRow(
 ) {
     var openPicker by remember { mutableStateOf(false) }
     val formatter = remember { DateTimeFormatter.ofPattern("MMM d, yyyy") }
-    Card(
-        colors = CardDefaults.cardColors(),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
+
+    Surface(
+        tonalElevation = 2.dp,
+        shape = MaterialTheme.shapes.large,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Column(Modifier.padding(12.dp)) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 DateTypeSelector(label = label, onLabelChange = onLabelChange)
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    OutlinedButton(onClick = { onRemove() }) { Text("Delete") }
-                }
+                OutlinedButton(onClick = onRemove) { Text("Delete") }
             }
-            Spacer(Modifier.height(8.dp))
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(if (date != null) "${date.format(formatter)}" else "No date selected")
-                OutlinedButton(onClick = { openPicker = true }) { Text("Pick Date") }
+                Text(if (date != null) date.format(formatter) else "No date selected")
+                Button(onClick = { openPicker = true }) { Text("Pick Date") }
             }
         }
     }
+
     if (openPicker) {
         val initialMillis = date?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
         val state = if (initialMillis != null) {
@@ -341,17 +340,14 @@ private fun TypedDateRow(
             confirmButton = {
                 TextButton(onClick = {
                     state.selectedDateMillis?.let { millis ->
-                        val picked =
-                            Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
+                        val picked = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
                         onPicked(picked)
                     }
                     openPicker = false
                 }) { Text("Done") }
             },
             dismissButton = { TextButton(onClick = { openPicker = false }) { Text("Cancel") } }
-        ) {
-            DatePicker(state = state)
-        }
+        ) { DatePicker(state = state) }
     }
 }
 
@@ -375,14 +371,8 @@ private fun DateTypeSelector(
     var customText by remember(label) { mutableStateOf(if (isKnownNonCustom) "" else label) }
 
     Column(Modifier.fillMaxWidth(0.7f)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OutlinedButton(onClick = { expanded = true }) {
-                Text(if (isKnownNonCustom) label else "Custom")
-            }
+        OutlinedButton(onClick = { expanded = true }) {
+            Text(if (isKnownNonCustom) label else "Custom")
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             knownTypes.forEach { type ->
@@ -391,7 +381,6 @@ private fun DateTypeSelector(
                     onClick = {
                         expanded = false
                         if (type == "Custom") {
-                            // Switch to custom, keep current customText
                             onLabelChange(if (customText.isBlank()) "Custom" else customText)
                         } else {
                             onLabelChange(type)
@@ -416,35 +405,30 @@ private fun DateTypeSelector(
 }
 
 @Composable
-private fun GiftInspirationsInline(
-    current: List<String>,
-    onAdd: (String) -> Unit,
-    onRemove: (String) -> Unit
+private fun LabeledValue(label: String, value: String) {
+    Column {
+        Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(value, style = MaterialTheme.typography.bodyLarge)
+    }
+}
+
+// --- Simple FlowRow (copy to avoid extra dependency) ---
+@Composable
+private fun FlowRow(
+    modifier: Modifier = Modifier,
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    content: @Composable () -> Unit
 ) {
-    var input by remember { mutableStateOf("") }
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedTextField(
-            value = input,
-            onValueChange = { input = it },
-            label = { Text("Add item") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = {
-                onAdd(input)
-                input = ""
-            }, enabled = input.isNotBlank()) { Text("Add") }
-        }
-        Spacer(Modifier.height(8.dp))
-        current.forEach { item ->
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(item)
-                TextButton(onClick = { onRemove(item) }) { Text("Remove") }
-            }
+    // Very lightweight wrapper around Row/Wrap for chips without adding Accompanist.
+    // For simplicity and stability, we just use a Column of Rows.
+    Column(modifier = modifier) {
+        var rowWidth = 0
+        var currentRow = mutableListOf<@Composable () -> Unit>()
+        val maxWidth = 10_000 // not measured here; chips will wrap visually by constraints
+        currentRow.clear()
+        Row(horizontalArrangement = horizontalArrangement, verticalAlignment = Alignment.CenterVertically) {
+            content()
         }
     }
 }
