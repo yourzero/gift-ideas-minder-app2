@@ -43,6 +43,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.ui.Alignment
 import androidx.navigation.NavController
 import java.time.format.DateTimeFormatter
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
 
 @Composable
 fun AddEditRecipientFlowScreen(
@@ -161,6 +163,23 @@ val state by viewModel.uiState.collectAsState()
                             DatePicker(state = dpState)
                         }
                     }
+
+                    // Preferences editor entry point in Dates step
+                    Spacer(Modifier.height(16.dp))
+                    var showPrefs by remember { mutableStateOf(false) }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        OutlinedButton(onClick = { showPrefs = true }) { Text("Preferences") }
+                    }
+                    if (showPrefs) {
+                        PreferencesEditorDialog(
+                            current = state.preferences,
+                            onAdd = { viewModel.onAddPreference(it) },
+                            onRemove = { viewModel.onRemovePreference(it) },
+                            onDismiss = { showPrefs = false }
+                        )
+                    }
+
+
                 }
                 PersonFlowViewModel.Step.Review -> {
                     Text("Review", style = MaterialTheme.typography.titleMedium)
@@ -191,6 +210,39 @@ val state by viewModel.uiState.collectAsState()
             }
         }
     }
+}
+
+@Composable
+private fun PreferencesEditorDialog(
+    current: List<String>,
+    onAdd: (String) -> Unit,
+    onRemove: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var input by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Preferences") },
+        text = {
+            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(value = input, onValueChange = { input = it }, label = { Text("Add item") }, modifier = Modifier.fillMaxWidth())
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = {
+                        onAdd(input)
+                        input = ""
+                    }, enabled = input.isNotBlank()) { Text("Add") }
+                }
+                Spacer(Modifier.height(8.dp))
+                current.forEach { item ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(item)
+                        TextButton(onClick = { onRemove(item) }) { Text("Remove") }
+                    }
+                }
+            }
+        },
+        confirmButton = { Button(onClick = onDismiss) { Text("Done") } }
+    )
 }
 
 @Composable

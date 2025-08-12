@@ -36,6 +36,7 @@ class PersonFlowViewModel @Inject constructor(
         val availableRelationships: List<String> = listOf("Spouse", "Partner", "Parent", "Child", "Sibling", "Friend", "Coworker"),
         val selectedRelationship: String? = null,
         val name: String = "",
+        val preferences: List<String> = emptyList(),
         val datePrompts: List<String> = emptyList(),
         val pickedDates: Map<String, java.time.LocalDate> = emptyMap(),
         val relationshipTypes: Map<String, RelationshipType> = emptyMap()
@@ -68,6 +69,7 @@ class PersonFlowViewModel @Inject constructor(
                             personId = id,
                             selectedRelationship = person.relationships.firstOrNull(),
                             name = person.name,
+                            preferences = person.preferences,
                             step = Step.Relationship
                         )
                     }
@@ -90,6 +92,16 @@ class PersonFlowViewModel @Inject constructor(
 
     fun onNameChange(new: String) {
         _uiState.update { it.copy(name = new) }
+    }
+
+    fun onAddPreference(item: String) {
+        val trimmed = item.trim()
+        if (trimmed.isEmpty()) return
+        _uiState.update { s -> s.copy(preferences = s.preferences + trimmed) }
+    }
+
+    fun onRemovePreference(item: String) {
+        _uiState.update { s -> s.copy(preferences = s.preferences - item) }
     }
 
     fun onBack(): NavResult {
@@ -155,7 +167,8 @@ class PersonFlowViewModel @Inject constructor(
         val person = Person(
             id = s.personId ?: 0,
             name = s.name,
-            relationships = listOfNotNull(s.selectedRelationship)
+            relationships = listOfNotNull(s.selectedRelationship),
+            preferences = s.preferences
         )
         val finalPersonId = if (s.isEditing) {
             personRepo.update(person)
