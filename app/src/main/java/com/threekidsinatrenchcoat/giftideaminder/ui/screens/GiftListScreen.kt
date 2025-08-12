@@ -129,7 +129,8 @@ fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
                             viewModel.dismissSuggestion(suggestion)
                         },
                         isLoading = viewModel.isLoadingSuggestions,
-                        error = viewModel.suggestionsError
+                        error = viewModel.suggestionsError,
+                        personIdToName = viewModel.peopleById.collectAsState().value
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))

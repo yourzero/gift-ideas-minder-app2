@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -27,34 +28,41 @@ class AddEditGifteeFlowInstrumentedTest {
         composeRule.onNodeWithText("Next").performClick()
         composeRule.onNode(hasSetTextAction()).performTextInput("Test User")
         composeRule.onNodeWithText("Next").performClick()
+        // Dates -> Preferences
+        composeRule.onNodeWithText("Next").performClick()
+        // Preferences -> Review
         composeRule.onNodeWithText("Next").performClick()
         composeRule.onNodeWithText("Save").performClick()
         composeRule.onNodeWithText("Test User was added").assertIsDisplayed()
     }
 
     @Test
-    fun datesStep_addCustomLabel_and_remove() {
+    fun datesStep_addTypedDate_and_remove() {
         composeRule.onNodeWithContentDescription("Add Options").performClick()
         composeRule.onNodeWithText("Add Person").performClick()
 
         // Relationship -> Details
         composeRule.onNodeWithText("Friend").performClick()
         composeRule.onNodeWithText("Next").performClick()
-        composeRule.onNode(hasSetTextAction()).performTextInput("Custom Date User")
+        composeRule.onNode(hasSetTextAction()).performTextInput("Typed Date User")
         composeRule.onNodeWithText("Next").performClick()
 
-        // Dates: add custom label
-        composeRule.onNodeWithText("Custom date label").performTextInput("Graduation")
-        composeRule.onNodeWithText("Pick date & add").performClick()
+        // Dates: add a typed date row, select a known type, pick a date
+        composeRule.onNodeWithText("Add Date").performClick()
+        // Open type dropdown using testTag to avoid ambiguity
+        composeRule.onNodeWithTag("date-type-selector").performClick()
+        composeRule.onNodeWithText("Graduation").performClick()
+        // Pick date
+        composeRule.onNodeWithText("Pick Date").performClick()
         composeRule.onNodeWithText("Done").performClick()
 
-        // Header appears when a non-prompt date is present (best-effort)
-        composeRule.onNodeWithText("Other dates").assertIsDisplayed()
-
-        // Remove the custom date and finish
-        composeRule.onNodeWithText("Clear").performClick()
+        // Remove the date row and finish
+        composeRule.onNodeWithText("Delete").performClick()
+        // Dates -> Preferences
+        composeRule.onNodeWithText("Next").performClick()
+        // Preferences -> Review
         composeRule.onNodeWithText("Next").performClick()
         composeRule.onNodeWithText("Save").performClick()
-        composeRule.onNodeWithText("Custom Date User was added").assertIsDisplayed()
+        composeRule.onNodeWithText("Typed Date User was added").assertIsDisplayed()
     }
 }

@@ -6,13 +6,14 @@
 - Implement unidirectional data flow with ViewModels
 
 ### New flow: Add/Edit Giftee (relationship-first)
-- Screen: `AddEditGifteeFlowScreen` implements a 4-step wizard: Relationship → Details → Dates → Review.
+- Screen: `AddEditGifteeFlowScreen` implements a 5-step wizard: Relationship → Details → Dates → Preferences → Review.
 - ViewModel: `PersonFlowViewModel` manages steps and state, including:
   - Seeding and observing `RelationshipType` entries to populate options and derive date prompts (`hasBirthday`, `hasAnniversary`).
-  - Tracking picked important dates as `Map<label, LocalDate>`; supports add, edit, clear.
+- Tracking picked important dates as `Map<label, LocalDate>`; supports add, edit, clear, and dynamic typed rows with dropdown (Birthday, Anniversary, Graduation, First Met, Valentine's Day, Mother's Day, Father's Day, Custom).
   - Persisting via `PersonRepository` (insert/update) and `ImportantDateRepository.replaceForPerson` in a single logical action on Save.
 - UX details:
-  - Dates step provides per-label date pickers and a custom labeled date add (text + date picker), with inline review/edit/remove.
+- Dates step provides typed date rows with per-row date pickers and dropdown for occasion type, with inline review/edit/remove.
+- Preferences step manages Gift Inspirations as a separate step from Dates.
   - Review step presents relationship, name, and formatted dates before Save.
   - Success snackbar and navigation handled centrally via `AppNavGraph` using a shared `SnackbarHostState` from `AppScaffold`.
 

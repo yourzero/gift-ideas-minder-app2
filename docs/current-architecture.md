@@ -6,7 +6,7 @@ The Gift Idea Minder Android app uses Jetpack Compose for UI, Room for persisten
 
 Key features include gift management (Epic 1), person management (Epic 2), basic reminders (Epic 3), integrations/import (Epic 4), budgeting (Epic 5), AI-driven suggestions (Epic 6), and partial price tracking (Epic 7), with navigation handled via Compose Navigation.
 
-Recent addition: a relationship-first Add/Edit Giftee flow (4-step wizard: Relationship → Details → Dates → Review) driven by `PersonFlowViewModel`, with important date prompts and shared snackbar handling.
+Recent addition: a relationship-first Add/Edit Giftee flow (5-step wizard: Relationship → Details → Dates → Preferences → Review) driven by `PersonFlowViewModel`, with important date prompts, typed date rows, and shared snackbar handling.
 
 ## Architecture Layers
 
@@ -25,11 +25,11 @@ Recent addition: a relationship-first Add/Edit Giftee flow (4-step wizard: Relat
 - Manages UI and user interactions using Jetpack Compose.
 - Located in `app/src/main/java/com/giftideaminder/ui/` and `viewmodel/`.
 - Components:
-  - **Screens**: `GiftListScreen.kt`, `AddEditGiftScreen.kt`, `PersonListScreen.kt`, and new `AddEditGifteeFlowScreen.kt` (relationship-first 4-step wizard). Other screens: `ImportScreen.kt`, `BudgetScreen.kt`, `GiftDetailScreen.kt`, dashboards.
+  - **Screens**: `GiftListScreen.kt`, `AddEditGiftScreen.kt`, `PersonListScreen.kt`, and new `AddEditGifteeFlowScreen.kt` (relationship-first 5-step wizard). Other screens: `ImportScreen.kt`, `BudgetScreen.kt`, `GiftDetailScreen.kt`, dashboards.
   - **Components**: `GiftItem.kt`, `PersonItem.kt`, `SuggestionsCarousel.kt`.
   - **Navigation**: `AppNavGraph.kt` routes `add_person` and `edit_person/{personId}` to `AddEditGifteeFlowScreen`. `AppScaffold.kt` owns a shared `SnackbarHostState` passed to `AppNavGraph`, with a central `showSnackbarAndPopBackStack(message)` util used by the flow.
   - **Theme**: Material3 theming in `theme/`.
-  - **ViewModels**: `GiftViewModel.kt`, `PersonViewModel.kt`, and new `PersonFlowViewModel.kt` (manages steps, prompts, picked dates, and persistence). `PersonFlowViewModel` seeds relationship types and derives prompts from flags.
+  - **ViewModels**: `GiftViewModel.kt`, `PersonViewModel.kt`, and new `PersonFlowViewModel.kt` (manages steps, prompts, typed date items with add/remove/rename, and persistence). `PersonFlowViewModel` seeds relationship types and derives prompts from flags; Preferences step manages Gift Inspirations.
 
 ### Dependency Injection
 - Uses Hilt for DI.
@@ -206,10 +206,11 @@ gift-idea-minder-android--cursor/
 ## Recent Improvements
 
 ### Relationship-first Add/Edit Giftee Flow (Wizard)
-- New `AddEditGifteeFlowScreen` with steps: Relationship → Details → Dates → Review.
-- `PersonFlowViewModel` handles step transitions, derives date prompts from `RelationshipType` flags, tracks `pickedDates`, and persists via `ImportantDateRepository.replaceForPerson`.
+- New `AddEditGifteeFlowScreen` with steps: Relationship → Details → Dates → Preferences → Review.
+- `PersonFlowViewModel` handles step transitions, derives date prompts from `RelationshipType` flags, tracks `pickedDates`, supports typed date rows (Birthday/Anniversary/Graduation/First Met/Valentine's Day/Mother's Day/Father's Day/Custom), add/remove/rename rows, and persists via `ImportantDateRepository.replaceForPerson`.
 - Shared snackbar handling via `AppScaffold` and `AppNavGraph` on success.
-- Dates step supports custom labeled dates with inline edit/remove and a reusable `DatePickerRow` with initial value and clear.
+- Dates step supports typed date rows with built-in dropdown and date picker per row.
+- Preferences step manages Gift Inspirations as a separate screen.
 
 ## Flow UI / UX Walkthrough
 ### LocalDate Migration (Database v2)
@@ -253,8 +254,8 @@ Notes
 - Minor `GiftViewModel` stubs to satisfy screen references.
 
 ### Testing
-- Unit tests for `PersonFlowViewModel` (date pick/remove, prompt derivation, persistence orchestration).
-- Instrumentation tests for the new flow (add person and custom date add/remove scenarios).
+- Unit tests for `PersonFlowViewModel` (date pick/remove, prompt derivation, persistence orchestration; updated for Preferences step).
+- Instrumentation tests for the flow updated to cover typed date add/remove and the extra Preferences step.
 ### Enhanced Recipient Management
 - **AddEditRecipientScreen**: Full-featured person management with photo, birthday, relationships, notes, and contact integration.
 - **Contact Picker Integration**: Users can import recipient data directly from device contacts.

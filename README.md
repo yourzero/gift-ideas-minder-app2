@@ -33,7 +33,7 @@ A mobile application for managing and planning gift ideas, featuring persistence
 * **Price tracking** and sale alerts (CamelCamelCamel integration)
 * **Budgeting** and event categorization
 * **Security** via password or biometric lock
-* **AI‑powered suggestions** based on past ideas and external data
+* **AI‑powered suggestions** based on past ideas and external data (now person‑centric; prioritized by upcoming events and recipient context)
 
 ---
 
@@ -52,7 +52,7 @@ As a user, I want to add, view, and delete gift ideas so I can keep track of pot
 
 As a user, I want to manage my gift recipients so I can assign ideas to the right people.
 
-* **Story PM-1**: Add a new person with name and optional birthday.
+* **Story PM-1**: Add a new person via a 5‑step flow (Relationship → Details → Dates → Preferences → Review), with typed dates and Gift Inspirations.
 * **Story PM-2**: Select or change a gift’s assigned person from a dropdown.
 * **Story PM-3**: View all persons and their upcoming birthdays.
 

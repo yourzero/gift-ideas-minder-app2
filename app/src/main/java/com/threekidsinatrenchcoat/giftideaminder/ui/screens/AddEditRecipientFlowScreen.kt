@@ -49,6 +49,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.ui.platform.testTag
 
 @Composable
 fun AddEditRecipientFlowScreen(
@@ -380,7 +381,7 @@ private fun DateTypeSelector(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedButton(onClick = { expanded = true }) {
+            OutlinedButton(modifier = Modifier.testTag("date-type-selector"), onClick = { expanded = true }) {
                 Text(if (isKnownNonCustom) label else "Custom")
             }
         }

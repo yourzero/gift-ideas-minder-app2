@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.threekidsinatrenchcoat.giftideaminder.BuildConfig
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.GiftDao
+import com.threekidsinatrenchcoat.giftideaminder.data.dao.PersonDao
 import com.threekidsinatrenchcoat.giftideaminder.data.model.Gift
 import com.threekidsinatrenchcoat.giftideaminder.data.model.GiftWithHistory
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +15,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class GiftViewModel @Inject constructor(
     private val giftDao: GiftDao,
-    private val aiRepo: com.threekidsinatrenchcoat.giftideaminder.data.repository.AISuggestionRepository
+    private val aiRepo: com.threekidsinatrenchcoat.giftideaminder.data.repository.AISuggestionRepository,
+    private val personDao: PersonDao
 ) : ViewModel() {
 
     // ---------- Public DAO-backed streams ----------
@@ -135,6 +137,18 @@ class GiftViewModel @Inject constructor(
     val suggestionsError: StateFlow<String?> = _suggestionsError.asStateFlow()
     private var lastSuggestionsFetchMs: Long = 0L
 
+    // People lookup for UI labels on suggestions
+    private val _peopleById: MutableStateFlow<Map<Int, String>> = MutableStateFlow(emptyMap())
+    val peopleById: StateFlow<Map<Int, String>> = _peopleById.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            personDao.getAllPersons().collect { people ->
+                _peopleById.value = people.associate { it.id to it.name }
+            }
+        }
+    }
+
     fun fetchSuggestions() {
         viewModelScope.launch {
             if (!BuildConfig.AI_ENABLED) {
@@ -151,7 +165,7 @@ class GiftViewModel @Inject constructor(
             _isLoadingSuggestions.value = true
             _suggestionsError.value = null
             try {
-                val ideas = aiRepo.fetchSuggestions()
+                val ideas = aiRepo.fetchSuggestionsPersonCentric(topN = 3, perPerson = 3)
                 _suggestions.value = ideas
             } catch (t: Throwable) {
                 _suggestionsError.value = t.message ?: "Failed to load suggestions"

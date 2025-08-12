@@ -39,6 +39,7 @@ Notes:
 - Data: keep suggestions ephemeral in memory and persist only accepted suggestions as `gifts`. Track dismissals via a lightweight table keyed by a stable suggestion hash.
 - ViewModel: implement `fetchSuggestions()` and `dismissSuggestion()`; add `isLoading`/`error` UI state.
 - UI: reuse `SuggestionsCarousel`; add loading/error empty states; trigger fetch on screen entry.
+- Person-centric prioritization: compute a priority per person from upcoming events, open gift count, time since last purchase, and relationship weight; request suggestions per top N persons and show the recipient on each card.
 
 2) Gift Picker by Budget (6.2)
 - API: `POST /suggestions/by-budget` (inputs: budget range, person/occasion, count, interests).
