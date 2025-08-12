@@ -14,7 +14,6 @@ import com.threekidsinatrenchcoat.giftideaminder.data.dao.ImportantDateDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.RelationshipTypeDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.SuggestionDismissalDao
 import com.threekidsinatrenchcoat.giftideaminder.data.model.AppDatabase
-import com.threekidsinatrenchcoat.giftideaminder.data.model.AppDatabase.Companion.MIGRATION_5_6
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,7 +36,6 @@ object DatabaseModule {
 
         if (BuildConfig.DEBUG) {
             builder
-                .addMigrations(MIGRATION_5_6)
                 .fallbackToDestructiveMigration()
                 .addCallback(object : RoomDatabase.Callback() {
                     override fun onDestructiveMigration(db: SupportSQLiteDatabase) {

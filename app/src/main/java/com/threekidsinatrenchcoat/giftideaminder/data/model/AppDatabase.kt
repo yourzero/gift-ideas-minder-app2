@@ -17,7 +17,7 @@ import com.threekidsinatrenchcoat.giftideaminder.data.model.SuggestionDismissal
 
 @Database(
     entities = [Gift::class, Person::class, PriceRecord::class, Suggestion::class, Settings::class, RelationshipType::class, ImportantDate::class, SuggestionDismissal::class],
-    version = 6,
+    version = 1,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -32,12 +32,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun importantDateDao(): ImportantDateDao
 
     // For development: no explicit migrations. Use fallbackToDestructiveMigration in builder.
-    companion object {
-        val MIGRATION_5_6: Migration = object : Migration(5, 6) {
-            override fun migrate(db: SupportSQLiteDatabase) {
-                // Add preferences TEXT column with default [] for existing rows
-                db.execSQL("ALTER TABLE persons ADD COLUMN preferences TEXT NOT NULL DEFAULT '[]'")
-            }
-        }
-    }
+    companion object {}
 }
