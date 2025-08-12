@@ -137,7 +137,7 @@ val uiState by viewModel.uiState.collectAsState()
             )
         }
 
-        var showPreferencesDialog by remember { mutableStateOf(false) }
+        var showGiftInspirationsDialog by remember { mutableStateOf(false) }
         Column(
             modifier = Modifier
                 .padding(padding)
@@ -220,7 +220,7 @@ val uiState by viewModel.uiState.collectAsState()
             // Notes
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 OutlinedButton(onClick = { /* could navigate to a dedicated notes screen if desired */ }) { Text("Notes") }
-                OutlinedButton(onClick = { showPreferencesDialog = true }) { Text("Preferences") }
+                OutlinedButton(onClick = { showGiftInspirationsDialog = true }) { Text("Gift Inspirations") }
             }
 
             // Actions
@@ -243,13 +243,13 @@ val uiState by viewModel.uiState.collectAsState()
             }
         }
 
-        // Preferences Dialog
-        PreferencesDialog(
-            visible = showPreferencesDialog,
+        // Gift Inspirations Dialog
+        GiftInspirationsDialog(
+            visible = showGiftInspirationsDialog,
             current = uiState.preferences,
             onAdd = { viewModel.addPreference(it) },
             onRemove = { viewModel.removePreference(it) },
-            onDismiss = { showPreferencesDialog = false }
+            onDismiss = { showGiftInspirationsDialog = false }
         )
 
         // Date Picker Dialog
@@ -282,7 +282,7 @@ val uiState by viewModel.uiState.collectAsState()
 }
 
 @Composable
-private fun PreferencesDialog(
+private fun GiftInspirationsDialog(
     visible: Boolean,
     current: List<String>,
     onAdd: (String) -> Unit,
@@ -293,7 +293,7 @@ private fun PreferencesDialog(
     var input by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Preferences") },
+        title = { Text("Gift Inspirations") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(value = input, onValueChange = { input = it }, label = { Text("Add item") })

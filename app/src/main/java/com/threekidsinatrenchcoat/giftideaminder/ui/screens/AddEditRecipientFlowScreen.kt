@@ -164,14 +164,14 @@ val state by viewModel.uiState.collectAsState()
                         }
                     }
 
-                    // Preferences editor entry point in Dates step
+                    // Gift Inspirations editor entry point in Dates step
                     Spacer(Modifier.height(16.dp))
                     var showPrefs by remember { mutableStateOf(false) }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        OutlinedButton(onClick = { showPrefs = true }) { Text("Preferences") }
+                        OutlinedButton(onClick = { showPrefs = true }) { Text("Gift Inspirations") }
                     }
                     if (showPrefs) {
-                        PreferencesEditorDialog(
+                        GiftInspirationsEditorDialog(
                             current = state.preferences,
                             onAdd = { viewModel.onAddPreference(it) },
                             onRemove = { viewModel.onRemovePreference(it) },
@@ -213,7 +213,7 @@ val state by viewModel.uiState.collectAsState()
 }
 
 @Composable
-private fun PreferencesEditorDialog(
+private fun GiftInspirationsEditorDialog(
     current: List<String>,
     onAdd: (String) -> Unit,
     onRemove: (String) -> Unit,
@@ -222,7 +222,7 @@ private fun PreferencesEditorDialog(
     var input by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Preferences") },
+        title = { Text("Gift Inspirations") },
         text = {
             Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(value = input, onValueChange = { input = it }, label = { Text("Add item") }, modifier = Modifier.fillMaxWidth())
