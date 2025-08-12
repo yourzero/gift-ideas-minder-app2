@@ -27,7 +27,7 @@ class PersonFlowViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    enum class Step { Relationship, Details, Dates, Review }
+    enum class Step { Relationship, Details, Dates, Preferences, Review }
 
     data class UiState(
         val isEditing: Boolean = false,
@@ -39,7 +39,11 @@ class PersonFlowViewModel @Inject constructor(
         val preferences: List<String> = emptyList(),
         val datePrompts: List<String> = emptyList(),
         val pickedDates: Map<String, java.time.LocalDate> = emptyMap(),
-        val relationshipTypes: Map<String, RelationshipType> = emptyMap()
+        val relationshipTypes: Map<String, RelationshipType> = emptyMap(),
+        // Labels for extra date rows the user added (can exist without a picked date)
+        val additionalDateLabels: List<String> = emptyList(),
+        // Labels the user chose to remove/hide from the list (e.g., hiding prompts)
+        val removedDateLabels: Set<String> = emptySet()
     )
 
     data class NavResult(val navigateBack: Boolean = false, val saved: Boolean = false, val successMessage: String? = null)
@@ -110,7 +114,8 @@ class PersonFlowViewModel @Inject constructor(
             Step.Relationship -> return NavResult(navigateBack = true)
             Step.Details -> Step.Relationship
             Step.Dates -> Step.Details
-            Step.Review -> Step.Dates
+            Step.Preferences -> Step.Dates
+            Step.Review -> Step.Preferences
         }
         _uiState.update { it.copy(step = prev) }
         return NavResult()
@@ -143,6 +148,10 @@ class PersonFlowViewModel @Inject constructor(
                 NavResult()
             }
             Step.Dates -> {
+                _uiState.update { it.copy(step = Step.Preferences) }
+                NavResult()
+            }
+            Step.Preferences -> {
                 _uiState.update { it.copy(step = Step.Review) }
                 NavResult()
             }
@@ -160,6 +169,62 @@ class PersonFlowViewModel @Inject constructor(
 
     fun onRemoveDate(label: String) {
         _uiState.update { it.copy(pickedDates = it.pickedDates - label) }
+    }
+
+    fun onAddDateItem(typeOrLabel: String) {
+        val trimmed = typeOrLabel.trim()
+        if (trimmed.isEmpty()) return
+        _uiState.update { state ->
+            val unique = generateUniqueLabel(trimmed, state)
+            val nextAdditional = if (unique in state.additionalDateLabels) state.additionalDateLabels else state.additionalDateLabels + unique
+            state.copy(
+                additionalDateLabels = nextAdditional,
+                removedDateLabels = state.removedDateLabels - unique
+            )
+        }
+    }
+
+    fun onRemoveDateItem(label: String) {
+        _uiState.update { state ->
+            val newAdditional = state.additionalDateLabels - label
+            val newPicked = state.pickedDates - label
+            val newRemoved = if (label in state.datePrompts) state.removedDateLabels + label else state.removedDateLabels
+            state.copy(
+                additionalDateLabels = newAdditional,
+                pickedDates = newPicked,
+                removedDateLabels = newRemoved
+            )
+        }
+    }
+
+    fun onChangeDateLabel(oldLabel: String, newLabelRaw: String) {
+        val proposed = newLabelRaw.trim()
+        if (proposed.isEmpty() || proposed == oldLabel) return
+        _uiState.update { state ->
+            val unique = generateUniqueLabel(proposed, state, excluding = oldLabel)
+            val newPicked = state.pickedDates.toMutableMap()
+            state.pickedDates[oldLabel]?.let { date ->
+                newPicked.remove(oldLabel)
+                newPicked[unique] = date
+            }
+            val newAdditional = state.additionalDateLabels.map { if (it == oldLabel) unique else it }
+            val newRemoved = if (oldLabel in state.removedDateLabels) state.removedDateLabels - oldLabel else state.removedDateLabels
+            state.copy(pickedDates = newPicked, additionalDateLabels = newAdditional, removedDateLabels = newRemoved)
+        }
+    }
+
+    private fun generateUniqueLabel(base: String, state: UiState, excluding: String? = null): String {
+        val occupied = (state.pickedDates.keys + state.additionalDateLabels + state.datePrompts)
+            .filter { it != excluding }
+            .toMutableSet()
+        if (base !in occupied) return base
+        var index = 2
+        var candidate = "$base ($index)"
+        while (candidate in occupied) {
+            index += 1
+            candidate = "$base ($index)"
+        }
+        return candidate
     }
 
     private suspend fun persistPersonAndDates() {

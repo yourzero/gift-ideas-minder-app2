@@ -101,6 +101,7 @@ class PersonFlowViewModelTest {
         vm.onNextOrSave() // to Dates
         val date = LocalDate.of(2025, 1, 1)
         vm.onDatePicked("Birthday", date)
+        vm.onNextOrSave() // to Preferences
         vm.onNextOrSave() // to Review
         val result2 = vm.onNextOrSave() // triggers save
         assertTrue(result2.saved)
