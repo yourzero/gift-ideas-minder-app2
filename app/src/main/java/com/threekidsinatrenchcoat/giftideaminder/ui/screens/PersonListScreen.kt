@@ -59,7 +59,8 @@ fun PersonListScreen(
                         onDelete = {
                             personToDelete = person
                             showDeleteDialog = true
-                        }
+                        },
+                        onIdeas = { navController.navigate("person_ideas/${person.id}") }
                     )
                 }
             }
