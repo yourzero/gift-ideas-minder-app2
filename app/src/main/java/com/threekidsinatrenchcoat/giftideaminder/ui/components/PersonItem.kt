@@ -15,7 +15,8 @@ import java.time.format.DateTimeFormatter
 fun PersonItem(
     person: Person,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onIdeas: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier
@@ -42,6 +43,10 @@ fun PersonItem(
                     .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.End
             ) {
+                Button(onClick = onIdeas) {
+                    Text("Ideas")
+                }
+                Spacer(modifier = Modifier.width(8.dp))
                 Button(onClick = onEdit) {
                     Text("Edit")
                 }

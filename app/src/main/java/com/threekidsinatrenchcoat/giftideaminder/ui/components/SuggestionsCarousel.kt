@@ -30,7 +30,8 @@ fun SuggestionsCarousel(
     onAccept: (Gift) -> Unit,
     onDismiss: (Gift) -> Unit,
     isLoading: StateFlow<Boolean>? = null,
-    error: StateFlow<String?>? = null
+    error: StateFlow<String?>? = null,
+    personIdToName: Map<Int, String> = emptyMap()
 ) {
     val suggestionList = suggestions.collectAsState().value
     val loading = isLoading?.collectAsState()?.value ?: false
@@ -57,6 +58,10 @@ fun SuggestionsCarousel(
                             Text("[Image Placeholder]")
                         }
                         Text(suggestion.title)
+                        val personName = suggestion.personId?.let { personIdToName[it] }
+                        if (!personName.isNullOrBlank()) {
+                            Text("For: $personName")
+                        }
                         Text(suggestion.description ?: "")
                         Text("Est. Price: $${suggestion.currentPrice ?: "N/A"}")
                         Row {

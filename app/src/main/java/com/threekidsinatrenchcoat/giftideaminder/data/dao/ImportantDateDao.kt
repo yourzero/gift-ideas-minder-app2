@@ -23,6 +23,9 @@ interface ImportantDateDao {
     @Query("SELECT * FROM important_dates WHERE personId = :personId ORDER BY date ASC")
     fun getForPerson(personId: Int): Flow<List<ImportantDate>>
 
+    @Query("SELECT * FROM important_dates")
+    fun getAll(): Flow<List<ImportantDate>>
+
     @Query("DELETE FROM important_dates WHERE personId = :personId")
     suspend fun deleteForPerson(personId: Int)
 

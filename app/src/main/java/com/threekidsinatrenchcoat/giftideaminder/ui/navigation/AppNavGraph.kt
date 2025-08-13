@@ -72,6 +72,15 @@ fun AppNavGraph(
             )
         }
         composable(
+            route = "person_ideas/{personId}",
+            arguments = listOf(
+                navArgument("personId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val personId = backStackEntry.arguments!!.getInt("personId")
+            PersonIdeasScreen(personId = personId, navController = navController)
+        }
+        composable(
             "add_gift?sharedText={sharedText}",
             arguments = listOf(navArgument("sharedText") {
                 type = NavType.StringType; nullable = true; defaultValue = null

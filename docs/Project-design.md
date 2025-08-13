@@ -22,9 +22,9 @@ Legend: [✓] Complete · [~] Partial · [◻] Not implemented
 3. [✓] **3.3 Import from Contacts**
 4. [~] **3.4 AI message history scan for giftees** (opt-in SMS scan wired; AI summarization is stubbed)
 5. [✓] **3.5 Relationship-first Add/Edit Giftee flow (wizard)**
-   - Relationship → Details → Dates → Review
+   - Relationship → Details → Dates → Preferences → Review
    - Important dates prompts driven by `RelationshipType` flags
-   - Custom labeled dates with inline edit/remove
+   - Typed dates with dropdown (Birthday/Anniversary/Graduation/First Met/Valentine's Day/Mother's Day/Father's Day/Custom), inline edit/remove
 
 Screenshots (place under `docs/images/add-edit-giftee/`):
 - `step1-relationship.png`
@@ -44,7 +44,7 @@ Screenshots (place under `docs/images/add-edit-giftee/`):
 3. [✓] **5.3 Budgeting & spend tracking**
 
 ### Epic 6: AI-Driven Features
-1. [~] **6.1 AI-generated gift suggestions** (UI present; fetch/dismiss not implemented)
+1. [~] **6.1 AI-generated gift suggestions** (person-centric fetch/dismiss wired; backend prompt may need tuning)
 2. [◻] **6.2 AI gift picker by budget**
 3. [✓] **6.3 Scan existing conversations (opt-in)**
 

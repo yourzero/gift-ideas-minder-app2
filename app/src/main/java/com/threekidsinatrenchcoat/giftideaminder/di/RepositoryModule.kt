@@ -43,6 +43,7 @@ object RepositoryModule {
         aiService: AIService,
         giftDao: GiftDao,
         personDao: PersonDao,
+        importantDateDao: ImportantDateDao,
         dismissalDao: SuggestionDismissalDao
-    ): AISuggestionRepository = AISuggestionRepository(aiService, giftDao, personDao, dismissalDao)
+    ): AISuggestionRepository = AISuggestionRepository(aiService, giftDao, personDao, importantDateDao, dismissalDao)
 }

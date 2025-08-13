@@ -22,6 +22,13 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.ui.platform.testTag
 
 @Composable
 fun AddEditRecipientFlowScreen(
@@ -371,8 +378,14 @@ private fun DateTypeSelector(
     var customText by remember(label) { mutableStateOf(if (isKnownNonCustom) "" else label) }
 
     Column(Modifier.fillMaxWidth(0.7f)) {
-        OutlinedButton(onClick = { expanded = true }) {
-            Text(if (isKnownNonCustom) label else "Custom")
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedButton(modifier = Modifier.testTag("date-type-selector"), onClick = { expanded = true }) {
+                Text(if (isKnownNonCustom) label else "Custom")
+            }
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             knownTypes.forEach { type ->
