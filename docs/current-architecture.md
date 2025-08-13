@@ -12,18 +12,18 @@ Recent addition: a relationship-first Add/Edit Giftee flow (5-step wizard: Relat
 
 ### Data Layer
 - Handles data persistence and retrieval using Room, plus network APIs for AI and price tracking.
-- Located in `app/src/main/java/com/giftideaminder/data/`.
+- Located in `app/src/main/java/com/threekidsinatrenchcoat/giftideaminder/data/`.
 - Components:
   - **Models**: `Gift.kt`, `Person.kt`, and new entities `RelationshipType.kt` (flags `hasBirthday`, `hasAnniversary`) and `ImportantDate.kt` (label + `LocalDate`).
   - **DAO**: `GiftDao.kt`, `PersonDao.kt`, plus new `RelationshipTypeDao.kt` and `ImportantDateDao.kt` with a transactional `replaceForPerson(personId, dates)` API.
   - **Repository**: `GiftRepository.kt`, `PersonRepository.kt`, plus new `RelationshipTypeRepository.kt` (with `ensureSeeded()`) and `ImportantDateRepository.kt`.
-  - **Database**: `AppDatabase.kt` for Room setup (schema version 4). In dev builds we enable destructive migrations; proper migrations should be restored for release builds.
+  - **Database**: `AppDatabase.kt` for Room setup (schema version 1). In dev builds we enable destructive migrations; proper migrations should be restored for release builds.
   - **API**: Services like `AIService.kt` and `PriceService.kt`.
   - **Converter**: `Converters.kt` for `LocalDate` and `List<String>`, `PriceHistoryConverter.kt` for price history.
 
 ### Presentation Layer
 - Manages UI and user interactions using Jetpack Compose.
-- Located in `app/src/main/java/com/giftideaminder/ui/` and `viewmodel/`.
+- Located in `app/src/main/java/com/threekidsinatrenchcoat/giftideaminder/ui/` and `viewmodel/`.
 - Components:
   - **Screens**: `GiftListScreen.kt`, `AddEditGiftScreen.kt`, `PersonListScreen.kt`, and new `AddEditGifteeFlowScreen.kt` (relationship-first 5-step wizard). Other screens: `ImportScreen.kt`, `BudgetScreen.kt`, `GiftDetailScreen.kt`, dashboards.
   - **Components**: `GiftItem.kt`, `PersonItem.kt`, `SuggestionsCarousel.kt`.
@@ -33,7 +33,7 @@ Recent addition: a relationship-first Add/Edit Giftee flow (5-step wizard: Relat
 
 ### Dependency Injection
 - Uses Hilt for DI.
-- Located in `app/src/main/java/com/giftideaminder/di/`.
+- Located in `app/src/main/java/com/threekidsinatrenchcoat/giftideaminder/di/`.
 - Modules: `DatabaseModule.kt`, `RepositoryModule.kt`, `NetworkModule.kt` (for AI and price services).
 
 ### Main Entry Points
@@ -56,23 +56,51 @@ gift-idea-minder-android--cursor/
         - AndroidManifest.xml
         - java/
           - com/
-            - giftideaminder/
+            - threekidsinatrenchcoat/
+              - giftideaminder/
               - data/
                 - api/
                   - AIService.kt
                   - PriceService.kt
+                - api/
+                  - AIService.kt
+                  - GeminiAIService.kt
+                  - NetworkClient.kt
+                  - PriceService.kt
                 - converter/
+                  - Converters.kt
                   - PriceHistoryConverter.kt
                 - dao/
                   - GiftDao.kt
+                  - ImportantDateDao.kt
                   - PersonDao.kt
+                  - PriceRecordDao.kt
+                  - RelationshipTypeDao.kt
+                  - SettingsDao.kt
+                  - SuggestionDao.kt
+                  - SuggestionDismissalDao.kt
                 - model/
                   - AppDatabase.kt
+                  - Converters.kt
                   - Gift.kt
+                  - GiftWithHistory.kt
+                  - ImportantDate.kt
                   - Person.kt
+                  - PersonRole.kt
+                  - PriceRecord.kt
+                  - RelationshipType.kt
+                  - Settings.kt
+                  - Suggestion.kt
+                  - SuggestionDismissal.kt
                 - repository/
+                  - AISuggestionRepository.kt
                   - GiftRepository.kt
+                  - ImportantDateDao.kt
+                  - ImportantDateRepository.kt
                   - PersonRepository.kt
+                  - PersonRoleQueries.kt
+                  - RelationshipTypeDao.kt
+                  - RelationshipTypeRepository.kt
               - di/
                 - DatabaseModule.kt
                 - NetworkModule.kt
@@ -81,29 +109,43 @@ gift-idea-minder-android--cursor/
               - MainApplication.kt
               - ui/
                 - components/
+                  - AppTopBar.kt
                   - GiftItem.kt
                   - PersonItem.kt
+                  - RelationshipChips.kt
                   - SuggestionsCarousel.kt
                 - navigation/
+                  - AppNavGraph.kt
+                  - AppNavHost.kt
+                  - AppScaffold.kt
+                  - BottomNavItem.kt
                   - Navigation.kt
+                  - PillBottomNavBar.kt
+                  - aAppScaffold.kt
                 - screens/
                   - AddEditGiftScreen.kt
+                  - AddEditRecipientFlowScreen.kt
+                  - AddEditRecipientScreen.kt
                   - BudgetScreen.kt
-                  - DashboardScreenMock.kt
+                  - EventListScreen.kt
                   - GiftDetailScreen.kt
                   - GiftListScreen.kt
                   - HomeDashboardGenerated_Chatgpt.kt
-                  - HomeDashboardGenerated.kt
+                  - HomeDashboardScreen.kt
                   - ImportScreen.kt
+                  - PersonIdeasScreen.kt
                   - PersonListScreen.kt
+                  - PersonListScreenExample.kt
                 - theme/
                   - Color.kt
                   - Shape.kt
                   - Theme.kt
                   - Type.kt
               - viewmodel/
+                - AddEditRecipientViewModel.kt
                 - GiftViewModel.kt
                 - ImportViewModel.kt
+                - PersonFlowViewModel.kt
                 - PersonViewModel.kt
         - res/
           - drawable/
@@ -250,7 +292,7 @@ Notes
 - Repositories: `RelationshipTypeRepository`, `ImportantDateRepository`.
 
 ### Stability and dev setup
-- Enabled destructive migrations in debug; bumped Room schema to v4.
+- Enabled destructive migrations in debug; schema currently at v1.
 - Minor `GiftViewModel` stubs to satisfy screen references.
 
 ### Testing
