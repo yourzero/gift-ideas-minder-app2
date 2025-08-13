@@ -2,13 +2,18 @@ package com.threekidsinatrenchcoat.giftideaminder.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.unit.dp
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +33,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.ui.platform.testTag
 
 @Composable
@@ -98,27 +104,28 @@ fun AddEditRecipientFlowScreen(
             )
 
             when (state.step) {
-                PersonFlowViewModel.Step.Relationship -> SectionCard(
-                    icon = Icons.Default.Person,
-                    title = "Select relationship"
-                ) {
-                    RelationshipChips(
-                        options = state.availableRelationships,
-                        selected = state.selectedRelationship,
-                        onSelected = { viewModel.onRelationshipSelected(it) }
-                    )
-                }
-
                 PersonFlowViewModel.Step.Details -> SectionCard(
                     icon = Icons.Default.Person,
                     title = "Details"
                 ) {
-                    OutlinedTextField(
-                        value = state.name,
-                        onValueChange = viewModel::onNameChange,
-                        label = { Text("Name") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        OutlinedTextField(
+                            value = state.name,
+                            onValueChange = viewModel::onNameChange,
+                            label = { Text("Name") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        
+                        Text("Relationship", style = MaterialTheme.typography.titleSmall)
+                        RelationshipSelector(
+                            options = state.availableRelationships,
+                            selected = state.selectedRelationships,
+                            onSelected = { viewModel.onRelationshipSelected(it) },
+                            onAddNew = { name, hasBirthday, hasAnniversary -> 
+                                viewModel.onAddNewRelationshipType(name, hasBirthday, hasAnniversary)
+                            }
+                        )
+                    }
                 }
 
                 PersonFlowViewModel.Step.Dates -> SectionCard(
@@ -139,7 +146,7 @@ fun AddEditRecipientFlowScreen(
 
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         visibleLabels.forEach { label ->
-                            TypedDateRow(
+                            ImprovedDateRow(
                                 label = label,
                                 date = state.pickedDates[label],
                                 onLabelChange = { newLabel -> viewModel.onChangeDateLabel(label, newLabel) },
@@ -148,8 +155,16 @@ fun AddEditRecipientFlowScreen(
                             )
                         }
 
-                        OutlinedButton(onClick = { viewModel.onAddDateItem("Custom") }) {
-                            Text("Add Date")
+                        OutlinedButton(
+                            onClick = { viewModel.onAddDateItem("Custom") },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text("Add Another Date")
                         }
                     }
                 }
@@ -171,13 +186,26 @@ fun AddEditRecipientFlowScreen(
                 ) {
                     val formatter = remember { DateTimeFormatter.ofPattern("MMM d, yyyy") }
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        LabeledValue(label = "Relationship", value = state.selectedRelationship ?: "None")
+                        LabeledValue(
+                            label = "Relationships", 
+                            value = if (state.selectedRelationships.isEmpty()) "None" else state.selectedRelationships.joinToString(", ")
+                        )
                         LabeledValue(label = "Name", value = state.name.ifBlank { "—" })
+                        
                         if (state.pickedDates.isNotEmpty()) {
-                            Text("Dates", style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold))
+                            Text("Important Dates", style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold))
                             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                 state.pickedDates.entries.sortedBy { it.key }.forEach { (label, date) ->
                                     Text("• $label: ${date.format(formatter)}")
+                                }
+                            }
+                        }
+                        
+                        if (state.preferences.isNotEmpty()) {
+                            Text("Gift Preferences", style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold))
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                state.preferences.forEach { preference ->
+                                    Text("• $preference")
                                 }
                             }
                         }
@@ -261,6 +289,145 @@ private fun RelationshipChips(
                 label = { Text(label) }
             )
         }
+    }
+}
+
+@Composable
+private fun RelationshipSelector(
+    options: List<String>,
+    selected: List<String>,
+    onSelected: (String) -> Unit,
+    onAddNew: (String, Boolean, Boolean) -> Unit
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    var showAddDialog by remember { mutableStateOf(false) }
+    
+    ElevatedCard(
+        onClick = { showDialog = true },
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = if (selected.isNotEmpty()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                if (selected.isEmpty()) {
+                    Text(
+                        text = "Select relationships",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    Text(
+                        text = "${selected.size} relationship${if (selected.size == 1) "" else "s"} selected",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Text(
+                        text = selected.joinToString(", "),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+            Icon(
+                Icons.Default.ArrowDropDown,
+                contentDescription = "Select",
+                tint = if (selected.isNotEmpty()) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+    
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Select Relationships") },
+            text = {
+                LazyColumn {
+                    items(options) { option ->
+                        Surface(
+                            onClick = { onSelected(option) },
+                            modifier = Modifier.fillMaxWidth(),
+                            color = if (option in selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (option in selected) {
+                                    Icon(
+                                        Icons.Default.Person,
+                                        contentDescription = "Selected",
+                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        modifier = Modifier.padding(end = 12.dp)
+                                    )
+                                }
+                                Text(
+                                    text = option,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = if (option in selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
+                    
+                    item {
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                        Surface(
+                            onClick = { 
+                                showDialog = false
+                                showAddDialog = true 
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.surfaceVariant
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.Person,
+                                    contentDescription = "Add new",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(end = 12.dp)
+                                )
+                                Text(
+                                    text = "Add New Relationship Type",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Done")
+                }
+            }
+        )
+    }
+    
+    if (showAddDialog) {
+        AddNewRelationshipDialog(
+            onDismiss = { showAddDialog = false },
+            onAdd = { name, hasBirthday, hasAnniversary ->
+                onAddNew(name, hasBirthday, hasAnniversary)
+                showAddDialog = false
+            }
+        )
     }
 }
 
@@ -359,6 +526,98 @@ private fun TypedDateRow(
 }
 
 @Composable
+private fun ImprovedDateRow(
+    label: String,
+    date: LocalDate?,
+    onLabelChange: (String) -> Unit,
+    onPicked: (LocalDate) -> Unit,
+    onRemove: () -> Unit
+) {
+    var openPicker by remember { mutableStateOf(false) }
+    val formatter = remember { DateTimeFormatter.ofPattern("MMM d, yyyy") }
+
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        )
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.CalendarToday,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    DateTypeSelector(label = label, onLabelChange = onLabelChange)
+                }
+                IconButton(onClick = onRemove) {
+                    Icon(Icons.Default.Delete, contentDescription = "Remove", tint = MaterialTheme.colorScheme.error)
+                }
+            }
+            
+            ElevatedCard(
+                onClick = { openPicker = true },
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = if (date != null) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = if (date != null) date.format(formatter) else "Tap to select date",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = if (date != null) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Icon(
+                        Icons.Default.CalendarToday,
+                        contentDescription = "Select date",
+                        tint = if (date != null) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+
+    if (openPicker) {
+        val initialMillis = date?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
+        val state = if (initialMillis != null) {
+            androidx.compose.material3.rememberDatePickerState(initialSelectedDateMillis = initialMillis)
+        } else {
+            androidx.compose.material3.rememberDatePickerState()
+        }
+        DatePickerDialog(
+            onDismissRequest = { openPicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    state.selectedDateMillis?.let { millis ->
+                        val picked = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
+                        onPicked(picked)
+                    }
+                    openPicker = false
+                }) { Text("Done") }
+            },
+            dismissButton = { TextButton(onClick = { openPicker = false }) { Text("Cancel") } }
+        ) { DatePicker(state = state) }
+    }
+}
+
+@Composable
 private fun DateTypeSelector(
     label: String,
     onLabelChange: (String) -> Unit
@@ -423,6 +682,69 @@ private fun LabeledValue(label: String, value: String) {
         Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(value, style = MaterialTheme.typography.bodyLarge)
     }
+}
+
+@Composable
+private fun AddNewRelationshipDialog(
+    onDismiss: () -> Unit,
+    onAdd: (String, Boolean, Boolean) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var hasBirthday by remember { mutableStateOf(true) }
+    var hasAnniversary by remember { mutableStateOf(false) }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add New Relationship Type") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Relationship Name") },
+                    placeholder = { Text("e.g., Cousin, Neighbor, Boss") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Text("Important Dates", style = MaterialTheme.typography.titleSmall)
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = hasBirthday,
+                        onCheckedChange = { hasBirthday = it }
+                    )
+                    Text("Has Birthday")
+                }
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = hasAnniversary,
+                        onCheckedChange = { hasAnniversary = it }
+                    )
+                    Text("Has Anniversary")
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onAdd(name, hasBirthday, hasAnniversary) },
+                enabled = name.isNotBlank()
+            ) {
+                Text("Add")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 // --- Simple FlowRow (copy to avoid extra dependency) ---

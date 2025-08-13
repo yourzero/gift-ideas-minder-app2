@@ -27,14 +27,14 @@ class PersonFlowViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    enum class Step { Relationship, Details, Dates, Preferences, Review }
+    enum class Step { Details, Dates, Preferences, Review }
 
     data class UiState(
         val isEditing: Boolean = false,
         val personId: Int? = null,
-        val step: Step = Step.Relationship,
+        val step: Step = Step.Details,
         val availableRelationships: List<String> = listOf("Spouse", "Partner", "Parent", "Child", "Sibling", "Friend", "Coworker"),
-        val selectedRelationship: String? = null,
+        val selectedRelationships: List<String> = emptyList(),
         val name: String = "",
         val preferences: List<String> = emptyList(),
         val datePrompts: List<String> = emptyList(),
@@ -71,10 +71,10 @@ class PersonFlowViewModel @Inject constructor(
                         it.copy(
                             isEditing = true,
                             personId = id,
-                            selectedRelationship = person.relationships.firstOrNull(),
+                            selectedRelationships = person.relationships,
                             name = person.name,
                             preferences = person.preferences,
-                            step = Step.Relationship
+                            step = Step.Details
                         )
                     }
                     // Prefill dates for edit mode
@@ -91,7 +91,27 @@ class PersonFlowViewModel @Inject constructor(
     }
 
     fun onRelationshipSelected(label: String) {
-        _uiState.update { it.copy(selectedRelationship = label) }
+        _uiState.update { state ->
+            val current = state.selectedRelationships
+            val updated = if (label in current) {
+                current - label
+            } else {
+                current + label
+            }
+            state.copy(selectedRelationships = updated)
+        }
+    }
+
+    fun onAddNewRelationshipType(name: String, hasBirthday: Boolean = true, hasAnniversary: Boolean = false) {
+        if (name.trim().isEmpty()) return
+        viewModelScope.launch {
+            val relationshipType = RelationshipType(
+                name = name.trim(),
+                hasBirthday = hasBirthday,
+                hasAnniversary = hasAnniversary
+            )
+            relRepo.insert(relationshipType)
+        }
     }
 
     fun onNameChange(new: String) {
@@ -111,8 +131,7 @@ class PersonFlowViewModel @Inject constructor(
     fun onBack(): NavResult {
         val current = _uiState.value
         val prev = when (current.step) {
-            Step.Relationship -> return NavResult(navigateBack = true)
-            Step.Details -> Step.Relationship
+            Step.Details -> return NavResult(navigateBack = true)
             Step.Dates -> Step.Details
             Step.Preferences -> Step.Dates
             Step.Review -> Step.Preferences
@@ -124,27 +143,26 @@ class PersonFlowViewModel @Inject constructor(
     fun onNextOrSave(): NavResult {
         val current = _uiState.value
         return when (current.step) {
-            Step.Relationship -> {
-                val relation = current.selectedRelationship
-                val prompts = if (relation == null) emptyList() else {
-                    val rt = _uiState.value.relationshipTypes[relation]
-                    if (rt != null) {
-                        buildList {
+            Step.Details -> {
+                val relations = current.selectedRelationships
+                val prompts = buildSet<String> {
+                    relations.forEach { relation ->
+                        val rt = _uiState.value.relationshipTypes[relation]
+                        if (rt != null) {
                             if (rt.hasBirthday) add("Birthday")
                             if (rt.hasAnniversary) add("Anniversary")
-                        }
-                    } else {
-                        when (relation) {
-                            "Spouse", "Partner" -> listOf("Birthday", "Anniversary")
-                            else -> listOf("Birthday")
+                        } else {
+                            when (relation) {
+                                "Spouse", "Partner" -> {
+                                    add("Birthday")
+                                    add("Anniversary")
+                                }
+                                else -> add("Birthday")
+                            }
                         }
                     }
-                }
-                _uiState.update { it.copy(step = Step.Details, datePrompts = prompts) }
-                NavResult()
-            }
-            Step.Details -> {
-                _uiState.update { it.copy(step = Step.Dates) }
+                }.toList()
+                _uiState.update { it.copy(step = Step.Dates, datePrompts = prompts) }
                 NavResult()
             }
             Step.Dates -> {
@@ -232,7 +250,7 @@ class PersonFlowViewModel @Inject constructor(
         val person = Person(
             id = s.personId ?: 0,
             name = s.name,
-            relationships = listOfNotNull(s.selectedRelationship),
+            relationships = s.selectedRelationships,
             preferences = s.preferences
         )
         val finalPersonId = if (s.isEditing) {

@@ -1,4 +1,4 @@
-* recipients screen
+* recipients
   - remove "add new person" button from Recipients screen
   - "select relationship" 
     - make UI better - popup like inspirations?
@@ -7,5 +7,7 @@
   - change "Name" to be first screen. Possibly add "select relationship" below it
   - clean up "important dates" UI
   - add all details to "review" screen
-* gifts screen
-  - 
+  - new:
+    - when add new relationship type, have it automatically selected
+    - when a date (type) is submitted with no date assigned, don't save it
+    - 

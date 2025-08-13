@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 class RelationshipTypeRepository(private val dao: RelationshipTypeDao) {
     fun getAll(): Flow<List<RelationshipType>> = dao.getAll()
+    suspend fun insert(type: RelationshipType) = dao.insert(type)
     suspend fun ensureSeeded() {
         if (dao.count() == 0) {
             dao.insertAll(
