@@ -104,13 +104,19 @@ class PersonFlowViewModel @Inject constructor(
 
     fun onAddNewRelationshipType(name: String, hasBirthday: Boolean = true, hasAnniversary: Boolean = false) {
         if (name.trim().isEmpty()) return
+        val trimmedName = name.trim()
         viewModelScope.launch {
             val relationshipType = RelationshipType(
-                name = name.trim(),
+                name = trimmedName,
                 hasBirthday = hasBirthday,
                 hasAnniversary = hasAnniversary
             )
             relRepo.insert(relationshipType)
+            
+            // Automatically select the newly added relationship type
+            _uiState.update { state ->
+                state.copy(selectedRelationships = state.selectedRelationships + trimmedName)
+            }
         }
     }
 
@@ -145,23 +151,32 @@ class PersonFlowViewModel @Inject constructor(
         return when (current.step) {
             Step.Details -> {
                 val relations = current.selectedRelationships
-                val prompts = buildSet<String> {
-                    relations.forEach { relation ->
-                        val rt = _uiState.value.relationshipTypes[relation]
-                        if (rt != null) {
-                            if (rt.hasBirthday) add("Birthday")
-                            if (rt.hasAnniversary) add("Anniversary")
-                        } else {
-                            when (relation) {
-                                "Spouse", "Partner" -> {
-                                    add("Birthday")
-                                    add("Anniversary")
+                // Only generate relationship-based date prompts for new person records
+                // For existing records, don't add prompts - let user work with existing dates
+                val prompts = if (current.isEditing) {
+                    // When editing, don't add relationship-based prompts
+                    // User already has their dates set up and can manually add more if needed
+                    emptyList()
+                } else {
+                    // When creating new person, generate prompts based on relationships
+                    buildSet<String> {
+                        relations.forEach { relation ->
+                            val rt = _uiState.value.relationshipTypes[relation]
+                            if (rt != null) {
+                                if (rt.hasBirthday) add("Birthday")
+                                if (rt.hasAnniversary) add("Anniversary")
+                            } else {
+                                when (relation) {
+                                    "Spouse", "Partner" -> {
+                                        add("Birthday")
+                                        add("Anniversary")
+                                    }
+                                    else -> add("Birthday")
                                 }
-                                else -> add("Birthday")
                             }
                         }
-                    }
-                }.toList()
+                    }.toList()
+                }
                 _uiState.update { it.copy(step = Step.Dates, datePrompts = prompts) }
                 NavResult()
             }
@@ -259,7 +274,16 @@ class PersonFlowViewModel @Inject constructor(
         } else {
             personRepo.insert(person)
         }
-        val dates = s.pickedDates.map { (label, date) -> ImportantDate(personId = finalPersonId, label = label, date = date) }
+        // Only save dates that actually have a date assigned 
+        // Double-check: only save entries where both label and date are valid
+        val dates = s.pickedDates
+            .filter { (label, date) -> 
+                label.isNotBlank() && 
+                // Ensure we're not somehow saving very old dates that might be placeholders
+                date.year > 1900
+            }
+            .map { (label, date) -> ImportantDate(personId = finalPersonId, label = label, date = date) }
+        
         importantDateRepo.replaceForPerson(finalPersonId, dates)
     }
 }
