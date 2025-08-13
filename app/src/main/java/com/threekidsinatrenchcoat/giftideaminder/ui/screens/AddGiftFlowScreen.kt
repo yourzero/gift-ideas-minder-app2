@@ -130,7 +130,7 @@ fun AddGiftFlowScreen(
                 1 -> PickPersonStep(
                     //onPersonSelected = { currentStep = 2 },
                     persons = persons,
-                    selectedPersonId = ui.personId,
+                    //selectedPersonId = ui.personId,
                     context = context,
                     viewModel = viewModel,
                     showAddPersonDialog = showAddPersonDialog,
@@ -225,30 +225,27 @@ fun AddGiftFlowScreen(
 private fun PickPersonStep(
     //onPersonSelected: () -> Unit,
     persons: List<Person>,
-    selectedPersonId: Int?,
     context: Context,
     viewModel: GiftViewModel,
     showAddPersonDialog: Boolean,
     onShowAddPersonDialogChange: (Boolean) -> Unit,
     personName: String,
-    onPersonNameChange: (String) -> Unit,
+    onPersonNameChange: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    // Contact picker launcher
     val contactPicker = rememberLauncherForActivityResult(
         ActivityResultContracts.PickContact()
     ) { uri: Uri? ->
         uri?.let {
             context.contentResolver.query(it, null, null, null, null)?.use { cursor ->
                 if (cursor.moveToFirst()) {
-                    val name =
-                        cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
-                    // If person exists, select; else prompt to add with prefill
+                    val name = cursor.getString(
+                        cursor.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME)
+                    )
                     val existing = persons.find { p -> p.name == name }
                     if (existing != null) {
                         viewModel.onPersonSelected(existing.id)
-                        //onPersonSelected()
                     } else {
                         onShowAddPersonDialogChange(true)
                         onPersonNameChange(name)
@@ -258,19 +255,13 @@ private fun PickPersonStep(
         }
     }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            "Select who this gift is for",
-            style = MaterialTheme.typography.headlineSmall
-        )
-        Spacer(Modifier.height(16.dp))
-
-
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box {
             Button(onClick = { expanded = true }) {
-                Text(persons.find { it.id == selectedPersonId }?.name ?: "Select Person")
+                Text(
+                    persons.find { it.id == viewModel.uiState.collectAsState().value.personId }
+                        ?.name ?: "Select Recipient"
+                )
             }
             DropdownMenu(
                 expanded = expanded,
@@ -290,7 +281,6 @@ private fun PickPersonStep(
                         onClick = {
                             viewModel.onPersonSelected(person.id)
                             expanded = false
-      //                      onPersonSelected()
                         }
                     )
                 }
@@ -298,15 +288,11 @@ private fun PickPersonStep(
                     text = { Text("Add New Person") },
                     onClick = {
                         onShowAddPersonDialogChange(true)
-                        onPersonNameChange("") // clear prefill
                         expanded = false
                     }
                 )
             }
         }
-
-
-
 
     }
 }
