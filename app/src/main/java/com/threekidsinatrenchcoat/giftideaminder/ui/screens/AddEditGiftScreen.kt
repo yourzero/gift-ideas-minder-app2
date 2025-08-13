@@ -208,13 +208,7 @@ val context = LocalContext.current
                             }
                         )
                     }
-                    DropdownMenuItem(
-                        text = { Text("Add New Person") },
-                        onClick = {
-                            showAddPersonDialog = true
-                            expanded = false
-                        }
-                    )
+
                 }
             }
             Spacer(Modifier.height(16.dp))
