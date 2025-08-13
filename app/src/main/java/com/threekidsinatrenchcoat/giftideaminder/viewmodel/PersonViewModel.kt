@@ -29,4 +29,8 @@ class PersonViewModel @Inject constructor(
     }
 
     fun getPersonById(id: Int): Flow<Person> = personRepository.getPersonById(id)
+
+    suspend fun insertAndReturnId(person: Person): Int {
+        return personRepository.insert(person)
+    }
 } 
