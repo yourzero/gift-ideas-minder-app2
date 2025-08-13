@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface RelationshipTypeDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(type: RelationshipType)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(types: List<RelationshipType>)
 
     @Query("SELECT * FROM relationship_types ORDER BY name ASC")

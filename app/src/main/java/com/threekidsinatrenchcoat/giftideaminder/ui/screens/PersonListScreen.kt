@@ -47,11 +47,6 @@ fun PersonListScreen(
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             LazyColumn {
-                item {
-                    Button(onClick = { navController.navigate("add_person") }) {
-                        Text("Add New Person")
-                    }
-                }
                 items(sortedPersons) { person ->
                     PersonItem(
                         person = person,

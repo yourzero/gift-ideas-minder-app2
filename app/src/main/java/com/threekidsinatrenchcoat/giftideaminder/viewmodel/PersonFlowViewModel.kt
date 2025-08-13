@@ -27,14 +27,14 @@ class PersonFlowViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    enum class Step { Relationship, Details, Dates, Preferences, Review }
+    enum class Step { Details, Dates, Preferences, Review }
 
     data class UiState(
         val isEditing: Boolean = false,
         val personId: Int? = null,
-        val step: Step = Step.Relationship,
+        val step: Step = Step.Details,
         val availableRelationships: List<String> = listOf("Spouse", "Partner", "Parent", "Child", "Sibling", "Friend", "Coworker"),
-        val selectedRelationship: String? = null,
+        val selectedRelationships: List<String> = emptyList(),
         val name: String = "",
         val preferences: List<String> = emptyList(),
         val datePrompts: List<String> = emptyList(),
@@ -71,10 +71,10 @@ class PersonFlowViewModel @Inject constructor(
                         it.copy(
                             isEditing = true,
                             personId = id,
-                            selectedRelationship = person.relationships.firstOrNull(),
+                            selectedRelationships = person.relationships,
                             name = person.name,
                             preferences = person.preferences,
-                            step = Step.Relationship
+                            step = Step.Details
                         )
                     }
                     // Prefill dates for edit mode
@@ -91,7 +91,33 @@ class PersonFlowViewModel @Inject constructor(
     }
 
     fun onRelationshipSelected(label: String) {
-        _uiState.update { it.copy(selectedRelationship = label) }
+        _uiState.update { state ->
+            val current = state.selectedRelationships
+            val updated = if (label in current) {
+                current - label
+            } else {
+                current + label
+            }
+            state.copy(selectedRelationships = updated)
+        }
+    }
+
+    fun onAddNewRelationshipType(name: String, hasBirthday: Boolean = true, hasAnniversary: Boolean = false) {
+        if (name.trim().isEmpty()) return
+        val trimmedName = name.trim()
+        viewModelScope.launch {
+            val relationshipType = RelationshipType(
+                name = trimmedName,
+                hasBirthday = hasBirthday,
+                hasAnniversary = hasAnniversary
+            )
+            relRepo.insert(relationshipType)
+            
+            // Automatically select the newly added relationship type
+            _uiState.update { state ->
+                state.copy(selectedRelationships = state.selectedRelationships + trimmedName)
+            }
+        }
     }
 
     fun onNameChange(new: String) {
@@ -111,8 +137,7 @@ class PersonFlowViewModel @Inject constructor(
     fun onBack(): NavResult {
         val current = _uiState.value
         val prev = when (current.step) {
-            Step.Relationship -> return NavResult(navigateBack = true)
-            Step.Details -> Step.Relationship
+            Step.Details -> return NavResult(navigateBack = true)
             Step.Dates -> Step.Details
             Step.Preferences -> Step.Dates
             Step.Review -> Step.Preferences
@@ -124,27 +149,35 @@ class PersonFlowViewModel @Inject constructor(
     fun onNextOrSave(): NavResult {
         val current = _uiState.value
         return when (current.step) {
-            Step.Relationship -> {
-                val relation = current.selectedRelationship
-                val prompts = if (relation == null) emptyList() else {
-                    val rt = _uiState.value.relationshipTypes[relation]
-                    if (rt != null) {
-                        buildList {
-                            if (rt.hasBirthday) add("Birthday")
-                            if (rt.hasAnniversary) add("Anniversary")
-                        }
-                    } else {
-                        when (relation) {
-                            "Spouse", "Partner" -> listOf("Birthday", "Anniversary")
-                            else -> listOf("Birthday")
-                        }
-                    }
-                }
-                _uiState.update { it.copy(step = Step.Details, datePrompts = prompts) }
-                NavResult()
-            }
             Step.Details -> {
-                _uiState.update { it.copy(step = Step.Dates) }
+                val relations = current.selectedRelationships
+                // Only generate relationship-based date prompts for new person records
+                // For existing records, don't add prompts - let user work with existing dates
+                val prompts = if (current.isEditing) {
+                    // When editing, don't add relationship-based prompts
+                    // User already has their dates set up and can manually add more if needed
+                    emptyList()
+                } else {
+                    // When creating new person, generate prompts based on relationships
+                    buildSet<String> {
+                        relations.forEach { relation ->
+                            val rt = _uiState.value.relationshipTypes[relation]
+                            if (rt != null) {
+                                if (rt.hasBirthday) add("Birthday")
+                                if (rt.hasAnniversary) add("Anniversary")
+                            } else {
+                                when (relation) {
+                                    "Spouse", "Partner" -> {
+                                        add("Birthday")
+                                        add("Anniversary")
+                                    }
+                                    else -> add("Birthday")
+                                }
+                            }
+                        }
+                    }.toList()
+                }
+                _uiState.update { it.copy(step = Step.Dates, datePrompts = prompts) }
                 NavResult()
             }
             Step.Dates -> {
@@ -232,7 +265,7 @@ class PersonFlowViewModel @Inject constructor(
         val person = Person(
             id = s.personId ?: 0,
             name = s.name,
-            relationships = listOfNotNull(s.selectedRelationship),
+            relationships = s.selectedRelationships,
             preferences = s.preferences
         )
         val finalPersonId = if (s.isEditing) {
@@ -241,7 +274,16 @@ class PersonFlowViewModel @Inject constructor(
         } else {
             personRepo.insert(person)
         }
-        val dates = s.pickedDates.map { (label, date) -> ImportantDate(personId = finalPersonId, label = label, date = date) }
+        // Only save dates that actually have a date assigned 
+        // Double-check: only save entries where both label and date are valid
+        val dates = s.pickedDates
+            .filter { (label, date) -> 
+                label.isNotBlank() && 
+                // Ensure we're not somehow saving very old dates that might be placeholders
+                date.year > 1900
+            }
+            .map { (label, date) -> ImportantDate(personId = finalPersonId, label = label, date = date) }
+        
         importantDateRepo.replaceForPerson(finalPersonId, dates)
     }
 }
