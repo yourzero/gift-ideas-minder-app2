@@ -38,7 +38,7 @@ fun AddEditGiftScreen(
     giftId: Int? = null,
     sharedText: String? = null
 ) {
-val context = LocalContext.current
+    val context = LocalContext.current
     val personViewModel: PersonViewModel = hiltViewModel()
 
     // VM state (Single Source of Truth)

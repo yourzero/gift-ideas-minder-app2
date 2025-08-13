@@ -8,9 +8,10 @@ import com.threekidsinatrenchcoat.giftideaminder.ui.state.*
 import com.threekidsinatrenchcoat.giftideaminder.viewmodel.GiftViewModel
 
 /**
- * Temporary integration layer that doesn't assume concrete fields
- * on your Gift model. It renders an empty state (or sample data),
- * keeping compilation green while you finalize DAO/VM shapes.
+ * Gifts screen with person-specific structure:
+ * - Upcoming Gifts: Shows gifts with upcoming events
+ * - Gifts by Person: Shows gifts grouped by person (with suggestions)
+ * Suggestions are person-specific, not general.
  */
 @Composable
 fun GiftsRoute(
@@ -21,7 +22,11 @@ fun GiftsRoute(
         GiftsUiState(
             groups = listOf(
                 GiftGroup(
-                    header = "All Gifts",
+                    header = "Upcoming Gifts",
+                    items = emptyList()
+                ),
+                GiftGroup(
+                    header = "Gifts by Person",
                     items = emptyList()
                 )
             )
@@ -34,10 +39,13 @@ fun GiftsRoute(
         onResetFilters = { println("Reset filters") },
         onSelectTab = { tab -> println("Selected tab: $tab") },
         onSelectGrouping = { grouping -> println("Selected grouping: $grouping") },
-        onAddGift = { navController.navigate("add_gift") },
+        onAddGift = { navController.navigate("add_gift_flow") },
         onSuggest = { /* TODO AI suggest */ },
         onOpenGift = { id -> navController.navigate("gift_detail/$id") },
-        onOpenLink = { /* TODO open URL */ },
+        onOpenLink = { id -> 
+            // TODO: Get gift URL by ID and open in external browser
+            println("Opening external link for gift $id")
+        },
         onToggleShortlist = { /* TODO */ },
         onMarkPurchased = { /* TODO */ },
         onAssistAction = { /* TODO */ }

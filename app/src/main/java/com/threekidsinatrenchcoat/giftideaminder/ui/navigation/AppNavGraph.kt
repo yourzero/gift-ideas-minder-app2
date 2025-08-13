@@ -86,12 +86,16 @@ fun AppNavGraph(
                 type = NavType.StringType; nullable = true; defaultValue = null
             })
         ) { back ->
+            AddGiftFlowScreen(//(navController = navController)
             AddEditGiftScreen(
                 onNavigateBack = ::showSnackbarAndPopBackStack,
                 navController = navController,
                 sharedText = back.arguments?.getString("sharedText")
             )
         }
+//        composable("add_gift_flow") {
+//
+//        }
         // … other routes …
     }
 }
