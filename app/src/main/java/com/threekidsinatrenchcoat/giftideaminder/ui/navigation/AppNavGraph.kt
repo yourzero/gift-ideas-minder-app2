@@ -87,7 +87,7 @@ fun AppNavGraph(
             })
         ) { back ->
             AddGiftFlowScreen(//(navController = navController)
-            AddEditGiftScreen(
+            //AddEditGiftScreen(
                 onNavigateBack = ::showSnackbarAndPopBackStack,
                 navController = navController,
                 sharedText = back.arguments?.getString("sharedText")

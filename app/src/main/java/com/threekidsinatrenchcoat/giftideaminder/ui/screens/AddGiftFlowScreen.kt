@@ -1,5 +1,9 @@
 package com.threekidsinatrenchcoat.giftideaminder.ui.screens
 
+import android.net.Uri
+import android.provider.ContactsContract
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -7,8 +11,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.threekidsinatrenchcoat.giftideaminder.data.model.Person
+import com.threekidsinatrenchcoat.giftideaminder.viewmodel.GiftViewModel
+import com.threekidsinatrenchcoat.giftideaminder.viewmodel.PersonViewModel
+import kotlinx.coroutines.flow.collectLatest
 
 /**
  * Add Gift Flow: pick person → pick date → add gift details
@@ -16,9 +26,24 @@ import androidx.navigation.NavController
  */
 @Composable
 fun AddGiftFlowScreen(
+    viewModel: GiftViewModel = hiltViewModel(),
+    onNavigateBack: (String?) -> Unit,
     navController: NavController,
-    modifier: Modifier = Modifier
+    giftId: Int? = null,
+    sharedText: String? = null
 ) {
+    val context = LocalContext.current
+    val personViewModel: PersonViewModel = hiltViewModel()
+
+    // Persons list
+    val persons by personViewModel.allPersons.collectAsState(initial = emptyList())
+
+
+    // VM state (Single Source of Truth)
+    val ui by viewModel.uiState.collectAsState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
     var currentStep by remember { mutableIntStateOf(1) }
     val totalSteps = 3
     
@@ -27,6 +52,72 @@ fun AddGiftFlowScreen(
         "Pick Date",
         "Gift Details"
     )
+
+    // UI-only controls
+    var expanded by remember { mutableStateOf(false) }
+    var showAddPersonDialog by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var personName by remember { mutableStateOf("") }
+
+    // Contact picker launcher
+    val contactPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickContact()
+    ) { uri: Uri? ->
+        uri?.let {
+            context.contentResolver.query(it, null, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val name =
+                        cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
+                    // If person exists, select; else prompt to add with prefill
+                    val existing = persons.find { p -> p.name == name }
+                    if (existing != null) {
+                        viewModel.onPersonSelected(existing.id)
+                    } else {
+                        showAddPersonDialog = true
+                        personName = name
+                    }
+                }
+            }
+        }
+    }
+
+    // Seed from share
+    if (sharedText != null && giftId == null) {
+        LaunchedEffect(sharedText) {
+            if (sharedText.startsWith("http")) {
+                viewModel.onUrlChanged(sharedText)
+            } else {
+                viewModel.onDescriptionChanged(sharedText)
+            }
+        }
+    }
+
+    // Edit mode: load gift once and push into VM state. Avoid overwriting user's in-progress edits.
+    LaunchedEffect(giftId) {
+        if (giftId != null) {
+            viewModel.getGiftById(giftId).collectLatest { gift ->
+                // Only load if state is still blank or matching id
+                val uiState = viewModel.uiState.value
+                if (uiState.id == null || uiState.id == giftId) {
+                    viewModel.loadForEdit(gift)
+                }
+            }
+        }
+    }
+
+    // Listen for one-off events (Saved => snackbar + back)
+    LaunchedEffect(Unit) {
+        viewModel.events.collectLatest { ev ->
+            when (ev) {
+                is GiftViewModel.GiftEvent.Saved -> {
+                    //snackbarHostState.showSnackbar("Saved")
+                    // Navigate back after snackbar
+                    //navController.popBackStack()
+                    onNavigateBack("Saved")
+                }
+            }
+        }
+    }
     
     Scaffold(
         topBar = {
@@ -41,7 +132,7 @@ fun AddGiftFlowScreen(
         }
     ) { padding ->
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp),
@@ -58,7 +149,8 @@ fun AddGiftFlowScreen(
             // Step content
             when (currentStep) {
                 1 -> PickPersonStep(
-                    onPersonSelected = { currentStep = 2 }
+                    onPersonSelected = { currentStep = 2 },
+                    persons
                 )
                 2 -> PickDateStep(
                     onDateSelected = { currentStep = 3 }
@@ -101,7 +193,8 @@ fun AddGiftFlowScreen(
 }
 
 @Composable
-private fun PickPersonStep(onPersonSelected: () -> Unit) {
+private fun PickPersonStep(onPersonSelected: () -> Unit, persons: List<Person>) {
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
