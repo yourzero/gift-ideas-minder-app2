@@ -4,6 +4,7 @@
       "Bash(./gradlew:*)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "defaultMode": "acceptEdits"
   }
 }
