@@ -19,7 +19,8 @@
       "mcp__intellij__list_available_actions",
       "Bash(find:*)",
       "Bash(grep:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "mcp__intellij__get_project_vcs_status"
     ],
     "deny": [],
     "ask": []

@@ -34,7 +34,13 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ContactPage
 import androidx.compose.ui.platform.testTag
+import android.net.Uri
+import android.provider.ContactsContract
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun AddEditRecipientFlowScreen(
@@ -104,27 +110,62 @@ fun AddEditRecipientFlowScreen(
             )
 
             when (state.step) {
-                PersonFlowViewModel.Step.Details -> SectionCard(
-                    icon = Icons.Default.Person,
-                    title = "Details"
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        OutlinedTextField(
-                            value = state.name,
-                            onValueChange = viewModel::onNameChange,
-                            label = { Text("Name") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        
-                        Text("Relationship", style = MaterialTheme.typography.titleSmall)
-                        RelationshipSelector(
-                            options = state.availableRelationships,
-                            selected = state.selectedRelationships,
-                            onSelected = { viewModel.onRelationshipSelected(it) },
-                            onAddNew = { name, hasBirthday, hasAnniversary -> 
-                                viewModel.onAddNewRelationshipType(name, hasBirthday, hasAnniversary)
+                PersonFlowViewModel.Step.Details -> {
+                    val context = LocalContext.current
+                    
+                    // Contact picker launcher
+                    val contactPicker = rememberLauncherForActivityResult(
+                        ActivityResultContracts.PickContact()
+                    ) { uri: Uri? ->
+                        uri?.let {
+                            context.contentResolver.query(it, null, null, null, null)?.use { cursor ->
+                                if (cursor.moveToFirst()) {
+                                    val name = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
+                                    viewModel.onNameChange(name)
+                                }
                             }
-                        )
+                        }
+                    }
+                    
+                    SectionCard(
+                        icon = Icons.Default.Person,
+                        title = "Details"
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            OutlinedTextField(
+                                value = state.name,
+                                onValueChange = viewModel::onNameChange,
+                                label = { Text("Name") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            
+                            // Import from contacts button
+                            OutlinedButton(
+                                onClick = { contactPicker.launch(null) },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Icon(
+                                    Icons.Default.ContactPage,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text("Import from Contacts")
+                            }
+                            
+                            Text("Relationship", style = MaterialTheme.typography.titleSmall)
+                            RelationshipSelector(
+                                options = state.availableRelationships,
+                                selected = state.selectedRelationships,
+                                onSelected = { viewModel.onRelationshipSelected(it) },
+                                onAddNew = { name, hasBirthday, hasAnniversary -> 
+                                    viewModel.onAddNewRelationshipType(name, hasBirthday, hasAnniversary)
+                                }
+                            )
+                        }
                     }
                 }
 
