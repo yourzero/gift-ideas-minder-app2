@@ -17,7 +17,9 @@
       "mcp__intellij__execute_action_by_id",
       "Bash(rm:*)",
       "mcp__intellij__list_available_actions",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(sed:*)"
     ],
     "deny": [],
     "ask": []

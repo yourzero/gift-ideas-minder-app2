@@ -40,6 +40,7 @@ import coil.request.ImageRequest
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.AssistChip
@@ -126,15 +127,7 @@ private fun SuggestionCard(
                     modifier = Modifier
                         .size(120.dp, 80.dp)
                         .clip(RoundedCornerShape(4.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .clickable { 
-                            // Open URL in external browser
-                            try {
-                                uriHandler.openUri(suggestion.url!!)
-                            } catch (e: Exception) {
-                                // Handle URL opening error silently
-                            }
-                        },
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentScale = ContentScale.Crop,
                     loading = {
                         Box(
@@ -181,26 +174,11 @@ private fun SuggestionCard(
             
             Spacer(modifier = Modifier.width(4.dp))
             
-            // Clickable title that opens URL
+            // Title (no longer clickable)
             Text(
                 text = suggestion.title,
                 style = MaterialTheme.typography.titleSmall,
-                modifier = if (!suggestion.url.isNullOrBlank()) {
-                    Modifier.clickable { 
-                        try {
-                            uriHandler.openUri(suggestion.url!!)
-                        } catch (e: Exception) {
-                            // Handle URL opening error silently
-                        }
-                    }
-                } else {
-                    Modifier
-                },
-                color = if (!suggestion.url.isNullOrBlank()) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                }
+                color = MaterialTheme.colorScheme.onSurface
             )
             
             val personName = suggestion.personId?.let { personIdToName[it] }
@@ -231,6 +209,25 @@ private fun SuggestionCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
             ) {
+                // Globe/WWW icon for opening URL
+                if (!suggestion.url.isNullOrBlank()) {
+                    IconButton(
+                        onClick = { 
+                            try {
+                                uriHandler.openUri(suggestion.url!!)
+                            } catch (e: Exception) {
+                                // Handle URL opening error silently
+                            }
+                        }
+                    ) {
+                        Icon(
+                            Icons.Filled.Language,
+                            contentDescription = "Open Link",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+                
                 if (isAccepted) {
                     // Accepted state - show confirmation and allow undo
                     AssistChip(

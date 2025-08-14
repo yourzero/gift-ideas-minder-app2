@@ -1,3 +1,4 @@
+# Gifts
 - gifts screen:
   - add gift:
     - we seem to have lost the flow UI that was recently implemented  
@@ -8,4 +9,7 @@
 - gift suggestion card
   - change the link to be accessible via a globe (www) icon, instead of having the whole card be clickable
 
- 
+# Recipients
+- add recipient screen
+  - have a button on the initial step to import from contacts. Implement/wire this functionality to allow the contacts to be searched, and any data to be imported the contact
+  - 
