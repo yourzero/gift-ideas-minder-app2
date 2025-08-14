@@ -29,4 +29,4 @@ class PersonViewModel @Inject constructor(
     }
 
     fun getPersonById(id: Int): Flow<Person> = personRepository.getPersonById(id)
-} 
+}

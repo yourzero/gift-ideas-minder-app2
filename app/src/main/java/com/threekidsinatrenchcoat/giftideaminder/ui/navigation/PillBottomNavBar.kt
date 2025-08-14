@@ -111,13 +111,13 @@ fun PillBottomNavBar(
                 TextButton(
                     onClick = {
                         showConfirmDialog = false
-                        // Navigate to target route
+                        // Navigate to target route, clearing state
                         navController.navigate(targetRoute) {
                             popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                                inclusive = false
                             }
                             launchSingleTop = true
-                            restoreState = true
+                            restoreState = false // Don't restore state to reset screens
                         }
                     }
                 ) {

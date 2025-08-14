@@ -439,10 +439,19 @@ private fun GiftInspirationsInline(
 ) {
     var input by remember { mutableStateOf("") }
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // Help text
+        Text(
+            text = "Enter as many things that this recipient likes to help generate gift ideas",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 4.dp)
+        )
+        
         OutlinedTextField(
             value = input,
             onValueChange = { input = it },
             label = { Text("Add item") },
+            placeholder = { Text("e.g., coffee, hiking, books, gaming") },
             modifier = Modifier.fillMaxWidth()
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -451,6 +460,16 @@ private fun GiftInspirationsInline(
                 enabled = input.isNotBlank()
             ) { Text("Add") }
         }
+        
+        if (current.isNotEmpty()) {
+            Text(
+                text = "Current interests:",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+        
         current.forEach { item ->
             Row(
                 Modifier

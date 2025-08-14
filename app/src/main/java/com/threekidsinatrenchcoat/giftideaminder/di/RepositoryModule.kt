@@ -6,11 +6,13 @@ import com.threekidsinatrenchcoat.giftideaminder.data.dao.PersonDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.ImportantDateDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.RelationshipTypeDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.SuggestionDismissalDao
+import com.threekidsinatrenchcoat.giftideaminder.data.dao.SettingsDao
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.GiftRepository
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.PersonRepository
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.ImportantDateRepository
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.RelationshipTypeRepository
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.AISuggestionRepository
+import com.threekidsinatrenchcoat.giftideaminder.data.repository.SettingsRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

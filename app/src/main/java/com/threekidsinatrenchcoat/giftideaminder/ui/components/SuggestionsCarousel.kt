@@ -55,15 +55,25 @@ fun SuggestionsCarousel(
     onDismiss: (Gift) -> Unit,
     isLoading: StateFlow<Boolean>? = null,
     error: StateFlow<String?>? = null,
-    personIdToName: Map<Int, String> = emptyMap()
+    personIdToName: Map<Int, String> = emptyMap(),
+    showDebugPrompt: Boolean = false,
+    aiPrompt: String = ""
 ) {
     val suggestionList = suggestions.collectAsState().value
     val loading = isLoading?.collectAsState()?.value ?: false
     val err = error?.collectAsState()?.value
+    
     if (loading) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            CircularProgressIndicator()
-        }
+        val personNames = personIdToName.values.toList()
+        LoadingMessages(
+            personNames = personNames,
+            showDebugPrompt = showDebugPrompt,
+            aiPrompt = aiPrompt,
+            onLoadingComplete = {
+                // This will be called when loading animation completes
+                // We can add sound effect here
+            }
+        )
     } else if (!err.isNullOrBlank()) {
         Text("Failed to load suggestions: $err")
     } else if (suggestionList.isNotEmpty()) {
