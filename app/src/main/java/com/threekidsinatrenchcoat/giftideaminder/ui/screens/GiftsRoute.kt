@@ -35,6 +35,10 @@ fun GiftsRoute(
 
     GiftsScreen(
         state = state,
+        suggestions = viewModel.suggestions,
+        isLoadingSuggestions = viewModel.isLoadingSuggestions,
+        suggestionsError = viewModel.suggestionsError,
+        peopleMap = viewModel.peopleById,
         onUpdateFilters = { filters -> println("Updated filters: $filters") },
         onResetFilters = { println("Reset filters") },
         onSelectTab = { tab -> println("Selected tab: $tab") },

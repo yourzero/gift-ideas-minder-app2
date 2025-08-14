@@ -1,86 +1,150 @@
+// app/src/main/java/com/threekidsinatrenchcoat/giftideaminder/ui/navigation/PillBottomNavBar.kt
 package com.threekidsinatrenchcoat.giftideaminder.ui.navigation
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.ListAlt
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.threekidsinatrenchcoat.giftideaminder.ui.theme.NavBarBg
+import androidx.navigation.navOptions
+
+data class NavItem(
+    val route: String,
+    val label: String,
+    val icon: @Composable () -> Unit
+)
 
 @Composable
 fun PillBottomNavBar(
-    navController: NavHostController,
+    navController: NavController,
+    items: List<NavItem> = defaultItems(),
     modifier: Modifier = Modifier
 ) {
-    val currentRoute = navController
-        .currentBackStackEntryAsState().value
-        ?.destination?.route
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = backStackEntry?.destination
+    val currentRoute = currentDestination?.route.orEmpty()
 
-    fun navTo(route: String) {
-        navController.navigate(route) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
-            launchSingleTop = true
-            restoreState = true
+    var showDiscardDialog by remember { mutableStateOf(false) }
+    var pendingRoute by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(currentRoute) {
+        if (showDiscardDialog && pendingRoute == null) {
+            showDiscardDialog = false
         }
+    }
+
+    val isEditingRoute = remember(currentRoute) {
+        currentRoute.startsWith("add_") || currentRoute.startsWith("edit_")
+    }
+
+    if (showDiscardDialog) {
+        AlertDialog(
+            onDismissRequest = { showDiscardDialog = false; pendingRoute = null },
+            title = { Text("Discard changes?") },
+            text = { Text("You have an add/edit screen open. If you leave now, any unsaved changes will be lost.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val target = pendingRoute
+                        showDiscardDialog = false
+                        pendingRoute = null
+                        if (!target.isNullOrBlank()) {
+                            navController.navigate(
+                                target,
+                                navOptions {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            )
+                        }
+                    }
+                ) { Text("Discard") }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDiscardDialog = false
+                        pendingRoute = null
+                    }
+                ) { Text("Cancel") }
+            }
+        )
     }
 
     NavigationBar(
-        containerColor = NavBarBg,
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
         modifier = modifier
-            .padding(horizontal = 24.dp, vertical = 30.dp)
-            .fillMaxWidth()
-            .height(80.dp)
-            .shadow(8.dp, RoundedCornerShape(40.dp))
-            .clip(RoundedCornerShape(40.dp))
+            .height(64.dp)
+            .windowInsetsPadding(WindowInsets(0, 0, 0, 0))
     ) {
-        listOf(
-            Triple(Icons.Default.Home, "home", "Home"),
-            Triple(Icons.Default.CardGiftcard, "gift_list", "Gifts"),
-            Triple(Icons.Default.Event, "event_list", "Events"),
-            Triple(Icons.Default.Person, "person_list", "People")
-        ).forEach { (icon, route, label) ->
-            val selected = currentRoute == route
+        items.forEach { item ->
+            val selected = currentDestination.isInHierarchy(item.route)
             NavigationBarItem(
                 selected = selected,
-                onClick = { navTo(route) },
-                icon = {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(RoundedCornerShape(28.dp))
-                            .background(if (selected) Color.White else Color.Transparent)
-                    ) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = label,
-                            tint = if (selected)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant
+                onClick = {
+                    if (item.route == currentRoute) return@NavigationBarItem
+                    if (isEditingRoute) {
+                        pendingRoute = item.route
+                        showDiscardDialog = true
+                    } else {
+                        navController.navigate(
+                            item.route,
+                            navOptions {
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         )
                     }
                 },
-                colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = Color.Transparent,
-                    selectedIconColor = Color.Unspecified,
-                    unselectedIconColor = Color.Unspecified
-                )
+                icon = { item.icon() },
+                label = { Text(item.label) }
             )
         }
     }
+}
+
+@Composable
+private fun defaultItems(): List<NavItem> = listOf(
+    NavItem(
+        route = "home",
+        label = "Home",
+        icon = { Icon(Icons.Filled.Home, contentDescription = "Home") }
+    ),
+    NavItem(
+        route = "gifts",
+        label = "Gifts",
+        icon = { Icon(Icons.Filled.ListAlt, contentDescription = "Gifts") }
+    ),
+    NavItem(
+        route = "people",
+        label = "People",
+        icon = { Icon(Icons.Filled.Person, contentDescription = "People") }
+    )
+)
+
+private fun NavDestination?.isInHierarchy(route: String): Boolean {
+    if (this == null) return false
+    return hierarchy.any { it.route == route }
 }

@@ -1,79 +1,100 @@
+// app/src/main/java/com/threekidsinatrenchcoat/giftideaminder/ui/components/SuggestionsCarousel.kt
 package com.threekidsinatrenchcoat.giftideaminder.ui.components
 
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.threekidsinatrenchcoat.giftideaminder.data.model.Gift
-import kotlinx.coroutines.flow.StateFlow
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.platform.LocalUriHandler
 import coil.compose.AsyncImage
+import com.threekidsinatrenchcoat.giftideaminder.ui.screens.SuggestionUi
 
+/**
+ * Horizontally scrollable row of suggestion cards.
+ * - Always shows image (Coil will fallback gracefully)
+ * - "Open Link" uses LocalUriHandler so your app state isn't lost.
+ */
 @Composable
 fun SuggestionsCarousel(
-    suggestions: StateFlow<List<Gift>>,
-    onAccept: (Gift) -> Unit,
-    onDismiss: (Gift) -> Unit,
-    isLoading: StateFlow<Boolean>? = null,
-    error: StateFlow<String?>? = null,
-    personIdToName: Map<Int, String> = emptyMap()
+    suggestions: List<SuggestionUi>,
+    onOpenLink: (String) -> Unit,
+    onAccept: (String) -> Unit,
+    onDismiss: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val suggestionList = suggestions.collectAsState().value
-    val loading = isLoading?.collectAsState()?.value ?: false
-    val err = error?.collectAsState()?.value
-    if (loading) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            CircularProgressIndicator()
+    if (suggestions.isEmpty()) return
+    LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(vertical = 4.dp)
+    ) {
+        items(suggestions, key = { it.id }) { s ->
+            SuggestionCard(
+                suggestion = s,
+                onOpenLink = onOpenLink,
+                onAccept = onAccept,
+                onDismiss = onDismiss
+            )
         }
-    } else if (!err.isNullOrBlank()) {
-        Text("Failed to load suggestions: $err")
-    } else if (suggestionList.isNotEmpty()) {
-        Text("Today’s Suggestions")
-        LazyRow(modifier = Modifier.semantics { contentDescription = "Suggestions carousel" }) {
-            items(suggestionList) { suggestion: Gift ->
-                Card(modifier = Modifier.padding(8.dp).semantics { contentDescription = "Suggestion: ${suggestion.title}" }) {
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        if (!suggestion.url.isNullOrBlank()) {
-                            AsyncImage(
-                                model = suggestion.url,
-                                contentDescription = suggestion.title,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        } else {
-                            Text("[Image Placeholder]")
-                        }
-                        Text(suggestion.title)
-                        val personName = suggestion.personId?.let { personIdToName[it] }
-                        if (!personName.isNullOrBlank()) {
-                            Text("For: $personName")
-                        }
-                        Text(suggestion.description ?: "")
-                        Text("Est. Price: $${suggestion.currentPrice ?: "N/A"}")
-                        Row {
-                            Button(onClick = { onAccept(suggestion) }) { Text("Accept") }
-                            Spacer(Modifier.width(8.dp))
-                            Button(onClick = { onDismiss(suggestion) }) { Text("Dismiss") }
-                        }
+    }
+}
+
+@Composable
+private fun SuggestionCard(
+    suggestion: SuggestionUi,
+    onOpenLink: (String) -> Unit,
+    onAccept: (String) -> Unit,
+    onDismiss: (String) -> Unit
+) {
+    ElevatedCard(
+        modifier = Modifier.width(240.dp)
+    ) {
+        Column(Modifier.fillMaxWidth().padding(12.dp)) {
+            AsyncImage(
+                model = suggestion.imageUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                suggestion.title,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (suggestion.priceLabel != null) {
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    suggestion.priceLabel,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (!suggestion.linkUrl.isNullOrBlank()) {
+                    TextButton(onClick = { onOpenLink(suggestion.linkUrl!!) }) {
+                        Text("Open Link")
                     }
                 }
+                OutlinedButton(onClick = { onDismiss(suggestion.id) }) { Text("Dismiss") }
+                Button(onClick = { onAccept(suggestion.id) }) { Text("Accept") }
             }
         }
-    } else {
-        Text("No suggestions yet—add more gifts!")
     }
-} 
+}

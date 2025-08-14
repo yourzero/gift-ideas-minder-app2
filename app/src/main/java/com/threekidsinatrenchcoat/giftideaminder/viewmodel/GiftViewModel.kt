@@ -229,4 +229,10 @@ class GiftViewModel @Inject constructor(
         }
         onSave()
     }
+
+
+    /** Reset transient UI state for creating a new gift. */
+    fun resetForCreate() {
+        _uiState.value = GiftUiState()
+    }
 }
