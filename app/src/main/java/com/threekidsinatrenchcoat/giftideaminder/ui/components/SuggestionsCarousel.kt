@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,6 +34,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.background
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 
 @Composable
 fun SuggestionsCarousel(
@@ -62,8 +66,11 @@ fun SuggestionsCarousel(
                         
                         // Image display with proper sizing and fallback
                         if (!suggestion.url.isNullOrBlank()) {
-                            AsyncImage(
-                                model = suggestion.url,
+                            SubcomposeAsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(suggestion.url)
+                                    .crossfade(true)
+                                    .build(),
                                 contentDescription = suggestion.title,
                                 modifier = Modifier
                                     .size(120.dp, 80.dp)
@@ -77,22 +84,47 @@ fun SuggestionsCarousel(
                                             // Handle URL opening error silently
                                         }
                                     },
-                                contentScale = ContentScale.Crop
+                                contentScale = ContentScale.Crop,
+                                loading = {
+                                    Box(
+                                        modifier = Modifier.size(120.dp, 80.dp),
+                                        contentAlignment = androidx.compose.ui.Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                    }
+                                },
+                                error = {
+                                    Box(
+                                        modifier = Modifier.size(120.dp, 80.dp),
+                                        contentAlignment = androidx.compose.ui.Alignment.Center
+                                    ) {
+                                        Text(
+                                            "🎁",
+                                            style = MaterialTheme.typography.headlineMedium
+                                        )
+                                    }
+                                }
                             )
                         } else {
-                            // Better placeholder with styling
-                            androidx.compose.foundation.layout.Box(
+                            // Better placeholder with styling when no URL provided
+                            Box(
                                 modifier = Modifier
                                     .size(120.dp, 80.dp)
                                     .clip(RoundedCornerShape(4.dp))
                                     .background(MaterialTheme.colorScheme.surfaceVariant),
                                 contentAlignment = androidx.compose.ui.Alignment.Center
                             ) {
-                                Text(
-                                    "No Image",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                                    Text(
+                                        "🎁",
+                                        style = MaterialTheme.typography.headlineMedium
+                                    )
+                                    Text(
+                                        "No Image",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
                         

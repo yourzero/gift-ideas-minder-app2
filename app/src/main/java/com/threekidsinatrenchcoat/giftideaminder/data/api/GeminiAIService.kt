@@ -76,7 +76,7 @@ class GeminiAIService(
                 val gift = Gift(
                     title = title,
                     description = description,
-                    url = imageUrl ?: url,
+                    url = imageUrl ?: url,  // Prioritize image URL for display, fallback to product URL
                     currentPrice = estimatedPrice,
                     personId = personId,
                     tags = tags
@@ -174,7 +174,7 @@ class GeminiAIService(
         })
 
         return buildString {
-            appendLine("You are an assistant generating thoughtful gift suggestions.")
+            appendLine("You are an assistant generating thoughtful gift suggestions with visual previews.")
             appendLine("Input gifts (existing and recent):")
             appendLine(giftsJson)
             appendLine("People context (include preferences to tailor suggestions):")
@@ -183,12 +183,23 @@ class GeminiAIService(
             appendLine("Return ONLY a strict JSON array (no code fences, no extra text). Each element object must include:")
             appendLine("- title (string, required)")
             appendLine("- description (string, optional)")
-            appendLine("- url (string, optional)")
-            appendLine("- imageUrl (string, optional)")
+            appendLine("- url (string, optional - product purchase URL)")
+            appendLine("- imageUrl (string, HIGHLY PREFERRED - provide a direct image URL that shows what the gift looks like)")
             appendLine("- estimatedPrice (number, optional)")
             appendLine("- personId (integer, optional — if a clear match)")
             appendLine("- tags (array of strings, optional)")
             appendLine("- reason (string, optional)")
+            appendLine()
+            appendLine("IMAGE REQUIREMENTS:")
+            appendLine("- Always try to provide 'imageUrl' with a real, working image URL")
+            appendLine("- Use publicly accessible images from: Amazon, Target, Walmart, Etsy, stock photos, or other retailers")
+            appendLine("- Prefer actual product images over generic category images")
+            appendLine("- Image URLs should be direct links to .jpg, .png, .webp files or retailer image endpoints")
+            appendLine("- Examples of good image URLs:")
+            appendLine("  - https://m.media-amazon.com/images/I/[product-id].jpg")
+            appendLine("  - https://target.scene7.com/is/image/Target/[product-id]")
+            appendLine("  - https://i5.walmartimages.com/[image-path]")
+            appendLine("- If you cannot find a specific product image, use a representative stock photo")
         }
     }
 
