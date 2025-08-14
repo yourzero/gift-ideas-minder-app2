@@ -25,6 +25,8 @@ new:
     - have each gift item link to the URL of the gift
     - for each gift item, change the accept and decline buttons to be graphical - use whatever style is appropriate to the current style of this app 
     - upon hitting the accept button, the UI of the gift item should change (allow decline, but show that accept has been hit)
+    - while the gift suggestions are loading from the ui, add pseudo work text - like when an app's loading screen scrolls a bunch of messages that make it sound like it's doing work, but they're probably made up. Except in this case, include the real gift ideas being sent, as in "searching for gift ideas for: x, y, z"; but also include other pseudo-work messages, and just scroll through them in the loading area until it's done. Also add a "ding" sound when it's done. Also this pseudo-work text should be small and grey-ish (to make it look like it's in the background)
+      - add a setting that will switch between the pseudo-work text described, and displaying the actual prompt being sent to the AI (and make it look and scroll like the pseudo-work text). I'll use the prompt for debugging
   - gifts list screen
     - clicking on a gift idea crashes (I assume it's not wired up to the edit screen)
     - 

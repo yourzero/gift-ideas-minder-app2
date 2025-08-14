@@ -111,6 +111,18 @@ fun AppNavGraph(
                 giftId = giftId
             )
         }
+        composable(
+            route = "gift_detail/{giftId}",
+            arguments = listOf(
+                navArgument("giftId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val giftId = backStackEntry.arguments!!.getInt("giftId")
+            GiftDetailScreen(
+                giftId = giftId,
+                navController = navController
+            )
+        }
         // … other routes …
     }
 }

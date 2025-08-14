@@ -37,6 +37,16 @@ import androidx.compose.foundation.background
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.AssistChip
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @Composable
 fun SuggestionsCarousel(
@@ -60,131 +70,200 @@ fun SuggestionsCarousel(
         Text("Today’s Suggestions")
         LazyRow(modifier = Modifier.semantics { contentDescription = "Suggestions carousel" }) {
             items(suggestionList) { suggestion: Gift ->
-                Card(modifier = Modifier.padding(8.dp).semantics { contentDescription = "Suggestion: ${suggestion.title}" }) {
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        val uriHandler = LocalUriHandler.current
-                        
-                        // Image display with proper sizing and fallback
-                        if (!suggestion.url.isNullOrBlank()) {
-                            SubcomposeAsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data(suggestion.url)
-                                    .crossfade(true)
-                                    .build(),
-                                contentDescription = suggestion.title,
-                                modifier = Modifier
-                                    .size(120.dp, 80.dp)
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .clickable { 
-                                        // Open URL in external browser
-                                        try {
-                                            uriHandler.openUri(suggestion.url!!)
-                                        } catch (e: Exception) {
-                                            // Handle URL opening error silently
-                                        }
-                                    },
-                                contentScale = ContentScale.Crop,
-                                loading = {
-                                    Box(
-                                        modifier = Modifier.size(120.dp, 80.dp),
-                                        contentAlignment = androidx.compose.ui.Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                                    }
-                                },
-                                error = {
-                                    Box(
-                                        modifier = Modifier.size(120.dp, 80.dp),
-                                        contentAlignment = androidx.compose.ui.Alignment.Center
-                                    ) {
-                                        Text(
-                                            "🎁",
-                                            style = MaterialTheme.typography.headlineMedium
-                                        )
-                                    }
-                                }
-                            )
-                        } else {
-                            // Better placeholder with styling when no URL provided
-                            Box(
-                                modifier = Modifier
-                                    .size(120.dp, 80.dp)
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                                contentAlignment = androidx.compose.ui.Alignment.Center
-                            ) {
-                                Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
-                                    Text(
-                                        "🎁",
-                                        style = MaterialTheme.typography.headlineMedium
-                                    )
-                                    Text(
-                                        "No Image",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        }
-                        
-                        Spacer(modifier = Modifier.width(4.dp))
-                        
-                        // Clickable title that opens URL
-                        Text(
-                            text = suggestion.title,
-                            style = MaterialTheme.typography.titleSmall,
-                            modifier = if (!suggestion.url.isNullOrBlank()) {
-                                Modifier.clickable { 
-                                    try {
-                                        uriHandler.openUri(suggestion.url!!)
-                                    } catch (e: Exception) {
-                                        // Handle URL opening error silently
-                                    }
-                                }
-                            } else {
-                                Modifier
-                            },
-                            color = if (!suggestion.url.isNullOrBlank()) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurface
-                            }
-                        )
-                        
-                        val personName = suggestion.personId?.let { personIdToName[it] }
-                        if (!personName.isNullOrBlank()) {
-                            Text(
-                                "For: $personName",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        
-                        Text(
-                            suggestion.description ?: "",
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 2
-                        )
-                        
-                        Text(
-                            "Est. Price: $${suggestion.currentPrice ?: "N/A"}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        
-                        Spacer(modifier = Modifier.width(8.dp))
-                        
-                        Row {
-                            Button(onClick = { onAccept(suggestion) }) { Text("Accept") }
-                            Spacer(Modifier.width(8.dp))
-                            Button(onClick = { onDismiss(suggestion) }) { Text("Dismiss") }
-                        }
-                    }
-                }
+                SuggestionCard(
+                    suggestion = suggestion,
+                    onAccept = onAccept,
+                    onDismiss = onDismiss,
+                    personIdToName = personIdToName
+                )
             }
         }
     } else {
         Text("No suggestions yet—add more gifts!")
     }
-} 
+}
+
+@Composable
+private fun SuggestionCard(
+    suggestion: Gift,
+    onAccept: (Gift) -> Unit,
+    onDismiss: (Gift) -> Unit,
+    personIdToName: Map<Int, String>
+) {
+    var isAccepted by remember { mutableStateOf(false) }
+    
+    Card(
+        modifier = Modifier.padding(8.dp)
+            .semantics { contentDescription = "Suggestion: ${suggestion.title}" }
+    ) {
+        Column(modifier = Modifier.padding(8.dp)) {
+            val uriHandler = LocalUriHandler.current
+            
+            // Image display with proper sizing and fallback
+            if (!suggestion.url.isNullOrBlank()) {
+                SubcomposeAsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(suggestion.url)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = suggestion.title,
+                    modifier = Modifier
+                        .size(120.dp, 80.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { 
+                            // Open URL in external browser
+                            try {
+                                uriHandler.openUri(suggestion.url!!)
+                            } catch (e: Exception) {
+                                // Handle URL opening error silently
+                            }
+                        },
+                    contentScale = ContentScale.Crop,
+                    loading = {
+                        Box(
+                            modifier = Modifier.size(120.dp, 80.dp),
+                            contentAlignment = androidx.compose.ui.Alignment.Center
+                        ) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        }
+                    },
+                    error = {
+                        Box(
+                            modifier = Modifier.size(120.dp, 80.dp),
+                            contentAlignment = androidx.compose.ui.Alignment.Center
+                        ) {
+                            Text(
+                                "🎁",
+                                style = MaterialTheme.typography.headlineMedium
+                            )
+                        }
+                    }
+                )
+            } else {
+                // Better placeholder with styling when no URL provided
+                Box(
+                    modifier = Modifier
+                        .size(120.dp, 80.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = androidx.compose.ui.Alignment.Center
+                ) {
+                    Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                        Text(
+                            "🎁",
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                        Text(
+                            "No Image",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.width(4.dp))
+            
+            // Clickable title that opens URL
+            Text(
+                text = suggestion.title,
+                style = MaterialTheme.typography.titleSmall,
+                modifier = if (!suggestion.url.isNullOrBlank()) {
+                    Modifier.clickable { 
+                        try {
+                            uriHandler.openUri(suggestion.url!!)
+                        } catch (e: Exception) {
+                            // Handle URL opening error silently
+                        }
+                    }
+                } else {
+                    Modifier
+                },
+                color = if (!suggestion.url.isNullOrBlank()) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
+            )
+            
+            val personName = suggestion.personId?.let { personIdToName[it] }
+            if (!personName.isNullOrBlank()) {
+                Text(
+                    "For: $personName",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            Text(
+                suggestion.description ?: "",
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 2
+            )
+            
+            Text(
+                "Est. Price: $${suggestion.currentPrice ?: "N/A"}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            
+            Spacer(modifier = Modifier.width(8.dp))
+            
+            // Action buttons with state-aware UI
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            ) {
+                if (isAccepted) {
+                    // Accepted state - show confirmation and allow undo
+                    AssistChip(
+                        onClick = { 
+                            isAccepted = false // Allow undo
+                        },
+                        label = { Text("Added ✓") },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Filled.Check,
+                                contentDescription = "Accepted",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    )
+                    IconButton(
+                        onClick = { onDismiss(suggestion) }
+                    ) {
+                        Icon(
+                            Icons.Filled.Close,
+                            contentDescription = "Dismiss",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    // Normal state - show accept and dismiss
+                    IconButton(
+                        onClick = { 
+                            isAccepted = true
+                            onAccept(suggestion)
+                        }
+                    ) {
+                        Icon(
+                            Icons.Filled.Check,
+                            contentDescription = "Accept",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    IconButton(
+                        onClick = { onDismiss(suggestion) }
+                    ) {
+                        Icon(
+                            Icons.Filled.Close,
+                            contentDescription = "Dismiss",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
