@@ -37,8 +37,12 @@ android {
         // BuildConfig fields for AI
         val apiKey = getLocalProperty("GEMINI_API_KEY", "")
         val aiEnabled = getLocalProperty("AI_ENABLED", "true").toBoolean()
+        val debugAiPrompts = getLocalProperty("DEBUG_AI_PROMPTS", "true").toBoolean()
+        val maxRetries = getLocalProperty("MAX_AI_RETRIES", "3").toInt()
         buildConfigField("String", "GEMINI_API_KEY", '"' + apiKey + '"')
         buildConfigField("boolean", "AI_ENABLED", aiEnabled.toString())
+        buildConfigField("boolean", "DEBUG_AI_PROMPTS", debugAiPrompts.toString())
+        buildConfigField("int", "MAX_AI_RETRIES", maxRetries.toString())
     }
 
     buildTypes {

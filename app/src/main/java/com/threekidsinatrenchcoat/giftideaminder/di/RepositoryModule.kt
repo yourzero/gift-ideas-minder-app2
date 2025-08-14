@@ -48,4 +48,8 @@ object RepositoryModule {
         importantDateDao: ImportantDateDao,
         dismissalDao: SuggestionDismissalDao
     ): AISuggestionRepository = AISuggestionRepository(aiService, giftDao, personDao, importantDateDao, dismissalDao)
+
+    @Provides
+    @Singleton
+    fun provideSettingsRepository(settingsDao: SettingsDao): SettingsRepository = SettingsRepository(settingsDao)
 }

@@ -12,6 +12,7 @@ import com.threekidsinatrenchcoat.giftideaminder.data.dao.GiftDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.PersonDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.ImportantDateDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.RelationshipTypeDao
+import com.threekidsinatrenchcoat.giftideaminder.data.dao.SettingsDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.SuggestionDismissalDao
 import com.threekidsinatrenchcoat.giftideaminder.data.model.AppDatabase
 import dagger.Module
@@ -64,6 +65,9 @@ object DatabaseModule {
 
     @Provides
     fun provideRelationshipTypeDao(db: AppDatabase): RelationshipTypeDao = db.relationshipTypeDao()
+
+    @Provides
+    fun provideSettingsDao(db: AppDatabase): SettingsDao = db.settingsDao()
 
     @Provides
     fun provideSuggestionDismissalDao(db: AppDatabase): SuggestionDismissalDao = db.suggestionDismissalDao()

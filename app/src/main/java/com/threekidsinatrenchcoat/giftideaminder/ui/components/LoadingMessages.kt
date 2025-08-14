@@ -18,13 +18,15 @@ fun LoadingMessages(
     personNames: List<String> = emptyList(),
     showDebugPrompt: Boolean = false,
     aiPrompt: String = "",
+    isRetrying: Boolean = false,
+    currentRetryCount: Int = 0,
     onLoadingComplete: () -> Unit = {}
 ) {
     var currentMessages by remember { mutableStateOf(emptyList<String>()) }
     val listState = rememberLazyListState()
     val context = LocalContext.current
     
-    val pseudoWorkMessages = remember(personNames) {
+    val pseudoWorkMessages = remember(personNames, isRetrying, currentRetryCount) {
         buildList {
             // Real work messages with person names
             if (personNames.isNotEmpty()) {
@@ -33,6 +35,12 @@ fun LoadingMessages(
                     add("Analyzing preferences for $name...")
                     add("Finding personalized gifts for $name...")
                 }
+            }
+            
+            // Add retry messages if retrying
+            if (isRetrying && currentRetryCount > 0) {
+                add("API error encountered, retrying... (attempt ${currentRetryCount + 1})")
+                add("Reconnecting to AI service...")
             }
             
             // Pseudo-work messages

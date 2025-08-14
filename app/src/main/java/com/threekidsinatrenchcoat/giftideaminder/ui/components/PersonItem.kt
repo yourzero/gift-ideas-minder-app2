@@ -9,6 +9,12 @@ import androidx.compose.ui.unit.dp
 import com.threekidsinatrenchcoat.giftideaminder.data.model.Person
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 
 @Preview
 @Composable
@@ -31,28 +37,43 @@ fun PersonItem(
                 text = person.name,
                 style = MaterialTheme.typography.titleMedium
             )
+            
             val dateFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy")
-            person.birthday?.let { birthday ->
-                Text("Birthday: ${birthday.format(dateFormatter)}")
-                val upcoming = calculateNextBirthday(birthday)
+            
+            if (person.birthday != null) {
+                Text("Birthday: ${person.birthday.format(dateFormatter)}")
+                val upcoming = calculateNextBirthday(person.birthday)
                 Text("Upcoming: ${upcoming.format(dateFormatter)}")
-            } ?: Text("No birthday set")
+            } else {
+                Text("No birthday set", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.End
             ) {
-                Button(onClick = onIdeas) {
-                    Text("Ideas")
+                IconButton(onClick = onIdeas) {
+                    Icon(
+                        Icons.Filled.Lightbulb,
+                        contentDescription = "Gift Ideas",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = onEdit) {
-                    Text("Edit")
+                IconButton(onClick = onEdit) {
+                    Icon(
+                        Icons.Filled.Edit,
+                        contentDescription = "Edit",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = onDelete) {
-                    Text("Delete")
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        Icons.Filled.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error
+                    )
                 }
             }
         }
@@ -67,4 +88,4 @@ private fun calculateNextBirthday(birthday: LocalDate): LocalDate {
     } else {
         thisYearBirthday
     }
-} 
+}

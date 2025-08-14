@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 @HiltViewModel
 class GiftViewModel @Inject constructor(
@@ -140,10 +141,23 @@ class GiftViewModel @Inject constructor(
     private val _suggestionsError = MutableStateFlow<String?>(null)
     val suggestionsError: StateFlow<String?> = _suggestionsError.asStateFlow()
     private var lastSuggestionsFetchMs: Long = 0L
+    
+    // Retry state
+    private val _currentRetryCount = MutableStateFlow(0)
+    val currentRetryCount: StateFlow<Int> = _currentRetryCount.asStateFlow()
+    private val _isRetrying = MutableStateFlow(false)
+    val isRetrying: StateFlow<Boolean> = _isRetrying.asStateFlow()
 
     // People lookup for UI labels on suggestions
     private val _peopleById: MutableStateFlow<Map<Int, String>> = MutableStateFlow(emptyMap())
     val peopleById: StateFlow<Map<Int, String>> = _peopleById.asStateFlow()
+    
+    // Debug and AI prompt state - using BuildConfig directly for simplicity
+    private val _showDebugPrompts = MutableStateFlow(BuildConfig.DEBUG_AI_PROMPTS)
+    val showDebugPrompts: StateFlow<Boolean> = _showDebugPrompts.asStateFlow()
+    
+    private val _currentAiPrompt = MutableStateFlow<String>("")
+    val currentAiPrompt: StateFlow<String> = _currentAiPrompt.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -151,6 +165,8 @@ class GiftViewModel @Inject constructor(
                 _peopleById.value = people.associate { it.id to it.name }
             }
         }
+        
+        // Debug prompts enabled via BuildConfig
     }
 
     fun fetchSuggestions() {
@@ -166,15 +182,47 @@ class GiftViewModel @Inject constructor(
                 return@launch
             }
             lastSuggestionsFetchMs = now
-            _isLoadingSuggestions.value = true
-            _suggestionsError.value = null
+            
+            executeWithRetry(
+                operation = { 
+                    // Set current prompt for debug display if enabled
+                    _currentAiPrompt.value = "Fetching person-centric suggestions (top 3, 3 per person)"
+                    aiRepo.fetchSuggestionsPersonCentric(topN = 3, perPerson = 3) 
+                },
+                onSuccess = { ideas -> _suggestions.value = ideas }
+            )
+        }
+    }
+    
+    private suspend fun <T> executeWithRetry(
+        operation: suspend () -> T,
+        onSuccess: (T) -> Unit,
+        maxRetries: Int = BuildConfig.MAX_AI_RETRIES
+    ) {
+        _isLoadingSuggestions.value = true
+        _suggestionsError.value = null
+        _currentRetryCount.value = 0
+        _isRetrying.value = false
+        
+        repeat(maxRetries + 1) { attempt ->
             try {
-                val ideas = aiRepo.fetchSuggestionsPersonCentric(topN = 3, perPerson = 3)
-                _suggestions.value = ideas
+                val result = operation()
+                onSuccess(result)
+                return
             } catch (t: Throwable) {
-                _suggestionsError.value = t.message ?: "Failed to load suggestions"
+                if (attempt < maxRetries) {
+                    _currentRetryCount.value = attempt + 1
+                    _isRetrying.value = true
+                    // Exponential backoff: 1s, 2s, 4s
+                    delay(1000L * (1 shl attempt))
+                } else {
+                    _suggestionsError.value = "Failed after $maxRetries retries: ${t.message ?: "Unknown error"}"
+                }
             } finally {
-                _isLoadingSuggestions.value = false
+                if (attempt == maxRetries) {
+                    _isLoadingSuggestions.value = false
+                    _isRetrying.value = false
+                }
             }
         }
     }
@@ -206,6 +254,25 @@ class GiftViewModel @Inject constructor(
             } finally {
                 _isLoadingSuggestions.value = false
             }
+        }
+    }
+
+    fun fetchSuggestionsForPerson(personId: Int, perPerson: Int = 3) {
+        viewModelScope.launch {
+            if (!BuildConfig.AI_ENABLED) {
+                _suggestions.value = emptyList()
+                _suggestionsError.value = "AI disabled"
+                return@launch
+            }
+            
+            executeWithRetry(
+                operation = { 
+                    // Set current prompt for debug display if enabled
+                    _currentAiPrompt.value = "Fetching suggestions for person ID $personId ($perPerson suggestions)"
+                    aiRepo.fetchSuggestionsForPerson(personId, perPerson) 
+                },
+                onSuccess = { ideas -> _suggestions.value = ideas }
+            )
         }
     }
 

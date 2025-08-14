@@ -57,11 +57,15 @@ fun SuggestionsCarousel(
     error: StateFlow<String?>? = null,
     personIdToName: Map<Int, String> = emptyMap(),
     showDebugPrompt: Boolean = false,
-    aiPrompt: String = ""
+    aiPrompt: String = "",
+    isRetrying: StateFlow<Boolean>? = null,
+    currentRetryCount: StateFlow<Int>? = null
 ) {
     val suggestionList = suggestions.collectAsState().value
     val loading = isLoading?.collectAsState()?.value ?: false
     val err = error?.collectAsState()?.value
+    val retrying = isRetrying?.collectAsState()?.value ?: false
+    val retryCount = currentRetryCount?.collectAsState()?.value ?: 0
     
     if (loading) {
         val personNames = personIdToName.values.toList()
@@ -69,6 +73,8 @@ fun SuggestionsCarousel(
             personNames = personNames,
             showDebugPrompt = showDebugPrompt,
             aiPrompt = aiPrompt,
+            isRetrying = retrying,
+            currentRetryCount = retryCount,
             onLoadingComplete = {
                 // This will be called when loading animation completes
                 // We can add sound effect here

@@ -38,8 +38,8 @@ fun PersonIdeasScreen(
     val peopleMap by viewModel.peopleById.collectAsState()
 
     LaunchedEffect(personId) {
-        // Reuse budget flow but with personId hint; or expose a dedicated VM method if needed
-        viewModel.fetchSuggestionsByBudget(min = 0.0, max = 10_000.0, personId = personId)
+        // Fetch suggestions specifically for this person only
+        viewModel.fetchSuggestionsForPerson(personId)
     }
 
     Scaffold(
@@ -68,9 +68,13 @@ fun PersonIdeasScreen(
                 onDismiss = { suggestion -> viewModel.dismissSuggestion(suggestion) },
                 isLoading = viewModel.isLoadingSuggestions,
                 error = viewModel.suggestionsError,
-                personIdToName = peopleMap
+                personIdToName = peopleMap,
+                showDebugPrompt = viewModel.showDebugPrompts.collectAsState().value,
+                aiPrompt = viewModel.currentAiPrompt.collectAsState().value,
+                isRetrying = viewModel.isRetrying,
+                currentRetryCount = viewModel.currentRetryCount
             )
-            Button(onClick = { viewModel.fetchSuggestionsByBudget(min = 0.0, max = 10_000.0, personId = personId) }) {
+            Button(onClick = { viewModel.fetchSuggestionsForPerson(personId) }) {
                 Text("Refresh")
             }
         }
