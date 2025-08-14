@@ -23,6 +23,7 @@
       "mcp__intellij__get_project_vcs_status"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "defaultMode": "acceptEdits"
   }
 }
