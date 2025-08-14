@@ -23,6 +23,16 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Arrangement
 import coil.compose.AsyncImage
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.background
 
 @Composable
 fun SuggestionsCarousel(
@@ -48,22 +58,91 @@ fun SuggestionsCarousel(
             items(suggestionList) { suggestion: Gift ->
                 Card(modifier = Modifier.padding(8.dp).semantics { contentDescription = "Suggestion: ${suggestion.title}" }) {
                     Column(modifier = Modifier.padding(8.dp)) {
+                        val uriHandler = LocalUriHandler.current
+                        
+                        // Image display with proper sizing and fallback
                         if (!suggestion.url.isNullOrBlank()) {
                             AsyncImage(
                                 model = suggestion.url,
                                 contentDescription = suggestion.title,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier
+                                    .size(120.dp, 80.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .clickable { 
+                                        // Open URL in external browser
+                                        try {
+                                            uriHandler.openUri(suggestion.url!!)
+                                        } catch (e: Exception) {
+                                            // Handle URL opening error silently
+                                        }
+                                    },
+                                contentScale = ContentScale.Crop
                             )
                         } else {
-                            Text("[Image Placeholder]")
+                            // Better placeholder with styling
+                            androidx.compose.foundation.layout.Box(
+                                modifier = Modifier
+                                    .size(120.dp, 80.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                                contentAlignment = androidx.compose.ui.Alignment.Center
+                            ) {
+                                Text(
+                                    "No Image",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
-                        Text(suggestion.title)
+                        
+                        Spacer(modifier = Modifier.width(4.dp))
+                        
+                        // Clickable title that opens URL
+                        Text(
+                            text = suggestion.title,
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = if (!suggestion.url.isNullOrBlank()) {
+                                Modifier.clickable { 
+                                    try {
+                                        uriHandler.openUri(suggestion.url!!)
+                                    } catch (e: Exception) {
+                                        // Handle URL opening error silently
+                                    }
+                                }
+                            } else {
+                                Modifier
+                            },
+                            color = if (!suggestion.url.isNullOrBlank()) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            }
+                        )
+                        
                         val personName = suggestion.personId?.let { personIdToName[it] }
                         if (!personName.isNullOrBlank()) {
-                            Text("For: $personName")
+                            Text(
+                                "For: $personName",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
-                        Text(suggestion.description ?: "")
-                        Text("Est. Price: $${suggestion.currentPrice ?: "N/A"}")
+                        
+                        Text(
+                            suggestion.description ?: "",
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 2
+                        )
+                        
+                        Text(
+                            "Est. Price: $${suggestion.currentPrice ?: "N/A"}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        
+                        Spacer(modifier = Modifier.width(8.dp))
+                        
                         Row {
                             Button(onClick = { onAccept(suggestion) }) { Text("Accept") }
                             Spacer(Modifier.width(8.dp))

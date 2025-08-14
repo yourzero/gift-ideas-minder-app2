@@ -48,6 +48,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.foundation.layout.Box
 import com.threekidsinatrenchcoat.giftideaminder.ui.components.AppTopBar
+import com.threekidsinatrenchcoat.giftideaminder.viewmodel.PersonViewModel
+import com.threekidsinatrenchcoat.giftideaminder.data.model.Person
+import kotlinx.coroutines.flow.MutableStateFlow
 
 
 @Preview
@@ -55,9 +58,11 @@ import com.threekidsinatrenchcoat.giftideaminder.ui.components.AppTopBar
 fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
                    navController: NavController) {
     val giftsState = viewModel.allGifts.collectAsState(initial = emptyList<Gift>())
+    val personViewModel: PersonViewModel = hiltViewModel()
+    val personsState = personViewModel.allPersons.collectAsState(initial = emptyList<Person>())
 
-    LaunchedEffect(Unit) { viewModel.fetchSuggestions() }
     val gifts = giftsState.value
+    val persons = personsState.value
     var searchQuery by remember { mutableStateOf("") }
     val filteredGifts: List<Gift> = gifts.filter { it.title.contains(searchQuery, ignoreCase = true) }
 
@@ -93,9 +98,6 @@ fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
                     Button(onClick = { navController.navigate("budget") }) {
                         Text("Budget")
                     }
-                    Button(onClick = { viewModel.fetchSuggestions() }) {
-                        Text("Refresh AI Suggestions")
-                    }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
@@ -113,34 +115,29 @@ fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
                 )
             }
             item {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text("Today’s Suggestions", style = MaterialTheme.typography.titleMedium)
-                    IconButton(onClick = { viewModel.fetchSuggestions() }) {
-                        //Icon(Icons.Filled.Refresh, contentDescription = "Refresh Suggestions")
-                    }
+                Text("Upcoming Gifts", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
+                val upcomingGifts = gifts.filter { gift -> 
+                    gift.eventDate?.let { eventDate ->
+                        val currentTime = System.currentTimeMillis()
+                        val thirtyDaysFromNow = currentTime + (30 * 24 * 60 * 60 * 1000L)
+                        eventDate in currentTime..thirtyDaysFromNow
+                    } ?: false
                 }
-                AnimatedVisibility(visible = true) {
-                    SuggestionsCarousel(
-                        suggestions = viewModel.suggestions,
-                        onAccept = { suggestion ->
-                            viewModel.insertGift(suggestion.copy(id = 0))
-                        },
-                        onDismiss = { suggestion ->
-                            viewModel.dismissSuggestion(suggestion)
-                        },
-                        isLoading = viewModel.isLoadingSuggestions,
-                        error = viewModel.suggestionsError,
-                        personIdToName = viewModel.peopleById.collectAsState().value
-                    )
+                
+                if (upcomingGifts.isEmpty()) {
+                    Text("No upcoming gift events in the next 30 days", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(vertical = 8.dp))
+                } else {
+                    upcomingGifts.sortedBy { it.eventDate }.forEach { gift ->
+                        GiftItem(gift = gift) {
+                            navController.navigate("gift_detail/${gift.id}")
+                        }
+                    }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
             }
-            item {
-                Text("Your Gifts", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
-            }
-            if (filteredGifts.size == 0) {
+            if (filteredGifts.isEmpty()) {
                 item {
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("No gifts yet. Start adding some!", textAlign = TextAlign.Center)
@@ -151,12 +148,62 @@ fun GiftListScreen(viewModel: GiftViewModel = hiltViewModel(),
                     }
                 }
             } else {
-                items(
-                    items = filteredGifts,
-                    key = { giftItem: Gift -> giftItem.id }
-                ) { gift ->
-                    GiftItem(gift = gift) {
-                        navController.navigate("gift_detail/${gift.id}")
+                // Group gifts by person
+                val giftsByPerson = filteredGifts.groupBy { it.personId }
+                val peopleById = persons.associateBy { it.id }
+                
+                giftsByPerson.forEach { (personId, giftsForPerson) ->
+                    item {
+                        val personName = personId?.let { peopleById[it]?.name } ?: "Unassigned"
+                        Text(
+                            text = "Gifts for $personName", 
+                            style = MaterialTheme.typography.titleMedium, 
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                        
+                        // Show suggestions for this person if they have gifts
+                        if (personId != null) {
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Text("AI Suggestions", style = MaterialTheme.typography.labelMedium)
+                                IconButton(onClick = { 
+                                    // Fetch suggestions for this specific person
+                                    viewModel.fetchSuggestions()
+                                }) {
+                                    //Icon(Icons.Filled.Refresh, contentDescription = "Get suggestions for ${personName}")
+                                }
+                            }
+                            
+                            // Filter suggestions for this person
+                            val suggestionsForPerson = viewModel.suggestions.collectAsState().value.filter { it.personId == personId }
+                            if (suggestionsForPerson.isNotEmpty()) {
+                                SuggestionsCarousel(
+                                    suggestions = MutableStateFlow(suggestionsForPerson),
+                                    onAccept = { suggestion ->
+                                        viewModel.insertGift(suggestion.copy(id = 0))
+                                    },
+                                    onDismiss = { suggestion ->
+                                        viewModel.dismissSuggestion(suggestion)
+                                    },
+                                    isLoading = viewModel.isLoadingSuggestions,
+                                    error = viewModel.suggestionsError,
+                                    personIdToName = viewModel.peopleById.collectAsState().value
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+                    
+                    items(
+                        items = giftsForPerson,
+                        key = { giftItem: Gift -> giftItem.id }
+                    ) { gift ->
+                        GiftItem(gift = gift) {
+                            navController.navigate("gift_detail/${gift.id}")
+                        }
+                    }
+                    
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }

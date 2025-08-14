@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,13 +28,29 @@ fun PillBottomNavBar(
         .currentBackStackEntryAsState().value
         ?.destination?.route
 
+    // Check if currently on an add/edit screen
+    val isOnAddEditScreen = currentRoute?.let { route ->
+        route.startsWith("add_") || route.startsWith("edit_") || route.contains("add_gift")
+    } ?: false
+
+    // State for confirmation dialog
+    var showConfirmDialog by remember { mutableStateOf(false) }
+    var targetRoute by remember { mutableStateOf("") }
+
     fun navTo(route: String) {
-        navController.navigate(route) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
+        if (isOnAddEditScreen && route != currentRoute) {
+            // Show confirmation dialog
+            targetRoute = route
+            showConfirmDialog = true
+        } else {
+            // Navigate normally
+            navController.navigate(route) {
+                popUpTo(navController.graph.findStartDestination().id) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
             }
-            launchSingleTop = true
-            restoreState = true
         }
     }
 
@@ -82,5 +99,38 @@ fun PillBottomNavBar(
                 )
             )
         }
+    }
+
+    // Confirmation dialog for leaving add/edit screens
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text("Cancel Changes?") },
+            text = { Text("You have unsaved changes. Are you sure you want to leave this screen?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showConfirmDialog = false
+                        // Navigate to target route
+                        navController.navigate(targetRoute) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                ) {
+                    Text("Leave")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showConfirmDialog = false }
+                ) {
+                    Text("Stay")
+                }
+            }
+        )
     }
 }

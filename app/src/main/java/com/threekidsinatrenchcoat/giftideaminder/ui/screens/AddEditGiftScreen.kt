@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Arrangement
 
 
 @Composable
@@ -88,9 +89,13 @@ val context = LocalContext.current
         }
     }
 
-    // Edit mode: load gift once and push into VM state. Avoid overwriting user's in-progress edits.
+    // Reset state when adding new gift or editing a different gift
     LaunchedEffect(giftId) {
-        if (giftId != null) {
+        if (giftId == null) {
+            // Adding new gift - clear all previous state
+            viewModel.resetState()
+        } else {
+            // Edit mode: load gift once and push into VM state
             viewModel.getGiftById(giftId).collectLatest { gift ->
                 // Only load if state is still blank or matching id
                 val uiState = viewModel.uiState.value
@@ -143,12 +148,15 @@ val context = LocalContext.current
             )
             Spacer(Modifier.height(8.dp))
 
-            // Description
+            // Gift Idea / Description
             OutlinedTextField(
                 value = ui.description,
                 onValueChange = viewModel::onDescriptionChanged,
-                label = { Text("Description") },
-                modifier = Modifier.fillMaxWidth()
+                label = { Text("Gift Idea") },
+                placeholder = { Text("Describe the gift idea...") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2,
+                maxLines = 4
             )
             Spacer(Modifier.height(8.dp))
 
@@ -171,14 +179,23 @@ val context = LocalContext.current
             Spacer(Modifier.height(12.dp))
 
             // Date picker
-            Button(onClick = { showDatePicker = true }) {
-                Text("Pick Event Date")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text("Event Date", style = MaterialTheme.typography.labelMedium)
+                    val dateText = if (ui.eventDateMillis > 0)
+                        java.text.SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                            .format(java.util.Date(ui.eventDateMillis))
+                    else "Not set"
+                    Text(dateText, style = MaterialTheme.typography.bodyMedium)
+                }
+                Button(onClick = { showDatePicker = true }) {
+                    Text("Pick Date")
+                }
             }
-            val dateText = if (ui.eventDateMillis > 0)
-                java.text.SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                    .format(java.util.Date(ui.eventDateMillis))
-            else "Not set"
-            Text("Selected Date: $dateText")
             Spacer(Modifier.height(16.dp))
 
             // Person select
@@ -213,12 +230,26 @@ val context = LocalContext.current
             }
             Spacer(Modifier.height(16.dp))
 
-            // Save
-            Button(
-                onClick = { viewModel.onSave() },
-                enabled = !ui.isSaving
+            // Bottom button row matching add/edit recipient layout
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(if (ui.id != null) "Update Gift" else "Add Gift")
+                OutlinedButton(
+                    onClick = { navController.popBackStack() },
+                    modifier = Modifier.weight(1f)
+                ) { 
+                    Text("Back") 
+                }
+
+                Button(
+                    onClick = { viewModel.onSave() },
+                    enabled = !ui.isSaving && ui.personId != null,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Save")
+                }
             }
 
             // Show inline error if any
@@ -262,21 +293,21 @@ val context = LocalContext.current
 
     // Material DatePickerDialog
     if (showDatePicker) {
-        val calendar = Calendar.getInstance().apply {
-            if (ui.eventDateMillis > 0) timeInMillis = ui.eventDateMillis
+        LaunchedEffect(showDatePicker) {
+            val calendar = Calendar.getInstance().apply {
+                if (ui.eventDateMillis > 0) timeInMillis = ui.eventDateMillis
+            }
+            DatePickerDialog(
+                context,
+                { _, year, month, dayOfMonth ->
+                    calendar.set(year, month, dayOfMonth)
+                    viewModel.onEventDateChanged(calendar.timeInMillis)
+                    showDatePicker = false
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
         }
-        DatePickerDialog(
-            context,
-            { _, year, month, dayOfMonth ->
-                calendar.set(year, month, dayOfMonth)
-                viewModel.onEventDateChanged(calendar.timeInMillis)
-                showDatePicker = false
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).show()
-        // prevent multiple dialogs
-        showDatePicker = false
     }
 }

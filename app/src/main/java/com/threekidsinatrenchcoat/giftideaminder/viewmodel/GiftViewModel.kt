@@ -50,6 +50,10 @@ class GiftViewModel @Inject constructor(
     val events: SharedFlow<GiftEvent> = _events.asSharedFlow()
 
     // ---------- State updaters ----------
+    fun resetState() {
+        _uiState.value = GiftUiState()
+    }
+    
     fun loadForEdit(gift: Gift) {
         _uiState.update {
             it.copy(

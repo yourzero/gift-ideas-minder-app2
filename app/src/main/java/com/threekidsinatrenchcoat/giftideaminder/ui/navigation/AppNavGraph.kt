@@ -80,6 +80,12 @@ fun AppNavGraph(
             val personId = backStackEntry.arguments!!.getInt("personId")
             PersonIdeasScreen(personId = personId, navController = navController)
         }
+        composable("add_gift") {
+            AddEditGiftScreen(
+                onNavigateBack = ::showSnackbarAndPopBackStack,
+                navController = navController
+            )
+        }
         composable(
             "add_gift?sharedText={sharedText}",
             arguments = listOf(navArgument("sharedText") {
@@ -90,6 +96,19 @@ fun AppNavGraph(
                 onNavigateBack = ::showSnackbarAndPopBackStack,
                 navController = navController,
                 sharedText = back.arguments?.getString("sharedText")
+            )
+        }
+        composable(
+            route = "edit_gift/{giftId}",
+            arguments = listOf(
+                navArgument("giftId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val giftId = backStackEntry.arguments!!.getInt("giftId")
+            AddEditGiftScreen(
+                onNavigateBack = ::showSnackbarAndPopBackStack,
+                navController = navController,
+                giftId = giftId
             )
         }
         // … other routes …
