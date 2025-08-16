@@ -1,10 +1,49 @@
 {
   "permissions": {
     "allow": [
-      "Bash(./gradlew:*)"
+      "Bash(./gradlew:*)",
+      "mcp__intellij__execute_terminal_command",
+      "mcp__intellij__get_file_text_by_path",
+      "Bash(git add:*)",
+      "mcp__intellij__search_in_files_content",
+      "mcp__intellij__replace_specific_text",
+      "mcp__intellij__create_new_file_with_text",
+      "mcp__intellij__find_files_by_name_substring",
+      "mcp__intellij__replace_file_text_by_path",
+      "mcp__intellij__get_current_file_errors",
+      "mcp__intellij__get_project_problems",
+      "mcp__intellij__get_run_configurations",
+      "mcp__intellij__wait",
+      "mcp__intellij__execute_action_by_id",
+      "Bash(rm:*)",
+      "mcp__intellij__list_available_actions",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(sed:*)",
+      "mcp__intellij__get_project_vcs_status",
+      "mcp__intellij__get_open_in_editor_file_path",
+      "mcp__intellij__list_files_in_folder"
     ],
     "deny": [],
     "ask": [],
     "defaultMode": "acceptEdits"
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "intellij"
+  ],
+  "mcpServers": {
+    "intellij": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@jetbrains/mcp-proxy"
+      ],
+      "env": {
+        "HOST": "10.100.170.108",
+        "IDE_PORT": "63342"
+      }
+    }
   }
 }
