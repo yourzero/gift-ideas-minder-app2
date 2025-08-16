@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "intellij": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@jetbrains/mcp-proxy"
+      ],
+      "env": {
+        "HOST": "10.100.170.108",
+        "IDE_PORT": "63342"
+      }
+    }
+  }
+}

@@ -54,7 +54,7 @@ class GiftViewModel @Inject constructor(
     fun resetState() {
         _uiState.value = GiftUiState()
     }
-    
+
     fun loadForEdit(gift: Gift) {
         _uiState.update {
             it.copy(
@@ -141,7 +141,7 @@ class GiftViewModel @Inject constructor(
     private val _suggestionsError = MutableStateFlow<String?>(null)
     val suggestionsError: StateFlow<String?> = _suggestionsError.asStateFlow()
     private var lastSuggestionsFetchMs: Long = 0L
-    
+
     // Retry state
     private val _currentRetryCount = MutableStateFlow(0)
     val currentRetryCount: StateFlow<Int> = _currentRetryCount.asStateFlow()
@@ -151,11 +151,11 @@ class GiftViewModel @Inject constructor(
     // People lookup for UI labels on suggestions
     private val _peopleById: MutableStateFlow<Map<Int, String>> = MutableStateFlow(emptyMap())
     val peopleById: StateFlow<Map<Int, String>> = _peopleById.asStateFlow()
-    
+
     // Debug and AI prompt state - using BuildConfig directly for simplicity
     private val _showDebugPrompts = MutableStateFlow(BuildConfig.DEBUG_AI_PROMPTS)
     val showDebugPrompts: StateFlow<Boolean> = _showDebugPrompts.asStateFlow()
-    
+
     private val _currentAiPrompt = MutableStateFlow<String>("")
     val currentAiPrompt: StateFlow<String> = _currentAiPrompt.asStateFlow()
 
@@ -165,7 +165,7 @@ class GiftViewModel @Inject constructor(
                 _peopleById.value = people.associate { it.id to it.name }
             }
         }
-        
+
         // Debug prompts enabled via BuildConfig
     }
 
@@ -182,18 +182,18 @@ class GiftViewModel @Inject constructor(
                 return@launch
             }
             lastSuggestionsFetchMs = now
-            
+
             executeWithRetry(
-                operation = { 
+                operation = {
                     // Set current prompt for debug display if enabled
                     _currentAiPrompt.value = "Fetching person-centric suggestions (top 3, 3 per person)"
-                    aiRepo.fetchSuggestionsPersonCentric(topN = 3, perPerson = 3) 
+                    aiRepo.fetchSuggestionsPersonCentric(topN = 3, perPerson = 3)
                 },
                 onSuccess = { ideas -> _suggestions.value = ideas }
             )
         }
     }
-    
+
     private suspend fun <T> executeWithRetry(
         operation: suspend () -> T,
         onSuccess: (T) -> Unit,
@@ -203,7 +203,7 @@ class GiftViewModel @Inject constructor(
         _suggestionsError.value = null
         _currentRetryCount.value = 0
         _isRetrying.value = false
-        
+
         repeat(maxRetries + 1) { attempt ->
             try {
                 val result = operation()
@@ -264,12 +264,12 @@ class GiftViewModel @Inject constructor(
                 _suggestionsError.value = "AI disabled"
                 return@launch
             }
-            
+
             executeWithRetry(
-                operation = { 
+                operation = {
                     // Set current prompt for debug display if enabled
                     _currentAiPrompt.value = "Fetching suggestions for person ID $personId ($perPerson suggestions)"
-                    aiRepo.fetchSuggestionsForPerson(personId, perPerson) 
+                    aiRepo.fetchSuggestionsForPerson(personId, perPerson)
                 },
                 onSuccess = { ideas -> _suggestions.value = ideas }
             )
@@ -299,5 +299,11 @@ class GiftViewModel @Inject constructor(
             )
         }
         onSave()
+    }
+
+
+    /** Reset transient UI state for creating a new gift. */
+    fun resetForCreate() {
+        _uiState.value = GiftUiState()
     }
 }

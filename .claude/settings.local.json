@@ -20,10 +20,30 @@
       "Bash(find:*)",
       "Bash(grep:*)",
       "Bash(sed:*)",
-      "mcp__intellij__get_project_vcs_status"
+      "mcp__intellij__get_project_vcs_status",
+      "mcp__intellij__get_open_in_editor_file_path",
+      "mcp__intellij__list_files_in_folder"
     ],
     "deny": [],
     "ask": [],
     "defaultMode": "acceptEdits"
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "intellij"
+  ],
+  "mcpServers": {
+    "intellij": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@jetbrains/mcp-proxy"
+      ],
+      "env": {
+        "HOST": "10.100.170.108",
+        "IDE_PORT": "63342"
+      }
+    }
   }
 }

@@ -1,8 +1,10 @@
 package com.threekidsinatrenchcoat.giftideaminder.ui.screens
 
 import android.app.DatePickerDialog
+import android.content.Context
 import android.net.Uri
 import android.provider.ContactsContract
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -39,7 +41,7 @@ fun AddEditGiftScreen(
     giftId: Int? = null,
     sharedText: String? = null
 ) {
-val context = LocalContext.current
+    val context = LocalContext.current
     val personViewModel: PersonViewModel = hiltViewModel()
 
     // VM state (Single Source of Truth)
@@ -57,26 +59,10 @@ val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Contact picker launcher
-    val contactPicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickContact()
-    ) { uri: Uri? ->
-        uri?.let {
-            context.contentResolver.query(it, null, null, null, null)?.use { cursor ->
-                if (cursor.moveToFirst()) {
-                    val name =
-                        cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
-                    // If person exists, select; else prompt to add with prefill
-                    val existing = persons.find { p -> p.name == name }
-                    if (existing != null) {
-                        viewModel.onPersonSelected(existing.id)
-                    } else {
-                        showAddPersonDialog = true
-                        personName = name
-                    }
-                }
-            }
-        }
-    }
+    val triple = triple(context, persons, viewModel, showAddPersonDialog, personName)
+    val contactPicker = triple.first
+    personName = triple.second
+    showAddPersonDialog = triple.third
 
     // Seed from share
     if (sharedText != null && giftId == null) {
@@ -239,8 +225,8 @@ val context = LocalContext.current
                 OutlinedButton(
                     onClick = { navController.popBackStack() },
                     modifier = Modifier.weight(1f)
-                ) { 
-                    Text("Back") 
+                ) {
+                    Text("Back")
                 }
 
                 Button(
@@ -310,4 +296,37 @@ val context = LocalContext.current
             ).show()
         }
     }
+}
+
+@Composable
+private fun triple(
+    context: Context,
+    persons: List<Person>,
+    viewModel: GiftViewModel,
+    showAddPersonDialog: Boolean,
+    personName: String
+): Triple<ManagedActivityResultLauncher<Void?, Uri?>, String, Boolean> {
+    var showAddPersonDialog1 = showAddPersonDialog
+    var personName1 = personName
+    val contactPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickContact()
+    ) { uri: Uri? ->
+        uri?.let {
+            context.contentResolver.query(it, null, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val name =
+                        cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
+                    // If person exists, select; else prompt to add with prefill
+                    val existing = persons.find { p -> p.name == name }
+                    if (existing != null) {
+                        viewModel.onPersonSelected(existing.id)
+                    } else {
+                        showAddPersonDialog1 = true
+                        personName1 = name
+                    }
+                }
+            }
+        }
+    }
+    return Triple(contactPicker, personName1, showAddPersonDialog1)
 }

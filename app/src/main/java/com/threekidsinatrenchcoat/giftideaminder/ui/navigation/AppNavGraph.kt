@@ -38,7 +38,7 @@ fun AppNavGraph(
             HomeDashboardScreen(name = "Guest", navController = navController)
         }
         composable("gift_list") {
-            GiftListScreen(navController = navController)
+            GiftsRoute(navController = navController)
         }
         composable("event_list") {
             EventListScreen(navController)
