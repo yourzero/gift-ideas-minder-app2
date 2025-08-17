@@ -1,247 +1,51 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file contains instructions for Claude Code when working with the Gift Idea Minder Android project.
 
-## Project Overview
+## Essential Project Info
 
-Gift Idea Minder is an Android application built with Jetpack Compose, Room, Hilt, and MVVM architecture. The app helps users capture, organize, and track gift ideas for friends and family with features including AI-powered suggestions, price tracking, OCR import, and comprehensive person/relationship management.
+**Gift Idea Minder** is an Android app built with Jetpack Compose, Room, Hilt, and MVVM architecture. It helps users capture, organize, and track gift ideas with AI-powered suggestions, price tracking, OCR import, and person/relationship management.
 
-## Build and Development Commands
+## AI-Optimized Rules (Use These)
 
-### Building and Running
-```bash
-# Build the project
-./gradlew build
+When working on this project, reference these token-optimized rule files:
 
-# Run on connected device/emulator
-./gradlew installDebug
+- **Commands**: `claude-rules/commands-ai.md` - Build, test, and SDK configuration
+- **Architecture**: `claude-rules/architecture-ai.md` - Tech stack and critical patterns
+- **Standards**: `claude-rules/coding-standards-ai.md` - Code style and requirements
+- **Workflows**: `claude-rules/workflows-ai.md` - Common development tasks
+- **Config**: `claude-rules/configuration-ai.md` - Required setup
+- **Features**: `claude-rules/features-ai.md` - Key features and integrations
+- **Roadmap**: `claude-rules/roadmap-ai.md` - Future plans and limitations
 
-# Clean build
-./gradlew clean
-```
+## Human-Readable Documentation
 
-### Testing
-```bash
-# Run unit tests
-./gradlew test
+For detailed explanations, see the full documentation files:
 
-# Run instrumentation tests
-./gradlew connectedAndroidTest
+- `claude-rules/commands.md`
+- `claude-rules/architecture.md` 
+- `claude-rules/coding-standards.md`
+- `claude-rules/workflows.md`
+- `claude-rules/configuration.md`
+- `claude-rules/features.md`
+- `claude-rules/roadmap.md`
 
-# Run specific test
-./gradlew testDebugUnitTest --tests "com.giftideaminder.viewmodel.PersonFlowViewModelTest"
-```
+## Project Status
 
-### Linting and Code Quality
-```bash
-# Run lint checks
-./gradlew lintDebug
+### Core Features
+- **Person Management**: Multi-step flow with relationship-based date prompting
+- **Gift Management**: Price tracking, AI suggestions, OCR import, budget alerts
+- **Integrations**: Gemini API, CamelCamelCamel, ML Kit, device contacts
 
-# Generate lint report
-./gradlew lintDebug --continue
-```
+### Known Incomplete Items
+- Share intent navigation to `add_gift?sharedText=...`
+- Full file import (only CSV works)
+- AI SMS history summarization (stubbed)
 
-### Change SDK folder when Claude initiates a build
-- Overview: Android Studio is running in Windows, so when I (the user) initiate a build through it, the sdk.dir must be set to a windows-compatible path for it to compile. But in the seldom occasions that Claude initiates the build agenticly, note: 
-  - If Claude is running in a powershell or command prompt window, the sdk.dir setting in local properties should be set to a windows-compatible path:
-  ```sdk.dir=D\:\\Users\\justin\\AppData\\Local\\Android\\Sdk```
-  - If Claude is running in a WSL/linux command window, the sdk.dir setting in local properties should be set to a linux-compatible path (below). Make this change before a claude-initiated build (when appropriate), and set it back to the windows path after.
-  ```sdk.dir=/home/justin/Android/Sdk```
+## Development Principles
 
-## Architecture Overview
-
-### Core Technologies
-- **UI**: Jetpack Compose with Material3 theming
-- **Architecture**: MVVM with unidirectional data flow
-- **Database**: Room with LocalDate support via TypeConverters
-- **Dependency Injection**: Hilt
-- **Navigation**: Compose Navigation
-- **Async**: Kotlin Coroutines and Flows
-- **Network**: Retrofit with Gson for AI and price services
-
-### Package Structure
-```
-com.threekidsinatrenchcoat.giftideaminder/
-├── data/
-│   ├── api/           # Network services (AIService, PriceService)
-│   ├── converter/     # Room TypeConverters
-│   ├── dao/           # Database access objects
-│   ├── model/         # Room entities and database
-│   └── repository/    # Data repositories
-├── di/                # Hilt dependency injection modules
-├── ui/
-│   ├── components/    # Reusable UI components
-│   ├── navigation/    # Navigation setup and routes
-│   ├── screens/       # Screen composables
-│   └── theme/         # Material3 theming
-└── viewmodel/         # UI state management
-```
-
-### Key Architectural Patterns
-
-#### Database Design
-- Uses `LocalDate` stored as epochDay with Room TypeConverter for date handling
-- Implements relationship-based person management with `RelationshipType` and `ImportantDate` entities
-- Database version 1 with destructive migrations enabled for debug builds
-- Transactional date replacement via `ImportantDateDao.replaceForPerson()`
-
-#### State Management
-- ViewModels expose UI state via StateFlow/Flow
-- Uses `remember` and `collectAsState` for Compose integration
-- Implements loading, success, and error states consistently
-
-#### Navigation
-- Central `AppNavGraph` with shared `SnackbarHostState`
-- Multi-step flows (e.g., Add/Edit Recipient) managed by dedicated ViewModels
-- Utility function `showSnackbarAndPopBackStack()` for consistent UX
-
-## Development Standards
-
-### Data Model Conventions
-- **Dates**: Always use `LocalDate`, never timestamps or epoch milliseconds
-- **Lists**: Store as delimited strings with TypeConverter (`§` delimiter)
-- **Person Roles**: Use bitmask pattern with `PersonRole` enum (`SELF`, `RECIPIENT`, `GIFTER`, `COLLABORATOR`, `CONTACT_ONLY`)
-- **Database Migrations**: Specify Room migrations for schema changes in production
-
-### Code Style
-- Follow existing Kotlin conventions in the codebase
-- Use meaningful, self-documenting variable and function names
-- Maintain MVVM separation: ViewModels handle business logic, Composables handle UI
-- Include all necessary imports in file changes
-- Use `@Composable` functions with appropriate modifiers and state hoisting
-
-### UI/UX Patterns
-- Relationship-first Add Person flow: ask relationship type, then prompt relevant dates
-- Use Material3 components and theming consistently
-- Implement proper loading and error states
-- Follow accessibility guidelines with content descriptions
-
-### Testing Requirements
-- Unit tests for ViewModels focusing on state transitions
-- Instrumentation tests for complex user flows
-- Mock external dependencies (AI services, price APIs)
-- Test database operations and migrations
-
-## Key Features and Flows
-
-### Person Management
-- Multi-step Add/Edit Person flow driven by `PersonFlowViewModel`
-- Relationship-based date prompting (birthday for friends, anniversary for spouses)
-- Custom date support with labels
-- Contact import integration with SMS scanning capability
-
-### Gift Management  
-- Gift tracking with price history via `PriceRecord` entities
-- AI-powered suggestions through `AIService` integration
-- OCR import from screenshots using ML Kit Text Recognition
-- Budget tracking and spending alerts
-
-### Integration Points
-- **AI Service**: Gemini API for gift suggestions (requires `GEMINI_API_KEY` in local.properties)
-- **Price Tracking**: CamelCamelCamel API integration for price history
-- **ML Kit**: Text recognition for OCR import functionality
-- **Contacts**: Device contact integration with permission handling
-
-## Configuration
-
-### Required Local Properties
-Add to `local.properties`:
-```properties
-GEMINI_API_KEY=your_api_key_here
-AI_ENABLED=true
-```
-
-### Permissions
-The app requires these permissions (declared in AndroidManifest.xml):
-- `READ_SMS` - for SMS scanning feature
-- `READ_EXTERNAL_STORAGE` - for file import
-- `READ_CONTACTS` - for contact integration
-
-## Common Development Tasks
-
-### Adding New Entities
-1. Create Room entity in `data/model/`
-2. Add DAO in `data/dao/` with appropriate queries
-3. Update `AppDatabase` entities list and version
-4. Create repository in `data/repository/`
-5. Add Hilt bindings in `di/RepositoryModule`
-6. Update ViewModels to use new repository
-
-### Database Schema Changes
-1. Increment version in `AppDatabase`
-2. For production: Create migration in `AppDatabase.companion`
-3. For development: Use destructive migration (already enabled)
-4. Update TypeConverters if needed
-
-### Adding New Screens
-1. Create Composable in `ui/screens/`
-2. Add route to `AppNavGraph`
-3. Create ViewModel if state management needed
-4. Update navigation calls from existing screens
-
-This project follows clean architecture principles adapted for Android development with Jetpack Compose, emphasizing maintainable code, proper testing, and excellent user experience.
-
-## Project Roadmap
-
-Based on the project design, the following features are planned for future implementation:
-
-### Epic 4: Gift Event Management
-- Event Detail screen for viewing specific gift events
-- Add/Edit Event form for creating and modifying gift events
-
-### Epic 5: Gift Browsing & Organization
-- Browse by Occasion screen for filtering gifts by event type
-- Enhanced gift event planning and categorization UI
-
-### Epic 6: AI-Driven Features (Remaining)
-- AI gift picker by budget for budget-constrained suggestions
-
-### Epic 7: Price Tracking & Comparison
-- Sale alert detection for monitored gifts
-- Price comparison UI for cross-platform price viewing
-- Full CamelCamelCamel integration for comprehensive price history
-
-### Epic 8: Security & Settings
-- Password protection (app-level or per-list)
-- Comprehensive settings screen for app configuration
-
-## Known Limitations
-
-The following features are partially implemented and may need completion:
-
-### Gift Capture
-- **Share intent integration**: Manifest filter exists but Activity doesn't navigate to `add_gift?sharedText=...`
-- **File import**: Only CSV import implemented; PDF/Doc/Spreadsheet import not yet available
-
-### Person Management
-- **AI message history scan**: Opt-in SMS scan is wired but AI summarization is stubbed
-
-## Future Integrations
-
-The following external services and APIs are planned for integration:
-
-### Enhanced AI Services
-- Improved Gemini API prompts for better gift suggestions
-- AI-powered budget-based gift recommendations
-
-### Price Tracking APIs
-- Full CamelCamelCamel API integration for price history tracking
-- Additional price comparison services for comprehensive coverage
-
-### File Processing
-- Extended file import capabilities (PDF, Word documents, Excel spreadsheets)
-- Enhanced OCR processing for complex document layouts
-
-## Security Considerations
-
-Future security implementations will include:
-
-### App Protection
-- Biometric authentication support
-- PIN/password protection options
-- Per-list security settings for sensitive gift information
-
-### Data Privacy
-- Secure storage of personal information
-- Privacy controls for AI features and external service integration
-- Optional data encryption for sensitive gift and person data
+Prioritize:
+1. **Maintainable code** over clever solutions
+2. **Proper testing** at all layers  
+3. **Excellent UX** with consistent patterns
+4. **Security best practices** for personal data
