@@ -10,6 +10,23 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.threekidsinatrenchcoat.giftideaminder.ui.screens.*
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.threekidsinatrenchcoat.giftideaminder.viewmodel.GiftViewModel
+import com.threekidsinatrenchcoat.giftideaminder.viewmodel.PersonViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -81,7 +98,7 @@ fun AppNavGraph(
             PersonIdeasScreen(personId = personId, navController = navController)
         }
         composable("add_gift") {
-            AddEditGiftScreen(
+            AddGiftFlowScreenWrapper(
                 onNavigateBack = ::showSnackbarAndPopBackStack,
                 navController = navController
             )
@@ -92,7 +109,7 @@ fun AppNavGraph(
                 type = NavType.StringType; nullable = true; defaultValue = null
             })
         ) { back ->
-            AddEditGiftScreen(
+            AddGiftFlowScreenWrapper(
                 onNavigateBack = ::showSnackbarAndPopBackStack,
                 navController = navController,
                 sharedText = back.arguments?.getString("sharedText")
@@ -124,5 +141,107 @@ fun AppNavGraph(
             )
         }
         // … other routes …
+    }
+}
+
+@Composable
+private fun AddGiftFlowScreenWrapper(
+    onNavigateBack: (String?) -> Unit,
+    navController: NavController,
+    sharedText: String? = null,
+    viewModel: GiftViewModel = hiltViewModel(),
+    personViewModel: PersonViewModel = hiltViewModel()
+) {
+    val ui by viewModel.uiState.collectAsState()
+    val persons by personViewModel.allPersons.collectAsState(initial = emptyList())
+    var showPersonDialog by remember { mutableStateOf(false) }
+    
+    // Handle shared text initialization
+    LaunchedEffect(sharedText) {
+        if (!sharedText.isNullOrBlank()) {
+            if (sharedText.startsWith("http")) {
+                viewModel.onUrlChanged(sharedText)
+            } else {
+                viewModel.onIdeaTextChanged(sharedText)
+            }
+        }
+    }
+    
+    // Listen for save events
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is GiftViewModel.GiftEvent.Saved -> {
+                    onNavigateBack("Gift saved successfully!")
+                }
+            }
+        }
+    }
+    
+    AddGiftFlowScreen(
+        selectedPersonName = ui.selectedPersonName,
+        selectedPersonId = ui.personId,
+        eventDateMillis = if (ui.eventDateMillis > 0) ui.eventDateMillis else null,
+        ideaText = ui.ideaText,
+        stepIndex = ui.stepIndex,
+        onSelectPersonClick = {
+            showPersonDialog = true
+        },
+        onDateSelected = { millis ->
+            viewModel.onDateSelectedFlow(millis)
+        },
+        onIdeaChange = { text ->
+            viewModel.onIdeaTextChanged(text)
+        },
+        onBack = {
+            if (ui.stepIndex > 0) {
+                viewModel.onStepBack()
+            } else {
+                navController.popBackStack()
+            }
+        },
+        onNext = {
+            viewModel.onStepNext()
+        },
+        onSave = {
+            // Populate the title if not set
+            if (ui.title.isBlank() && ui.ideaText.isNotBlank()) {
+                viewModel.onTitleChanged(ui.ideaText)
+            }
+            viewModel.onSave()
+        },
+        onResetForCreate = {
+            viewModel.resetForCreateFlow()
+        },
+        openedFromFab = sharedText == null // Assume opened from FAB if no shared text
+    )
+    
+    // Person selection dialog
+    if (showPersonDialog) {
+        AlertDialog(
+            onDismissRequest = { showPersonDialog = false },
+            title = { Text("Select Person") },
+            text = {
+                LazyColumn {
+                    items(persons.size) { index ->
+                        val person = persons[index]
+                        TextButton(
+                            onClick = {
+                                viewModel.onPersonSelectedFlow(person.id, person.name)
+                                showPersonDialog = false
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(person.name, modifier = Modifier.padding(8.dp))
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showPersonDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }

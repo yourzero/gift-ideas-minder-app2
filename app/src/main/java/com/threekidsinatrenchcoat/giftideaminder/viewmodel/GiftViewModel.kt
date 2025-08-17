@@ -39,7 +39,11 @@ class GiftViewModel @Inject constructor(
         val eventDateMillis: Long = -1L,
         val personId: Int? = null,
         val isSaving: Boolean = false,
-        val error: String? = null
+        val error: String? = null,
+        // AddGiftFlowScreen specific state
+        val stepIndex: Int = 0,
+        val selectedPersonName: String? = null,
+        val ideaText: String = ""
     )
 
     private val _uiState = MutableStateFlow(GiftUiState())
@@ -75,6 +79,32 @@ class GiftViewModel @Inject constructor(
     fun onPriceChanged(v: String) = _uiState.update { it.copy(priceText = v) }
     fun onEventDateChanged(millis: Long) = _uiState.update { it.copy(eventDateMillis = millis) }
     fun onPersonSelected(id: Int?) = _uiState.update { it.copy(personId = id) }
+
+    // ---------- AddGiftFlowScreen specific methods ----------
+    fun onStepBack() = _uiState.update { 
+        it.copy(stepIndex = (it.stepIndex - 1).coerceAtLeast(0)) 
+    }
+    
+    fun onStepNext() = _uiState.update { 
+        it.copy(stepIndex = (it.stepIndex + 1).coerceAtMost(2)) 
+    }
+    
+    fun onIdeaTextChanged(text: String) = _uiState.update { 
+        it.copy(ideaText = text, description = text) 
+    }
+    
+    fun onDateSelectedFlow(millis: Long?) = _uiState.update { 
+        it.copy(eventDateMillis = millis ?: -1L) 
+    }
+    
+    fun onPersonSelectedFlow(personId: Int?, personName: String?) = _uiState.update { 
+        it.copy(personId = personId, selectedPersonName = personName) 
+    }
+    
+    fun onSelectPersonClick() {
+        // This will be handled by the screen to show person selection dialog
+        // The actual selection will be done via onPersonSelectedFlow
+    }
 
     // ---------- Save (mirrors AddEditRecipientViewModel.onSave) ----------
     fun onSave() {
@@ -305,5 +335,10 @@ class GiftViewModel @Inject constructor(
     /** Reset transient UI state for creating a new gift. */
     fun resetForCreate() {
         _uiState.value = GiftUiState()
+    }
+    
+    /** Reset specifically for AddGiftFlowScreen usage */
+    fun resetForCreateFlow() {
+        _uiState.value = GiftUiState(stepIndex = 0)
     }
 }
