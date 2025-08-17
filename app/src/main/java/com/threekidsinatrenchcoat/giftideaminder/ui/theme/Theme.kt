@@ -21,14 +21,10 @@ private val LightColorScheme = lightColorScheme(
 @Preview
 @Composable
 fun GiftIdeaMinderTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) {
-        DarkColorScheme
-    } else {
-        LightColorScheme
-    }
+    val colorScheme = LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,

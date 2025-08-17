@@ -33,7 +33,8 @@
       "mcp__serena__search_for_pattern",
       "Bash(powershell:*)",
       "mcp__sequential-thinking__sequentialthinking",
-      "Bash(Test-Path \"C:\\Users\\justin\\Music\\notifications\\notification-sound-3-262896.wav\")"
+      "Bash(Test-Path \"C:\\Users\\justin\\Music\\notifications\\notification-sound-3-262896.wav\")",
+      "Bash(.gradlew assembleDebug)"
     ],
     "deny": [],
     "ask": [],
