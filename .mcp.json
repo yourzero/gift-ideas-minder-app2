@@ -2,15 +2,28 @@
   "mcpServers": {
     "intellij": {
       "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "@jetbrains/mcp-proxy"
-      ],
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@jetbrains/mcp-proxy"],
       "env": {
         "HOST": "10.100.170.108",
         "IDE_PORT": "63342"
       }
-    }
+    },
+    "adb": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "adb-mcp"]
+    },
+    "search_serpapi": {
+      "command": "python",
+      "args": [".claude/servers/serpapi/server.py"]
+    },
+    "git": { "type": "stdio", "command": "uvx", "args": ["mcp-server-git"] },
+    "serena": { "type": "stdio", "command": "uvx", "args": ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "ide-assistant"] },
+    "sequential-thinking": { "type": "stdio", "command": "npx", "args": ["@modelcontextprotocol/server-sequential-thinking"] },
+    "supabase": { "type": "stdio", "command": "npx", "args": ["@supabase/mcp-server-supabase@latest"], "env": { "SUPABASE_ACCESS_TOKEN": "[YOUR_TOKEN]" } },
+    "sentry": { "type": "http", "url": "https://mcp.sentry.dev/mcp" },
+    "context7": { "type": "stdio", "command": "npx", "args": ["@upstash/context7-mcp"] },
+    "playwright": { "type": "stdio", "command": "npx", "args": ["@playwright/mcp@latest"] }
   }
 }

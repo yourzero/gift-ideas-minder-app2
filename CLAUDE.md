@@ -49,3 +49,6 @@ Prioritize:
 2. **Proper testing** at all layers  
 3. **Excellent UX** with consistent patterns
 4. **Security best practices** for personal data
+
+## Configuration
+- load ./.claude/.mcp.json for the MCP server configuration

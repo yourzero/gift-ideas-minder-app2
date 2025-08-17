@@ -1,0 +1,68 @@
+{
+  "agents": [
+    {
+      "name": "Compose Stylist",
+      "description": "Jetpack Compose UI/UX polish for Gift Idea Minder.",
+      "model": "claude-3.7-sonnet",
+      "package_name": "com.threekidsinatrenchcoat",
+      "allowed_servers": ["jetbrains", "github"],
+      "instructions": "Improve Compose code in-place (Material3, typography, spacing, state hoisting, previews, a11y). Keep diffs minimal and explain rationale."
+    },
+    {
+      "name": "Gradle Doctor",
+      "description": "Fixes Gradle/AGP/SDK issues and optimizes builds.",
+      "model": "claude-3.7-sonnet",
+      "allowed_servers": ["jetbrains", "adb", "github"],
+      "instructions": "Inspect AGP/JDK/SDK licenses, gradle.properties, and build files. Propose concrete edits and explain performance impact."
+    },
+    {
+      "name": "Navigation & Routes Auditor",
+      "description": "Validates Navigation routes/args and deep links.",
+      "model": "claude-3.7-sonnet",
+      "allowed_servers": ["jetbrains", "github", "adb"],
+      "instructions": "Audit NavGraph and routes (e.g., edit_person/{id}); add simple tests and deep links for QA. Keep changes surgical."
+    },
+    {
+      "name": "Room/DB Companion",
+      "description": "Inspects Room entities/DAOs/migrations; queries SQLite.",
+      "model": "claude-3.7-sonnet",
+      "allowed_servers": ["jetbrains", "sqlite", "github", "adb"],
+      "instructions": "Verify schema/migrations; run safe read-only queries; propose seed scripts and migration tests."
+    },
+    {
+      "name": "QA On-Device Runner",
+      "description": "Installs debug builds and runs happy-path UI flows via ADB.",
+      "model": "claude-3.7-sonnet",
+      "allowed_servers": ["adb", "jetbrains", "github"],
+      "instructions": "Install latest debug, launch via deep links, exercise add giftee/relationships/gifts, capture logs/screenshots for PRs."
+    },
+    {
+      "name": "Price/Link Integrator",
+      "description": "Prototypes retailer link discovery and basic price checks.",
+      "model": "claude-3.7-sonnet",
+      "allowed_servers": ["search_serpapi", "jetbrains", "github"],
+      "instructions": "Use Search MCP to find retailer pages; no scraping beyond TOS. Keep behind feature flags; Camel integration later."
+    },
+    {
+      "name": "Docs & Changelog Scribe",
+      "description": "Generates READMEs, PR descriptions, and release notes.",
+      "model": "claude-3.7-sonnet",
+      "allowed_servers": ["github"],
+      "instructions": "Summarize diffs crisply, list breaking changes, and produce human-editable markdown."
+    },
+    {
+      "name": "Privacy & Data-Handling Reviewer",
+      "description": "Flags risks in SMS/import/AI flows; suggests mitigations.",
+      "model": "claude-3.7-sonnet",
+      "allowed_servers": ["jetbrains", "github"],
+      "instructions": "Identify data-collection/consent issues and recommend opt-ins, retention toggles, and minimal diffs."
+    },
+    {
+      "name": "OCR Import Prototyper",
+      "description": "Runs PDF/image OCR experiments to import gift ideas.",
+      "model": "claude-3.7-sonnet",
+      "allowed_servers": ["pdf_ocr", "jetbrains", "github"],
+      "instructions": "Create a feature-ocr-import module with toggles and tests; parse into domain objects."
+    }
+  ]
+}

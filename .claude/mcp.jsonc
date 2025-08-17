@@ -1,0 +1,58 @@
+{
+  // Project-local MCP config (keep this inside your repo under .claude/)
+  "clients": {
+    "android-studio": {
+      "servers": {
+        "jetbrains": {
+          "transport": "stdio",
+          "command": "mcp-jetbrains"
+        },
+        "github": {
+          "transport": "sse",
+          "url": "https://mcp.github.com",
+          "metadata": { "scope": "repo, issues, pull_requests" }
+        },
+        "adb": {
+          "transport": "stdio",
+          "command": "npx",
+          "args": ["adb-mcp"],
+          "metadata": { "device": "auto" }
+        },
+        "sqlite": {
+          "transport": "stdio",
+          "command": "npx",
+          "args": ["@modelcontextprotocol/server-sqlite"],
+          "metadata": {
+            "defaultDbPath": "${SQLITE_DB_PATH:-.claude/dev-debug.db}"
+          }
+        },
+        "pdf_ocr": {
+          "transport": "stdio",
+          "command": "npx",
+          "args": ["mcp-pdf-reader"],
+          "metadata": { "ocr": true },
+          "disabled": true
+        },
+        "search_serpapi": {
+          "transport": "stdio",
+          "command": "npx",
+          "args": ["serpapi-mcp-server"],
+          "environment": {
+            "SERPAPI_API_KEY": "${SERPAPI_API_KEY}"
+          },
+          "disabled": true
+        },
+        "gdrive": {
+          "transport": "sse",
+          "url": "https://mcp.google-drive.example",
+          "disabled": true
+        },
+        "semantic_context": {
+          "transport": "sse",
+          "url": "https://__SET_ME__/semantic-context",
+          "disabled": true
+        }
+      }
+    }
+  }
+}
