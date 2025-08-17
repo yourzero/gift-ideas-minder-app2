@@ -231,6 +231,10 @@ class GiftViewModel @Inject constructor(
             }
             lastSuggestionsFetchMs = now
 
+            // Clear previous suggestions and errors at the start
+            _suggestions.value = emptyList()
+            _suggestionsError.value = null
+
             executeWithRetry(
                 operation = {
                     // Set current prompt for debug display if enabled
@@ -313,13 +317,20 @@ class GiftViewModel @Inject constructor(
                 return@launch
             }
 
+            // Clear previous suggestions and errors at the start
+            _suggestions.value = emptyList()
+            _suggestionsError.value = null
+
             executeWithRetry(
                 operation = {
                     // Set current prompt for debug display if enabled
                     _currentAiPrompt.value = "Fetching suggestions for person ID $personId ($perPerson suggestions)"
                     aiRepo.fetchSuggestionsForPerson(personId, perPerson)
                 },
-                onSuccess = { ideas -> _suggestions.value = ideas }
+                onSuccess = {
+                    ideas -> _suggestions.value = ideas
+                    _isLoadingSuggestions.value = false
+                }
             )
         }
     }

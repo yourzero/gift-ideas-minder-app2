@@ -52,3 +52,14 @@ Prioritize:
 
 ## Configuration
 - load ./.claude/.mcp.json for the MCP server configuration
+
+## Command Execution
+- Use PowerShell for all shell commands
+- Default shell: `powershell.exe`
+
+
+
+## Notifications
+- **Permission prompts**: powershell.exe -c "(New-Object Media.SoundPlayer 'C:\Users\justin\Music\notifications\new-notification-022-370046.wav').PlaySync()"
+- **Task completion**: powershell.exe -c "(New-Object Media.SoundPlayer 'C:\Users\justin\Music\notifications\notification-sound-3-262896.wav').PlaySync()"
+- **Errors/Warnings**: powershell.exe -c "(New-Object Media.SoundPlayer 'C:\Users\justin\Music\notifications\error-04-199275.wav').PlaySync()"

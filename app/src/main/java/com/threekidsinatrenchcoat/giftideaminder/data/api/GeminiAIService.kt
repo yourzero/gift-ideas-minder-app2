@@ -197,7 +197,12 @@ class GeminiAIService(
     }
 
     private fun buildSuggestionsPrompt(request: AIRequest): String {
-        val giftsJson = gson.toJson(request.gifts.map { g ->
+        // Check if there's a person hint in the gifts list
+        val personHint = request.gifts.find { it.title == "__PERSON_HINT__" }
+        val focusPersonId = personHint?.personId
+        val actualGifts = request.gifts.filter { it.title != "__PERSON_HINT__" && it.title != "__BUDGET_HINT__" }
+        
+        val giftsJson = gson.toJson(actualGifts.map { g ->
             mapOf(
                 "id" to g.id,
                 "title" to g.title,
@@ -221,6 +226,21 @@ class GeminiAIService(
 
         return buildString {
             appendLine("You are an assistant generating thoughtful gift suggestions with visual previews.")
+            
+            // Add person-specific instruction if we have a focus person
+            if (focusPersonId != null) {
+                val focusPerson = request.persons.find { it.id == focusPersonId }
+                if (focusPerson != null) {
+                    appendLine("FOCUS: Generate gift suggestions specifically for ${focusPerson.name} (ID: $focusPersonId).")
+                    appendLine("Consider their preferences: ${focusPerson.preferences.joinToString(", ")}")
+                    if (focusPerson.notes?.isNotBlank() == true) {
+                        appendLine("Additional context: ${focusPerson.notes}")
+                    }
+                    appendLine("Set personId to $focusPersonId for ALL suggestions.")
+                    appendLine()
+                }
+            }
+            
             appendLine("Input gifts (existing and recent):")
             appendLine(giftsJson)
             appendLine("People context (include preferences to tailor suggestions):")
@@ -232,7 +252,7 @@ class GeminiAIService(
             appendLine("- url (string, optional - product purchase URL)")
             appendLine("- imageUrl (string, HIGHLY PREFERRED - provide a direct image URL that shows what the gift looks like)")
             appendLine("- estimatedPrice (number, optional)")
-            appendLine("- personId (integer, optional — if a clear match)")
+            appendLine("- personId (integer, ${if (focusPersonId != null) "REQUIRED - must be $focusPersonId" else "optional — if a clear match"})")
             appendLine("- tags (array of strings, optional)")
             appendLine("- reason (string, optional)")
             appendLine()
@@ -246,6 +266,11 @@ class GeminiAIService(
             appendLine("  - https://target.scene7.com/is/image/Target/[product-id]")
             appendLine("  - https://i5.walmartimages.com/[image-path]")
             appendLine("- If you cannot find a specific product image, use a representative stock photo")
+            
+            if (focusPersonId != null) {
+                appendLine()
+                appendLine("REMINDER: ALL suggestions must have personId set to $focusPersonId")
+            }
         }
     }
 

@@ -1,21 +1,21 @@
 # Build and Development Commands
 
 ## Build & Deploy
-```bash
+```powershell
 ./gradlew build                    # Build project
 ./gradlew installDebug            # Install on device/emulator
 ./gradlew clean                   # Clean build
 ```
 
 ## Testing
-```bash
+```powershell
 ./gradlew test                    # Unit tests
 ./gradlew connectedAndroidTest    # Instrumentation tests
 ./gradlew testDebugUnitTest --tests "com.giftideaminder.viewmodel.PersonFlowViewModelTest"  # Specific test
 ```
 
 ## Linting and Code Quality
-```bash
+```powershell
 ./gradlew lintDebug               # Lint checks
 ./gradlew lintDebug --continue    # Generate lint report
 ```

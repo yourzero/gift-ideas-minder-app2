@@ -2,14 +2,22 @@
 package com.threekidsinatrenchcoat.giftideaminder.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -95,15 +103,27 @@ private fun PersonSection(
         }
 
         if (person.suggestions.isNotEmpty()) {
-            // Suggestions appear ONLY under a person
-            // TODO: Implement suggestions display when we have proper Gift data
+            // Display AI suggestions for this person
             Text(
-                "AI Suggestions (${person.suggestions.size})",
+                "AI Suggestions",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary
             )
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(person.suggestions) { suggestion ->
+                    SuggestionCard(
+                        suggestion = suggestion,
+                        onAccept = { onAcceptSuggestion(suggestion.id) },
+                        onDismiss = { onDismissSuggestion(suggestion.id) },
+                        onOpenLink = onOpenLink
+                    )
+                }
+            }
         }
-        Divider(Modifier.padding(top = 8.dp))
+        HorizontalDivider(Modifier.padding(top = 8.dp))
     }
 }
 
@@ -163,6 +183,118 @@ data class SuggestionUi(
     val imageUrl: String? = null,
     val linkUrl: String? = null
 )
+
+@Composable
+private fun SuggestionCard(
+    suggestion: SuggestionUi,
+    onAccept: () -> Unit,
+    onDismiss: () -> Unit,
+    onOpenLink: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .width(200.dp)
+            .padding(4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Image placeholder or actual image
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .then(
+                        if (suggestion.imageUrl != null) {
+                            Modifier
+                        } else {
+                            Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                if (suggestion.imageUrl != null) {
+                    AsyncImage(
+                        model = suggestion.imageUrl,
+                        contentDescription = suggestion.title,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Text(
+                        "🎁",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                }
+            }
+
+            // Title
+            Text(
+                text = suggestion.title,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            // Price
+            suggestion.priceLabel?.let { price ->
+                Text(
+                    text = price,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            // Action buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Open link button
+                suggestion.linkUrl?.let { url ->
+                    IconButton(
+                        onClick = { onOpenLink(url) },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.Language,
+                            contentDescription = "Open Link",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                // Accept button
+                IconButton(
+                    onClick = onAccept,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        Icons.Filled.Add,
+                        contentDescription = "Accept",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                // Dismiss button
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = "Dismiss",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        }
+    }
+}
 
 data class PersonGiftsUi(
     val personId: String,

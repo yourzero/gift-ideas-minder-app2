@@ -1,5 +1,6 @@
 package com.threekidsinatrenchcoat.giftideaminder.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.padding
@@ -77,6 +78,7 @@ fun SuggestionsCarousel(
             isRetrying = retrying,
             currentRetryCount = retryCount,
             onLoadingComplete = {
+                Log.d("SuggestionsCarousel", "onLoadingComplete")
                 // This will be called when loading animation completes
                 // We can add sound effect here
             }

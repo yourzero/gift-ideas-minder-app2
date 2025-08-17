@@ -74,9 +74,15 @@ fun PersonIdeasScreen(
                 isRetrying = viewModel.isRetrying,
                 currentRetryCount = viewModel.currentRetryCount
             )
+            Text(
+                text = "Tip: swipe to view all of the ideas.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
             Button(onClick = { viewModel.fetchSuggestionsForPerson(personId) }) {
                 Text("Refresh")
             }
+
         }
     }
 }
