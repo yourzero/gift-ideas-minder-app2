@@ -41,6 +41,13 @@ Gift Idea Minder is an Android application built with Jetpack Compose, Room, Hil
 ./gradlew lintDebug --continue
 ```
 
+### Change SDK folder when Claude initiates a build
+- Overview: Android Studio is running in Windows, so when I (the user) initiate a build through it, the sdk.dir must be set to a windows-compatible path for it to compile. But in the seldom occasions that Claude initiates the build agenticly, note: 
+  - If Claude is running in a powershell or command prompt window, the sdk.dir setting in local properties should be set to a windows-compatible path:
+  ```sdk.dir=D\:\\Users\\justin\\AppData\\Local\\Android\\Sdk```
+  - If Claude is running in a WSL/linux command window, the sdk.dir setting in local properties should be set to a linux-compatible path (below). Make this change before a claude-initiated build (when appropriate), and set it back to the windows path after.
+  ```sdk.dir=/home/justin/Android/Sdk```
+
 ## Architecture Overview
 
 ### Core Technologies
