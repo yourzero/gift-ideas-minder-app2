@@ -1,4 +1,5 @@
-# Gifts
+# Done
+## Gifts
 - gifts screen:
   - add gift:
     - "pick date" should prompt the user with the dates that have been set for the recipient, not prompt for a date itself (at least not initially)
@@ -13,4 +14,10 @@
 - gift suggestion card
   - change the link to be accessible via a globe (www) icon, instead of having the whole card be clickable
 
-  
+# TODO
+## Gifts
+- gifts screen:
+  - add gift:
+    - change the add gift flow screen to clearly indicate when one of the saved dates is selected (the button itself); 
+    - in fact, change the whole "pick custom date" and "add & use date" to one "add date" button. this button will popup a dialog similar to the current "add & use date", but with a date picker too. also include a checkbox to save the date to the person's profile (unless the data model is structured so that a date can't be associated with a gift unless it's saved - if that's the case, then ignore the checkbox and always save it)
+      - after this custom date is added, ensure it is automatically selected on the screen

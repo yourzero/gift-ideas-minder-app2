@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -57,7 +57,12 @@ fun GiftCard(
             Spacer(Modifier.width(8.dp))
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 IconButton(onClick = onOpenLink, enabled = item.linkUrl != null) {
-                    Icon(Icons.Default.Link, contentDescription = "Open link")
+                    Icon(
+                        Icons.Default.Language, 
+                        contentDescription = "Open product website",
+                        tint = if (item.linkUrl != null) MaterialTheme.colorScheme.primary 
+                               else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    )
                 }
                 IconButton(onClick = onToggleShortlist) {
                     Icon(Icons.Default.Star, contentDescription = "Shortlist")

@@ -7,6 +7,9 @@ import com.threekidsinatrenchcoat.giftideaminder.data.dao.GiftDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.PersonDao
 import com.threekidsinatrenchcoat.giftideaminder.data.model.Gift
 import com.threekidsinatrenchcoat.giftideaminder.data.model.GiftWithHistory
+import com.threekidsinatrenchcoat.giftideaminder.data.model.ImportantDate
+import com.threekidsinatrenchcoat.giftideaminder.data.repository.ImportantDateRepository
+import java.time.LocalDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.*
@@ -17,7 +20,8 @@ import kotlinx.coroutines.delay
 class GiftViewModel @Inject constructor(
     private val giftDao: GiftDao,
     private val aiRepo: com.threekidsinatrenchcoat.giftideaminder.data.repository.AISuggestionRepository,
-    private val personDao: PersonDao
+    private val personDao: PersonDao,
+    private val importantDateRepository: ImportantDateRepository
 ) : ViewModel() {
 
     // ---------- Public DAO-backed streams ----------
@@ -43,7 +47,8 @@ class GiftViewModel @Inject constructor(
         // AddGiftFlowScreen specific state
         val stepIndex: Int = 0,
         val selectedPersonName: String? = null,
-        val ideaText: String = ""
+        val ideaText: String = "",
+        val personImportantDates: List<ImportantDate> = emptyList()
     )
 
     private val _uiState = MutableStateFlow(GiftUiState())
@@ -97,8 +102,21 @@ class GiftViewModel @Inject constructor(
         it.copy(eventDateMillis = millis ?: -1L) 
     }
     
-    fun onPersonSelectedFlow(personId: Int?, personName: String?) = _uiState.update { 
-        it.copy(personId = personId, selectedPersonName = personName) 
+    fun onPersonSelectedFlow(personId: Int?, personName: String?) {
+        _uiState.update { 
+            it.copy(personId = personId, selectedPersonName = personName) 
+        }
+        
+        // Load important dates for the selected person
+        if (personId != null) {
+            viewModelScope.launch {
+                importantDateRepository.getForPerson(personId).collect { dates ->
+                    _uiState.update { it.copy(personImportantDates = dates) }
+                }
+            }
+        } else {
+            _uiState.update { it.copy(personImportantDates = emptyList()) }
+        }
     }
     
     fun onSelectPersonClick() {
@@ -340,5 +358,19 @@ class GiftViewModel @Inject constructor(
     /** Reset specifically for AddGiftFlowScreen usage */
     fun resetForCreateFlow() {
         _uiState.value = GiftUiState(stepIndex = 0)
+    }
+    
+    /** Add a custom important date for the current person and use it */
+    fun onAddCustomDate(label: String, date: LocalDate) {
+        val personId = _uiState.value.personId ?: return
+        
+        viewModelScope.launch {
+            val importantDate = ImportantDate(
+                personId = personId,
+                label = label,
+                date = date
+            )
+            importantDateRepository.insert(importantDate)
+        }
     }
 }

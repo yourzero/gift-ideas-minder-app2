@@ -1,5 +1,6 @@
 package com.threekidsinatrenchcoat.giftideaminder.data.api
 
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -49,10 +50,26 @@ class GeminiAIService(
 
     // --- Public API (AIService) ---
     override suspend fun getSuggestions(request: AIRequest): List<Gift> {
+        Log.d("GeminiAIService", "Starting getSuggestions - building prompt")
         val prompt = buildSuggestionsPrompt(request)
-        val jsonText: String = callGemini(prompt)
+        Log.d("GeminiAIService", "Prompt built, calling Gemini API")
+        
+        val jsonText: String = try {
+            callGemini(prompt)
+        } catch (e: Exception) {
+            Log.e("GeminiAIService", "Error calling Gemini API", e)
+            throw e
+        }
+        
+        Log.d("GeminiAIService", "Gemini API response received: ${jsonText.take(500)}...")
+        
         val jsonArray: JsonElement? = extractTopLevelJsonArray(jsonText)
-        if (jsonArray == null || !jsonArray.isJsonArray) return emptyList()
+        if (jsonArray == null || !jsonArray.isJsonArray) {
+            Log.w("GeminiAIService", "Failed to extract JSON array from response")
+            return emptyList()
+        }
+        
+        Log.d("GeminiAIService", "JSON array extracted, parsing gifts")
 
         val suggestions = mutableListOf<Gift>()
         jsonArray.asJsonArray.forEach { element ->
@@ -82,8 +99,13 @@ class GeminiAIService(
                     tags = tags
                 )
                 suggestions.add(gift)
+                Log.d("GeminiAIService", "Parsed gift: ${gift.title}")
+            }.onFailure { e ->
+                Log.w("GeminiAIService", "Failed to parse gift from JSON element", e)
             }
         }
+        
+        Log.d("GeminiAIService", "Parsed ${suggestions.size} gift suggestions")
         return suggestions
     }
 
@@ -124,11 +146,15 @@ class GeminiAIService(
 
     // --- Internal helpers ---
     private suspend fun callGemini(prompt: String): String = withContext(Dispatchers.IO) {
+        Log.d("GeminiAIService", "Calling Gemini API with model: $modelName")
+        
         val url = "$endpointBase$modelName:generateContent?key=$apiKey"
         val req = GeminiRequest(
             contents = listOf(GeminiContent(parts = listOf(GeminiPart(text = prompt))))
         )
         val json = gson.toJson(req)
+        Log.d("GeminiAIService", "Request JSON length: ${json.length}")
+        
         val mediaType = "application/json; charset=utf-8".toMediaType()
         val body = json.toRequestBody(mediaType)
         val httpRequest = Request.Builder()
@@ -137,15 +163,35 @@ class GeminiAIService(
             .build()
 
         httpClient.newCall(httpRequest).execute().use { resp ->
-            if (!resp.isSuccessful) throw IllegalStateException("Gemini API error: HTTP ${'$'}{resp.code}")
+            Log.d("GeminiAIService", "HTTP response code: ${resp.code}")
+            
+            if (!resp.isSuccessful) {
+                val errorBody = resp.body?.string()
+                Log.e("GeminiAIService", "Gemini API error: HTTP ${resp.code}, body: $errorBody")
+                throw IllegalStateException("Gemini API error: HTTP ${resp.code}")
+            }
+            
             val respBody = resp.body?.string().orEmpty()
-            val parsed: GeminiResponse = gson.fromJson(respBody, GeminiResponse::class.java)
+            Log.d("GeminiAIService", "Raw response body length: ${respBody.length}")
+            
+            val parsed: GeminiResponse = try {
+                gson.fromJson(respBody, GeminiResponse::class.java)
+            } catch (e: Exception) {
+                Log.e("GeminiAIService", "Failed to parse Gemini response as JSON", e)
+                Log.d("GeminiAIService", "Raw response: $respBody")
+                throw e
+            }
+            
             val text: String = parsed.candidates
                 ?.firstOrNull()
                 ?.content
                 ?.parts
                 ?.joinToString(separator = "") { it.text }
                 .orEmpty()
+                
+            Log.d("GeminiAIService", "Extracted text length: ${text.length}")
+            Log.d("GeminiAIService", "Extracted text preview: ${text.take(200)}...")
+            
             text
         }
     }

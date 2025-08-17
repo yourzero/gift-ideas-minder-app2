@@ -184,6 +184,7 @@ private fun AddGiftFlowScreenWrapper(
         eventDateMillis = if (ui.eventDateMillis > 0) ui.eventDateMillis else null,
         ideaText = ui.ideaText,
         stepIndex = ui.stepIndex,
+        personImportantDates = ui.personImportantDates,
         onSelectPersonClick = {
             showPersonDialog = true
         },
@@ -212,6 +213,9 @@ private fun AddGiftFlowScreenWrapper(
         },
         onResetForCreate = {
             viewModel.resetForCreateFlow()
+        },
+        onAddCustomDate = { label, date ->
+            viewModel.onAddCustomDate(label, date)
         },
         openedFromFab = sharedText == null // Assume opened from FAB if no shared text
     )

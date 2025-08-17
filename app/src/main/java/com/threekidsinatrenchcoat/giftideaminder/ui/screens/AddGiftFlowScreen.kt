@@ -2,12 +2,22 @@
 package com.threekidsinatrenchcoat.giftideaminder.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.threekidsinatrenchcoat.giftideaminder.data.model.ImportantDate
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 /**
@@ -32,6 +42,8 @@ fun AddGiftFlowScreen(
     eventDateMillis: Long?,
     ideaText: String,
     stepIndex: Int,
+    // Important dates for the selected person
+    personImportantDates: List<ImportantDate>,
     // VM callbacks
     onSelectPersonClick: () -> Unit,
     onDateSelected: (Long?) -> Unit,
@@ -40,6 +52,7 @@ fun AddGiftFlowScreen(
     onNext: () -> Unit,
     onSave: () -> Unit,
     onResetForCreate: () -> Unit,
+    onAddCustomDate: (String, LocalDate) -> Unit,
     // Whether this screen was opened fresh from the "+" FAB
     openedFromFab: Boolean,
     modifier: Modifier = Modifier
@@ -80,7 +93,7 @@ fun AddGiftFlowScreen(
         Text(text = "Add Gift", style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(8.dp))
         LinearProgressIndicator(
-            progress = ((stepIndex + 1).coerceAtMost(3)) / 3f,
+            progress = { ((stepIndex + 1).coerceAtMost(3)) / 3f },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.height(16.dp))
@@ -92,7 +105,10 @@ fun AddGiftFlowScreen(
             )
             1 -> StepPickDate(
                 dateMillis = eventDateMillis,
-                onPickClick = { showDatePicker = true }
+                personImportantDates = personImportantDates,
+                onPickClick = { showDatePicker = true },
+                onDateSelected = onDateSelected,
+                onAddCustomDate = onAddCustomDate
             )
             else -> StepDetails(
                 ideaText = ideaText,
@@ -153,15 +169,178 @@ private fun StepSelectPerson(
 @Composable
 private fun StepPickDate(
     dateMillis: Long?,
-    onPickClick: () -> Unit
+    personImportantDates: List<ImportantDate>,
+    onPickClick: () -> Unit,
+    onDateSelected: (Long?) -> Unit,
+    onAddCustomDate: (String, LocalDate) -> Unit
 ) {
+    var showAddDateDialog by remember { mutableStateOf(false) }
+    var customDateLabel by remember { mutableStateOf("") }
+    var selectedLocalDate by remember { mutableStateOf(LocalDate.now()) }
+    var saveToProfile by remember { mutableStateOf(true) }
+    
+    // Check if current dateMillis matches any saved date for visual indication
+    val selectedImportantDate = dateMillis?.let { millis ->
+        val selectedDate = Date(millis).toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+        personImportantDates.find { it.date == selectedDate }
+    }
+    
     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
         Text("Pick Date", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
-        val label = dateMillis?.let { Date(it).toString() } ?: "No date selected"
-        OutlinedButton(onClick = onPickClick) { Text("Pick Date") }
+        
+        if (personImportantDates.isNotEmpty()) {
+            Text(
+                "Choose from saved dates:",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+            )
+            Spacer(Modifier.height(8.dp))
+            
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.heightIn(max = 200.dp)
+            ) {
+                items(personImportantDates) { importantDate ->
+                    val isSelected = selectedImportantDate?.id == importantDate.id
+                    Card(
+                        onClick = {
+                            val millis = importantDate.date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                            onDateSelected(millis)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isSelected) {
+                                MaterialTheme.colorScheme.primaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.surface
+                            }
+                        ),
+                        border = if (isSelected) {
+                            CardDefaults.outlinedCardBorder().copy(
+                                width = 2.dp,
+                                brush = SolidColor(MaterialTheme.colorScheme.primary)
+                            )
+                        } else {
+                            CardDefaults.outlinedCardBorder()
+                        }
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = importantDate.label,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = if (isSelected) {
+                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                    } else {
+                                        MaterialTheme.colorScheme.primary
+                                    }
+                                )
+                                Text(
+                                    text = importantDate.date.format(DateTimeFormatter.ofPattern("MMM dd, yyyy")),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = if (isSelected) {
+                                        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                    }
+                                )
+                            }
+                            if (isSelected) {
+                                Icon(
+                                    Icons.Default.Check,
+                                    contentDescription = "Selected",
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            
+            Spacer(Modifier.height(12.dp))
+            HorizontalDivider()
+            Spacer(Modifier.height(12.dp))
+        }
+        
+        // Single "Add Date" button
+        OutlinedButton(
+            onClick = { showAddDateDialog = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(Icons.Default.Add, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("Add Date")
+        }
+        
         Spacer(Modifier.height(8.dp))
-        Text(label, style = MaterialTheme.typography.bodyMedium)
+        
+        // Show selected date status
+        val selectedLabel = if (selectedImportantDate != null) {
+            "${selectedImportantDate.label} - ${selectedImportantDate.date.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))}"
+        } else if (dateMillis != null) {
+            val date = Date(dateMillis)
+            "Custom date - ${date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                .format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))}"
+        } else {
+            "No date selected"
+        }
+        
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = if (dateMillis != null) {
+                    MaterialTheme.colorScheme.tertiaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                }
+            )
+        ) {
+            Text(
+                text = "Selected: $selectedLabel",
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (dateMillis != null) {
+                    MaterialTheme.colorScheme.onTertiaryContainer
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+                modifier = Modifier.padding(12.dp)
+            )
+        }
+    }
+    
+    if (showAddDateDialog) {
+        AddDateDialog(
+            customDateLabel = customDateLabel,
+            selectedDate = selectedLocalDate,
+            saveToProfile = saveToProfile,
+            onLabelChange = { customDateLabel = it },
+            onDateChange = { selectedLocalDate = it },
+            onSaveToProfileChange = { saveToProfile = it },
+            onConfirm = {
+                if (customDateLabel.isNotBlank()) {
+                    if (saveToProfile) {
+                        onAddCustomDate(customDateLabel, selectedLocalDate)
+                    }
+                    val millis = selectedLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                    onDateSelected(millis)
+                    showAddDateDialog = false
+                    customDateLabel = ""
+                    selectedLocalDate = LocalDate.now()
+                    saveToProfile = true
+                }
+            },
+            onDismiss = { 
+                showAddDateDialog = false 
+                customDateLabel = ""
+                selectedLocalDate = LocalDate.now()
+                saveToProfile = true
+            }
+        )
     }
 }
 
@@ -179,5 +358,119 @@ private fun StepDetails(
             label = { Text("Gift idea") },
             modifier = Modifier.fillMaxWidth()
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AddDateDialog(
+    customDateLabel: String,
+    selectedDate: LocalDate,
+    saveToProfile: Boolean,
+    onLabelChange: (String) -> Unit,
+    onDateChange: (LocalDate) -> Unit,
+    onSaveToProfileChange: (Boolean) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+    )
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add Date") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = customDateLabel,
+                    onValueChange = onLabelChange,
+                    label = { Text("Occasion/Label") },
+                    placeholder = { Text("e.g., Anniversary, Birthday") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                OutlinedCard(
+                    onClick = { showDatePicker = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "Date",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = selectedDate.format(DateTimeFormatter.ofPattern("MMM dd, yyyy")),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Pick date",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Checkbox(
+                        checked = saveToProfile,
+                        onCheckedChange = onSaveToProfileChange
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Save to person's profile",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                enabled = customDateLabel.isNotBlank()
+            ) {
+                Text("Add & Use")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+    
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val newDate = Date(millis).toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                            onDateChange(newDate)
+                        }
+                        showDatePicker = false
+                    }
+                ) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
     }
 }
