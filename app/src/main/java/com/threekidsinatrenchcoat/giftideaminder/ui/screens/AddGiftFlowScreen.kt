@@ -2,6 +2,7 @@
 package com.threekidsinatrenchcoat.giftideaminder.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -29,6 +30,7 @@ import java.util.*
  * - Primary button label is "Save" on final step
  * - Back/Save aligned like Add/Edit Recipient flow (weighted row on final step)
  * - Clears transient state when opened from FAB by calling [onResetForCreate] once at first composition
+ * - Prompts for occasion when missing (step 2)
  *
  * Note: Wire these callbacks to your ViewModel. This composable keeps minimal local state,
  * delegating persistence to the VM via parameters/callbacks.
@@ -42,12 +44,14 @@ fun AddGiftFlowScreen(
     eventDateMillis: Long?,
     ideaText: String,
     stepIndex: Int,
+    occasion: String,
     // Important dates for the selected person
     personImportantDates: List<ImportantDate>,
     // VM callbacks
     onSelectPersonClick: () -> Unit,
     onDateSelected: (Long?) -> Unit,
     onIdeaChange: (String) -> Unit,
+    onOccasionChange: (String) -> Unit,
     onBack: () -> Unit,
     onNext: () -> Unit,
     onSave: () -> Unit,
@@ -93,7 +97,7 @@ fun AddGiftFlowScreen(
         Text(text = "Add Gift", style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(8.dp))
         LinearProgressIndicator(
-            progress = { ((stepIndex + 1).coerceAtMost(3)) / 3f },
+            progress = { ((stepIndex + 1).coerceAtMost(4)) / 4f },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.height(16.dp))
@@ -110,6 +114,10 @@ fun AddGiftFlowScreen(
                 onDateSelected = onDateSelected,
                 onAddCustomDate = onAddCustomDate
             )
+            2 -> StepSelectOccasion(
+                occasion = occasion,
+                onOccasionChange = onOccasionChange
+            )
             else -> StepDetails(
                 ideaText = ideaText,
                 onIdeaChange = onIdeaChange
@@ -119,13 +127,16 @@ fun AddGiftFlowScreen(
         Spacer(Modifier.height(24.dp))
 
         // Bottom buttons
-        if (stepIndex < 2) {
+        if (stepIndex < 3) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 OutlinedButton(onClick = onBack) { Text("Back") }
-                val nextEnabled = if (stepIndex == 0) selectedPersonId != null else true
+                val nextEnabled = when (stepIndex) {
+                    0 -> selectedPersonId != null
+                    else -> true
+                }
                 Button(onClick = onNext, enabled = nextEnabled) { Text("Next") }
             }
         } else {
@@ -340,6 +351,60 @@ private fun StepPickDate(
                 selectedLocalDate = LocalDate.now()
                 saveToProfile = true
             }
+        )
+    }
+}
+
+@Composable
+private fun StepSelectOccasion(
+    occasion: String,
+    onOccasionChange: (String) -> Unit
+) {
+    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
+        Text("What's the occasion?", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+        
+        Text(
+            "Knowing the occasion helps generate more relevant gift ideas.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        
+        Spacer(Modifier.height(16.dp))
+        
+        // Common occasions as buttons
+        val commonOccasions = listOf(
+            "Birthday", "Anniversary", "Christmas", "Valentine's Day",
+            "Mother's Day", "Father's Day", "Graduation", "Wedding",
+            "Baby Shower", "Housewarming", "Thank You", "Just Because"
+        )
+        
+        Text("Popular occasions:", style = MaterialTheme.typography.labelMedium)
+        Spacer(Modifier.height(8.dp))
+        
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            commonOccasions.forEach { commonOccasion ->
+                FilterChip(
+                    onClick = { onOccasionChange(commonOccasion) },
+                    label = { Text(commonOccasion) },
+                    selected = occasion == commonOccasion
+                )
+            }
+        }
+        
+        Spacer(Modifier.height(16.dp))
+        
+        // Custom occasion input
+        OutlinedTextField(
+            value = if (occasion in commonOccasions) "" else occasion,
+            onValueChange = onOccasionChange,
+            label = { Text("Or enter custom occasion") },
+            placeholder = { Text("e.g., Promotion celebration") },
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }

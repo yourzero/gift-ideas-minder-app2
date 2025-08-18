@@ -48,7 +48,8 @@ class GiftViewModel @Inject constructor(
         val stepIndex: Int = 0,
         val selectedPersonName: String? = null,
         val ideaText: String = "",
-        val personImportantDates: List<ImportantDate> = emptyList()
+        val personImportantDates: List<ImportantDate> = emptyList(),
+        val occasion: String = ""
     )
 
     private val _uiState = MutableStateFlow(GiftUiState())
@@ -85,13 +86,15 @@ class GiftViewModel @Inject constructor(
     fun onEventDateChanged(millis: Long) = _uiState.update { it.copy(eventDateMillis = millis) }
     fun onPersonSelected(id: Int?) = _uiState.update { it.copy(personId = id) }
 
+    fun onOccasionChanged(v: String) = _uiState.update { it.copy(occasion = v) }
+
     // ---------- AddGiftFlowScreen specific methods ----------
     fun onStepBack() = _uiState.update { 
         it.copy(stepIndex = (it.stepIndex - 1).coerceAtLeast(0)) 
     }
     
     fun onStepNext() = _uiState.update { 
-        it.copy(stepIndex = (it.stepIndex + 1).coerceAtMost(2)) 
+        it.copy(stepIndex = (it.stepIndex + 1).coerceAtMost(3)) 
     }
     
     fun onIdeaTextChanged(text: String) = _uiState.update { 
@@ -331,6 +334,29 @@ class GiftViewModel @Inject constructor(
                     ideas -> _suggestions.value = ideas
                     _isLoadingSuggestions.value = false
                 }
+            )
+        }
+    }
+
+    fun fetchSuggestionsWithOccasion(personId: Int?, occasion: String, perPerson: Int = 3) {
+        viewModelScope.launch {
+            if (!BuildConfig.AI_ENABLED) {
+                _suggestions.value = emptyList()
+                _suggestionsError.value = "AI disabled"
+                return@launch
+            }
+
+            // Clear previous suggestions and errors at the start
+            _suggestions.value = emptyList()
+            _suggestionsError.value = null
+
+            executeWithRetry(
+                operation = {
+                    // Set current prompt for debug display if enabled
+                    _currentAiPrompt.value = "Fetching suggestions with occasion \"$occasion\" ${if (personId != null) "for person ID $personId " else ""}($perPerson suggestions)"
+                    aiRepo.fetchSuggestionsWithOccasion(personId, occasion, perPerson)
+                },
+                onSuccess = { ideas -> _suggestions.value = ideas }
             )
         }
     }

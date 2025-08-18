@@ -139,6 +139,33 @@ class AISuggestionRepository(
         }.dedupeAgainst(gifts)
     }
 
+    suspend fun fetchSuggestionsWithOccasion(personId: Int?, occasion: String, perPerson: Int = 3): List<Gift> {
+        val gifts: List<Gift> = giftDao.getAllGifts().first()
+        val persons: List<Person> = personDao.getAllPersons().first()
+        
+        val hints = mutableListOf<Gift>()
+        
+        // Add person hint if specified
+        if (personId != null) {
+            hints.add(Gift(title = "__PERSON_HINT__", description = "focus", personId = personId))
+        }
+        
+        // Add occasion hint
+        hints.add(Gift(title = "__OCCASION_HINT__", description = occasion))
+        
+        val response = aiService.getSuggestions(AIRequest(gifts = gifts + hints, persons = persons))
+        val dismissedKeys: List<String> = dismissalDao.getAllDismissedKeys().first()
+        
+        return response.filterNot { gift ->
+            val key = buildSuggestionKey(gift)
+            dismissedKeys.contains(key)
+        }.dedupeAgainst(gifts)
+            .filter { if (personId != null) it.personId == personId else true }
+            .let { filtered ->
+                if (filtered.size <= perPerson) filtered else filtered.take(perPerson)
+            }
+    }
+
     private fun List<Gift>.dedupeAgainst(existing: List<Gift>): List<Gift> {
         val existingKeys = existing.map { buildSuggestionKey(it) }.toSet()
         return this.filter { buildSuggestionKey(it) !in existingKeys }

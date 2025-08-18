@@ -64,7 +64,7 @@ class GeminiAIService(
                 if (min != null && max != null) Pair(min, max) else null
             } else null
         }
-        
+
         val jsonText: String = try {
             callGemini(prompt)
         } catch (e: Exception) {
@@ -135,14 +135,14 @@ class GeminiAIService(
         } else {
             suggestions
         }
-        
+
         Log.d("GeminiAIService", "Final suggestions count: ${filteredSuggestions.size}")
-        
+
         // If budget filtering resulted in no suggestions, return an empty list
         if (budgetRange != null && filteredSuggestions.isEmpty()) {
             Log.w("GeminiAIService", "No suggestions found within budget range ${budgetRange.first}-${budgetRange.second}")
         }
-        
+
         return filteredSuggestions
     }
 
@@ -237,7 +237,7 @@ class GeminiAIService(
         // Check if there's a person hint in the gifts list
         val personHint = request.gifts.find { it.title == "__PERSON_HINT__" }
         val focusPersonId = personHint?.personId
-        
+
         // Check if there's a budget hint
         val budgetHint = request.gifts.find { it.title == "__BUDGET_HINT__" }
         val budgetRange = budgetHint?.description?.let { desc ->
@@ -248,8 +248,14 @@ class GeminiAIService(
                 if (min != null && max != null) Pair(min, max) else null
             } else null
         }
-        
-        val actualGifts = request.gifts.filter { it.title != "__PERSON_HINT__" && it.title != "__BUDGET_HINT__" }
+
+        // Check if there's an occasion hint
+        val occasionHint = request.gifts.find { it.title == "__OCCASION_HINT__" }
+        val occasion = occasionHint?.description
+
+        val actualGifts = request.gifts.filter {
+            it.title !in listOf("__PERSON_HINT__", "__BUDGET_HINT__", "__OCCASION_HINT__")
+        }
         
         val giftsJson = gson.toJson(actualGifts.map { g ->
             mapOf(
@@ -277,6 +283,14 @@ class GeminiAIService(
         return buildString {
             appendLine("You are an assistant generating thoughtful gift suggestions with visual previews.")
             
+            // Add occasion context if specified
+            if (!occasion.isNullOrBlank()) {
+                appendLine()
+                appendLine("OCCASION CONTEXT: These gifts are for \"$occasion\".")
+                appendLine("Tailor all suggestions to be appropriate for this specific occasion.")
+                appendLine("Consider traditional gifts, cultural expectations, and seasonal relevance for this occasion.")
+            }
+
             // Add budget constraint if specified
             if (budgetRange != null) {
                 appendLine()
@@ -284,7 +298,7 @@ class GeminiAIService(
                 appendLine("If you cannot find suitable suggestions within this budget range, return an empty array [].")
                 appendLine("Do not suggest items outside this price range under any circumstances.")
             }
-            
+
             // Add person-specific instruction if we have a focus person
             if (focusPersonId != null) {
                 val focusPerson = request.persons.find { it.id == focusPersonId }
@@ -295,7 +309,7 @@ class GeminiAIService(
                         appendLine("Additional context: ${focusPerson.notes}")
                     }
                     appendLine("Set personId to $focusPersonId for ALL suggestions.")
-                    
+
                     // Add budget consideration from person's default budget
                     val personBudget = focusPerson.defaultBudget
                     if (personBudget != null && personBudget > 0 && budgetRange == null) {
@@ -305,7 +319,7 @@ class GeminiAIService(
                     appendLine()
                 }
             }
-            
+
             // Add general budget guidance from existing gifts
             val budgetsFromGifts = actualGifts.mapNotNull { it.budget }.filter { it > 0 }
             if (budgetsFromGifts.isNotEmpty() && budgetRange == null) {
@@ -355,10 +369,15 @@ class GeminiAIService(
                 appendLine()
                 appendLine("REMINDER: ALL suggestions must have personId set to $focusPersonId")
             }
-            
+
             if (budgetRange != null) {
                 appendLine()
                 appendLine("FINAL REMINDER: ALL suggestions must have estimatedPrice between $${budgetRange.first} and $${budgetRange.second}")
+            }
+
+            if (!occasion.isNullOrBlank()) {
+                appendLine()
+                appendLine("FINAL REMINDER: ALL suggestions must be appropriate for \"$occasion\"")
             }
         }
     }

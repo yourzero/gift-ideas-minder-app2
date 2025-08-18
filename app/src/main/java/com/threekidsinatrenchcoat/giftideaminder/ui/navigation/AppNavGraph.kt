@@ -184,6 +184,7 @@ private fun AddGiftFlowScreenWrapper(
         eventDateMillis = if (ui.eventDateMillis > 0) ui.eventDateMillis else null,
         ideaText = ui.ideaText,
         stepIndex = ui.stepIndex,
+        occasion = ui.occasion,
         personImportantDates = ui.personImportantDates,
         onSelectPersonClick = {
             showPersonDialog = true
@@ -193,6 +194,9 @@ private fun AddGiftFlowScreenWrapper(
         },
         onIdeaChange = { text ->
             viewModel.onIdeaTextChanged(text)
+        },
+        onOccasionChange = { occasion ->
+            viewModel.onOccasionChanged(occasion)
         },
         onBack = {
             if (ui.stepIndex > 0) {
