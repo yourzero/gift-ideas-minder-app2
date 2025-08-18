@@ -253,10 +253,15 @@ class GeminiAIService(
         val occasionHint = request.gifts.find { it.title == "__OCCASION_HINT__" }
         val occasion = occasionHint?.description
 
+
+        val interestsHint = request.gifts.find { it.title == "__INTERESTS_HINT__" }
+        val ownedHint = request.gifts.find { it.title == "__OWNED_HINT__" }
+
         val actualGifts = request.gifts.filter {
-            it.title !in listOf("__PERSON_HINT__", "__BUDGET_HINT__", "__OCCASION_HINT__")
+            !listOf("__PERSON_HINT__", "__BUDGET_HINT__", "__OCCASION_HINT__", "__INTERESTS_HINT__", "__OWNED_HINT__").contains(it.title)
         }
-        
+
+
         val giftsJson = gson.toJson(actualGifts.map { g ->
             mapOf(
                 "id" to g.id,
@@ -316,6 +321,31 @@ class GeminiAIService(
                         appendLine("PERSON BUDGET: Consider ${focusPerson.name}'s default budget of $$personBudget when suggesting items.")
                         appendLine("Prefer suggestions within or slightly below this budget range.")
                     }
+
+                    // Add interests context
+                    if (interestsHint != null && !interestsHint.description.isNullOrBlank()) {
+                        appendLine()
+                        appendLine("INTERESTS TO CONSIDER:")
+                        val interests = interestsHint.description!!.split("|")
+                        interests.forEach { interest ->
+                            val (type, value) = interest.split(":", limit = 2)
+                            appendLine("- $value (${type.lowercase()} interest)")
+                        }
+                        appendLine("Base your suggestions on these interests, especially the specific ones.")
+                    }
+
+                    // Add already owned items to avoid
+                    if (ownedHint != null && !ownedHint.description.isNullOrBlank()) {
+                        appendLine()
+                        appendLine("ITEMS ALREADY OWNED (DO NOT SUGGEST):")
+                        val ownedItems = ownedHint.description!!.split("|")
+                        ownedItems.forEach { ownedItem ->
+                            val (type, value) = ownedItem.split(":", limit = 2)
+                            appendLine("- $value (already owned)")
+                        }
+                        appendLine("IMPORTANT: Do not suggest these items or very similar items.")
+                    }
+
                     appendLine()
                 }
             }

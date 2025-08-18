@@ -4,6 +4,7 @@ import com.threekidsinatrenchcoat.giftideaminder.data.api.AIService
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.GiftDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.PersonDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.ImportantDateDao
+import com.threekidsinatrenchcoat.giftideaminder.data.dao.InterestDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.RelationshipTypeDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.SuggestionDismissalDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.SettingsDao
@@ -12,10 +13,14 @@ import com.threekidsinatrenchcoat.giftideaminder.data.repository.PersonRepositor
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.ImportantDateRepository
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.RelationshipTypeRepository
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.AISuggestionRepository
+import com.threekidsinatrenchcoat.giftideaminder.data.repository.ContactsRepository
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.SettingsRepository
+import android.content.ContentResolver
+import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -46,10 +51,19 @@ object RepositoryModule {
         giftDao: GiftDao,
         personDao: PersonDao,
         importantDateDao: ImportantDateDao,
+        interestDao: InterestDao,
         dismissalDao: SuggestionDismissalDao
-    ): AISuggestionRepository = AISuggestionRepository(aiService, giftDao, personDao, importantDateDao, dismissalDao)
+    ): AISuggestionRepository = AISuggestionRepository(aiService, giftDao, personDao, importantDateDao, interestDao, dismissalDao)
 
     @Provides
     @Singleton
     fun provideSettingsRepository(settingsDao: SettingsDao): SettingsRepository = SettingsRepository(settingsDao)
+    
+    @Provides
+    @Singleton
+    fun provideContentResolver(@ApplicationContext context: Context): ContentResolver = context.contentResolver
+    
+    @Provides
+    @Singleton
+    fun provideContactsRepository(contentResolver: ContentResolver): ContactsRepository = ContactsRepository(contentResolver)
 }

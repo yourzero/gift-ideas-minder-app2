@@ -5,6 +5,7 @@ import com.threekidsinatrenchcoat.giftideaminder.data.api.AIService
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.GiftDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.PersonDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.ImportantDateDao
+import com.threekidsinatrenchcoat.giftideaminder.data.dao.InterestDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.SuggestionDismissalDao
 import com.threekidsinatrenchcoat.giftideaminder.data.model.Gift
 import com.threekidsinatrenchcoat.giftideaminder.data.model.Person
@@ -18,6 +19,7 @@ class AISuggestionRepository(
     private val giftDao: GiftDao,
     private val personDao: PersonDao,
     private val importantDateDao: ImportantDateDao,
+    private val interestDao: InterestDao,
     private val dismissalDao: SuggestionDismissalDao
 ) {
 
@@ -36,8 +38,33 @@ class AISuggestionRepository(
         // Backward-compatible hint: include a sentinel gift with personId set.
         val gifts = giftDao.getAllGifts().first()
         val persons = personDao.getAllPersons().first()
+        val interests = interestDao.getInterestsForPerson(personId).first()
+        
+        // Create hints for interests
         val personHint = Gift(title = "__PERSON_HINT__", description = "focus", personId = personId)
-        val response = aiService.getSuggestions(AIRequest(gifts = gifts + personHint, persons = persons))
+        val availableInterests = interests.filter { !it.alreadyOwned }
+        val ownedInterests = interests.filter { it.alreadyOwned }
+        
+        val interestHints = mutableListOf<Gift>()
+        if (availableInterests.isNotEmpty()) {
+            interestHints.add(Gift(
+                title = "__INTERESTS_HINT__", 
+                description = availableInterests.joinToString("|") { "${it.type.name}:${it.value}" },
+                personId = personId
+            ))
+        }
+        if (ownedInterests.isNotEmpty()) {
+            interestHints.add(Gift(
+                title = "__OWNED_HINT__", 
+                description = ownedInterests.joinToString("|") { "${it.type.name}:${it.value}" },
+                personId = personId
+            ))
+        }
+        
+        val response = aiService.getSuggestions(AIRequest(
+            gifts = gifts + personHint + interestHints, 
+            persons = persons
+        ))
         val dismissedKeys = dismissalDao.getAllDismissedKeys().first().toSet()
         val filtered = response.filterNot { buildSuggestionKey(it) in dismissedKeys }
             .dedupeAgainst(gifts)
