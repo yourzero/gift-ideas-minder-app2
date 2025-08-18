@@ -54,6 +54,17 @@ class GeminiAIService(
         val prompt = buildSuggestionsPrompt(request)
         Log.d("GeminiAIService", "Prompt built, calling Gemini API")
         
+        // Check for budget constraint
+        val budgetHint = request.gifts.find { it.title == "__BUDGET_HINT__" }
+        val budgetRange = budgetHint?.description?.let { desc ->
+            val parts = desc.split("-")
+            if (parts.size == 2) {
+                val min = parts[0].toDoubleOrNull()
+                val max = parts[1].toDoubleOrNull()
+                if (min != null && max != null) Pair(min, max) else null
+            } else null
+        }
+        
         val jsonText: String = try {
             callGemini(prompt)
         } catch (e: Exception) {
@@ -105,8 +116,34 @@ class GeminiAIService(
             }
         }
         
-        Log.d("GeminiAIService", "Parsed ${suggestions.size} gift suggestions")
-        return suggestions
+        // Apply budget filter as fallback if AI didn't respect budget constraints
+        val filteredSuggestions = if (budgetRange != null) {
+            val (minBudget, maxBudget) = budgetRange
+            suggestions.filter { gift ->
+                val price = gift.currentPrice
+                if (price == null) {
+                    Log.w("GeminiAIService", "Suggestion '${gift.title}' has no price, excluding from budget-filtered results")
+                    false
+                } else {
+                    price in minBudget..maxBudget
+                }
+            }.also { filtered ->
+                if (filtered.size < suggestions.size) {
+                    Log.w("GeminiAIService", "Budget filter removed ${suggestions.size - filtered.size} suggestions outside $minBudget-$maxBudget range")
+                }
+            }
+        } else {
+            suggestions
+        }
+        
+        Log.d("GeminiAIService", "Final suggestions count: ${filteredSuggestions.size}")
+        
+        // If budget filtering resulted in no suggestions, return an empty list
+        if (budgetRange != null && filteredSuggestions.isEmpty()) {
+            Log.w("GeminiAIService", "No suggestions found within budget range ${budgetRange.first}-${budgetRange.second}")
+        }
+        
+        return filteredSuggestions
     }
 
     override suspend fun summarizeMessages(request: SummarizeMessagesRequest): SummarizeMessagesResponse {
@@ -200,6 +237,18 @@ class GeminiAIService(
         // Check if there's a person hint in the gifts list
         val personHint = request.gifts.find { it.title == "__PERSON_HINT__" }
         val focusPersonId = personHint?.personId
+        
+        // Check if there's a budget hint
+        val budgetHint = request.gifts.find { it.title == "__BUDGET_HINT__" }
+        val budgetRange = budgetHint?.description?.let { desc ->
+            val parts = desc.split("-")
+            if (parts.size == 2) {
+                val min = parts[0].toDoubleOrNull()
+                val max = parts[1].toDoubleOrNull()
+                if (min != null && max != null) Pair(min, max) else null
+            } else null
+        }
+        
         val actualGifts = request.gifts.filter { it.title != "__PERSON_HINT__" && it.title != "__BUDGET_HINT__" }
         
         val giftsJson = gson.toJson(actualGifts.map { g ->
@@ -210,7 +259,8 @@ class GeminiAIService(
                 "url" to (g.url ?: ""),
                 "currentPrice" to (g.currentPrice ?: 0.0),
                 "personId" to (g.personId ?: 0),
-                "tags" to (g.tags ?: emptyList<String>())
+                "tags" to (g.tags ?: emptyList<String>()),
+                "budget" to (g.budget ?: 0.0)
             )
         })
         val personsJson = gson.toJson(request.persons.map { p ->
@@ -227,6 +277,14 @@ class GeminiAIService(
         return buildString {
             appendLine("You are an assistant generating thoughtful gift suggestions with visual previews.")
             
+            // Add budget constraint if specified
+            if (budgetRange != null) {
+                appendLine()
+                appendLine("BUDGET CONSTRAINT: ALL suggestions must be priced between $${budgetRange.first} and $${budgetRange.second}.")
+                appendLine("If you cannot find suitable suggestions within this budget range, return an empty array [].")
+                appendLine("Do not suggest items outside this price range under any circumstances.")
+            }
+            
             // Add person-specific instruction if we have a focus person
             if (focusPersonId != null) {
                 val focusPerson = request.persons.find { it.id == focusPersonId }
@@ -237,8 +295,24 @@ class GeminiAIService(
                         appendLine("Additional context: ${focusPerson.notes}")
                     }
                     appendLine("Set personId to $focusPersonId for ALL suggestions.")
+                    
+                    // Add budget consideration from person's default budget
+                    val personBudget = focusPerson.defaultBudget
+                    if (personBudget != null && personBudget > 0 && budgetRange == null) {
+                        appendLine("PERSON BUDGET: Consider ${focusPerson.name}'s default budget of $$personBudget when suggesting items.")
+                        appendLine("Prefer suggestions within or slightly below this budget range.")
+                    }
                     appendLine()
                 }
+            }
+            
+            // Add general budget guidance from existing gifts
+            val budgetsFromGifts = actualGifts.mapNotNull { it.budget }.filter { it > 0 }
+            if (budgetsFromGifts.isNotEmpty() && budgetRange == null) {
+                val avgBudget = budgetsFromGifts.average()
+                appendLine("BUDGET GUIDANCE: Based on existing gifts, typical budget appears to be around $${"%.2f".format(avgBudget)}.")
+                appendLine("Consider this as a guide for price ranges of suggestions.")
+                appendLine()
             }
             
             appendLine("Input gifts (existing and recent):")
@@ -251,10 +325,20 @@ class GeminiAIService(
             appendLine("- description (string, optional)")
             appendLine("- url (string, optional - product purchase URL)")
             appendLine("- imageUrl (string, HIGHLY PREFERRED - provide a direct image URL that shows what the gift looks like)")
-            appendLine("- estimatedPrice (number, optional)")
+            appendLine("- estimatedPrice (number, ${if (budgetRange != null) "REQUIRED - must be between $${budgetRange.first} and $${budgetRange.second}" else "optional"})")
             appendLine("- personId (integer, ${if (focusPersonId != null) "REQUIRED - must be $focusPersonId" else "optional — if a clear match"})")
             appendLine("- tags (array of strings, optional)")
             appendLine("- reason (string, optional)")
+            appendLine()
+            appendLine("PRICE REQUIREMENTS:")
+            if (budgetRange != null) {
+                appendLine("- estimatedPrice is MANDATORY for all suggestions")
+                appendLine("- ALL prices must be between $${budgetRange.first} and $${budgetRange.second}")
+                appendLine("- If no items can be found within budget, return empty array: []")
+            } else {
+                appendLine("- Include realistic estimated prices when possible")
+                appendLine("- Consider budget context from person's defaultBudget or existing gift budgets")
+            }
             appendLine()
             appendLine("IMAGE REQUIREMENTS:")
             appendLine("- Always try to provide 'imageUrl' with a real, working image URL")
@@ -270,6 +354,11 @@ class GeminiAIService(
             if (focusPersonId != null) {
                 appendLine()
                 appendLine("REMINDER: ALL suggestions must have personId set to $focusPersonId")
+            }
+            
+            if (budgetRange != null) {
+                appendLine()
+                appendLine("FINAL REMINDER: ALL suggestions must have estimatedPrice between $${budgetRange.first} and $${budgetRange.second}")
             }
         }
     }
