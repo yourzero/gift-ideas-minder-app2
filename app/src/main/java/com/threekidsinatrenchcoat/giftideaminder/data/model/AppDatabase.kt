@@ -7,6 +7,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.GiftDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.ImportantDateDao
+import com.threekidsinatrenchcoat.giftideaminder.data.dao.InterestDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.PersonDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.PriceRecordDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.RelationshipTypeDao
@@ -16,8 +17,8 @@ import com.threekidsinatrenchcoat.giftideaminder.data.dao.SuggestionDismissalDao
 import com.threekidsinatrenchcoat.giftideaminder.data.model.SuggestionDismissal
 
 @Database(
-    entities = [Gift::class, Person::class, PriceRecord::class, Suggestion::class, Settings::class, RelationshipType::class, ImportantDate::class, SuggestionDismissal::class],
-    version = 1,
+    entities = [Gift::class, Person::class, PriceRecord::class, Suggestion::class, Settings::class, RelationshipType::class, ImportantDate::class, SuggestionDismissal::class, Interest::class],
+    version = 2,  // Incremented version for new Interest table
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -30,6 +31,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun settingsDao(): SettingsDao
     abstract fun relationshipTypeDao(): RelationshipTypeDao
     abstract fun importantDateDao(): ImportantDateDao
+    abstract fun interestDao(): InterestDao
 
     // For development: no explicit migrations. Use fallbackToDestructiveMigration in builder.
     companion object {}

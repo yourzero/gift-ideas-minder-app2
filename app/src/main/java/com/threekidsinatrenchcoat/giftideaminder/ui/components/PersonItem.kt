@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 
@@ -22,7 +23,8 @@ fun PersonItem(
     person: Person,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
-    onIdeas: () -> Unit = {}
+    onIdeas: () -> Unit = {},
+    onInterests: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier
@@ -54,6 +56,13 @@ fun PersonItem(
                     .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.End
             ) {
+                IconButton(onClick = onInterests) {
+                    Icon(
+                        Icons.Filled.Favorite,
+                        contentDescription = "Interests",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
                 IconButton(onClick = onIdeas) {
                     Icon(
                         Icons.Filled.Lightbulb,

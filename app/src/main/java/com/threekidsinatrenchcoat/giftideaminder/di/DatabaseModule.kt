@@ -11,6 +11,7 @@ import com.threekidsinatrenchcoat.giftideaminder.BuildConfig
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.GiftDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.PersonDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.ImportantDateDao
+import com.threekidsinatrenchcoat.giftideaminder.data.dao.InterestDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.RelationshipTypeDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.SettingsDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.SuggestionDismissalDao
@@ -71,4 +72,7 @@ object DatabaseModule {
 
     @Provides
     fun provideSuggestionDismissalDao(db: AppDatabase): SuggestionDismissalDao = db.suggestionDismissalDao()
+
+    @Provides
+    fun provideInterestDao(db: AppDatabase): InterestDao = db.interestDao()
 }
