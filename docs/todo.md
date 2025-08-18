@@ -43,5 +43,11 @@
 
 ## NEW
 
-- [ ] fox: the general/specific tabs have been added to the new interests edit screen, but the reciepient add flow itself is using the old style of interests
+- [ ] fix: the general/specific tabs have been added to the new interests edit screen, but the reciepient add flow itself is using the old style of interests
+- [ ] fix: the gift ideas screen coming from the person list screen:
+  - hitting plus takes me to add a new gift, when it should let me add an interest
+  - the UI could be much better, smoother, cleaner
+- [ ] fix: the actual add gift flow screen - the "pick date" and "what's the occasion" steps are duplicate functionality - i think we can lose the "what's the occasion" screen, and the user can add occasions on the date screen. Unless you can think of a good reason we need both. I'm not sure what it's even for, because AI gift suggestion are done for a person, not for a gift idea - because a gift idea is the *result* of ai suggestions, not the source
+- [ ] fix: add/edit person - gift inspirations screen, the current interests doesn't scroll. also, tighten up the UI, especially the padding between each current interest
+- [ ] fix: add person screen, inline autocomplete doesn't seem to be working at all; at worst, add debug logging to the autocomplete code so I can see if it's even firing
 - 
