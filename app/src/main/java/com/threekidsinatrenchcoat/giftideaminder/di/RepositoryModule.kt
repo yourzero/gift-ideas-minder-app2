@@ -4,6 +4,7 @@ import com.threekidsinatrenchcoat.giftideaminder.data.api.AIService
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.GiftDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.PersonDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.ImportantDateDao
+import com.threekidsinatrenchcoat.giftideaminder.data.dao.InterestDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.RelationshipTypeDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.SuggestionDismissalDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.SettingsDao
@@ -46,8 +47,9 @@ object RepositoryModule {
         giftDao: GiftDao,
         personDao: PersonDao,
         importantDateDao: ImportantDateDao,
+        interestDao: InterestDao,
         dismissalDao: SuggestionDismissalDao
-    ): AISuggestionRepository = AISuggestionRepository(aiService, giftDao, personDao, importantDateDao, dismissalDao)
+    ): AISuggestionRepository = AISuggestionRepository(aiService, giftDao, personDao, importantDateDao, interestDao, dismissalDao)
 
     @Provides
     @Singleton
