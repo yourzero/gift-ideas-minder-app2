@@ -40,6 +40,24 @@ fun PersonDetailScreen(
     var showAddDialog by remember { mutableStateOf(false) }
     var newInterestText by remember { mutableStateOf("") }
     
+    // Track specific-sounding interests added in simple mode
+    var showAdvancedModePrompt by remember { mutableStateOf(false) }
+    
+    // Check if we should show advanced mode prompt
+    LaunchedEffect(interests, isAdvancedMode) {
+        if (!isAdvancedMode) {
+            // Count interests that sound specific (contain specific keywords or patterns)
+            val specificSoundingInterests = interests.count { interest ->
+                isSpecificSounding(interest.value)
+            }
+            
+            // Show prompt if 3+ specific-sounding interests in simple mode
+            if (specificSoundingInterests >= 3) {
+                showAdvancedModePrompt = true
+            }
+        }
+    }
+    
     // Filter interests by selected type and mode
     val filteredInterests = interests.filter { 
         if (!isAdvancedMode) {
@@ -255,6 +273,90 @@ fun PersonDetailScreen(
                 }
             }
         )
+    }
+    
+    // Advanced mode suggestion prompt
+    if (showAdvancedModePrompt) {
+        AlertDialog(
+            onDismissRequest = { showAdvancedModePrompt = false },
+            title = { Text("Enable Advanced Mode?") },
+            text = {
+                Column {
+                    Text("It looks like you're adding specific items like product names or brands.")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Advanced Mode lets you:")
+                    Text("• Separate general interests from specific items")
+                    Text("• Mark specific items as 'already owned'")
+                    Text("• Get better AI suggestions")
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        settingsViewModel.setAdvancedMode(true)
+                        showAdvancedModePrompt = false
+                    }
+                ) {
+                    Text("Enable Advanced Mode")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showAdvancedModePrompt = false }
+                ) {
+                    Text("Keep Simple Mode")
+                }
+            }
+        )
+    }
+}
+
+/**
+ * Checks if an interest value sounds specific (like a product name or brand)
+ * rather than general (like "cooking" or "sports")
+ */
+private fun isSpecificSounding(interest: String): Boolean {
+    val lowercaseInterest = interest.lowercase().trim()
+    
+    // Check for specific patterns that indicate specific items
+    return when {
+        // Contains brand names or specific product indicators
+        lowercaseInterest.contains("nike") || 
+        lowercaseInterest.contains("adidas") ||
+        lowercaseInterest.contains("apple") ||
+        lowercaseInterest.contains("samsung") ||
+        lowercaseInterest.contains("iphone") ||
+        lowercaseInterest.contains("macbook") ||
+        lowercaseInterest.contains("playstation") ||
+        lowercaseInterest.contains("xbox") ||
+        lowercaseInterest.contains("switch") -> true
+        
+        // Contains model numbers or specific product patterns
+        lowercaseInterest.matches(Regex(".*\\d+.*")) && 
+        (lowercaseInterest.contains("max") || 
+         lowercaseInterest.contains("pro") ||
+         lowercaseInterest.contains("plus") ||
+         lowercaseInterest.contains("air")) -> true
+        
+        // Contains specific product categories with descriptors
+        lowercaseInterest.contains("shoes") && 
+        (lowercaseInterest.contains(" ") && lowercaseInterest.length > 10) -> true
+        
+        // Long descriptive phrases (likely specific items)
+        lowercaseInterest.contains(" ") && lowercaseInterest.length > 15 -> true
+        
+        // Contains specific size/color/model indicators
+        lowercaseInterest.contains("size") ||
+        lowercaseInterest.contains("color") ||
+        lowercaseInterest.contains("black") ||
+        lowercaseInterest.contains("white") ||
+        lowercaseInterest.contains("red") ||
+        lowercaseInterest.contains("blue") ||
+        lowercaseInterest.contains("large") ||
+        lowercaseInterest.contains("medium") ||
+        lowercaseInterest.contains("small") -> true
+        
+        else -> false
     }
 }
 
