@@ -66,6 +66,9 @@ fun AppNavGraph(
         composable("budget") {
             BudgetScreen(navController = navController)
         }
+        composable("settings") {
+            SettingsScreen(navController = navController)
+        }
         composable("import") {
             ImportScreen(navController = navController)
         }

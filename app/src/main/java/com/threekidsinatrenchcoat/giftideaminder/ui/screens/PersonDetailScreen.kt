@@ -19,23 +19,37 @@ import com.threekidsinatrenchcoat.giftideaminder.data.model.Interest
 import com.threekidsinatrenchcoat.giftideaminder.data.model.InterestType
 import com.threekidsinatrenchcoat.giftideaminder.data.model.Person
 import com.threekidsinatrenchcoat.giftideaminder.viewmodel.PersonViewModel
+import com.threekidsinatrenchcoat.giftideaminder.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PersonDetailScreen(
     personId: Int,
     navController: NavController,
-    viewModel: PersonViewModel = hiltViewModel()
+    viewModel: PersonViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     val person by viewModel.getPersonById(personId).collectAsState(initial = null)
     val interests by viewModel.getInterestsForPerson(personId).collectAsState(initial = emptyList())
+    val isAdvancedMode by settingsViewModel.isAdvancedMode.collectAsState()
     
-    var selectedType by remember { mutableStateOf(InterestType.GENERAL) }
+    // Force General mode if not in advanced mode
+    var selectedType by remember(isAdvancedMode) { 
+        mutableStateOf(if (isAdvancedMode) InterestType.GENERAL else InterestType.GENERAL) 
+    }
     var showAddDialog by remember { mutableStateOf(false) }
     var newInterestText by remember { mutableStateOf("") }
     
-    // Filter interests by selected type
-    val filteredInterests = interests.filter { it.type == selectedType }
+    // Filter interests by selected type and mode
+    val filteredInterests = interests.filter { 
+        if (!isAdvancedMode) {
+            // Simple mode: only show general interests
+            it.type == InterestType.GENERAL 
+        } else {
+            // Advanced mode: show selected type
+            it.type == selectedType
+        }
+    }
     
     Scaffold(
         topBar = {
@@ -98,29 +112,51 @@ fun PersonDetailScreen(
                     Column(
                         modifier = Modifier.padding(16.dp)
                     ) {
-                        Text(
-                            text = "Interests & Inspirations",
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                        
-                        // Type toggle buttons
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            FilterChip(
-                                onClick = { selectedType = InterestType.GENERAL },
-                                label = { Text("General") },
-                                selected = selectedType == InterestType.GENERAL,
-                                modifier = Modifier.weight(1f)
+                            Text(
+                                text = "Interests & Inspirations",
+                                style = MaterialTheme.typography.titleLarge
                             )
-                            FilterChip(
-                                onClick = { selectedType = InterestType.SPECIFIC },
-                                label = { Text("Specific") },
-                                selected = selectedType == InterestType.SPECIFIC,
-                                modifier = Modifier.weight(1f)
+                            
+                            if (!isAdvancedMode) {
+                                TextButton(
+                                    onClick = { navController.navigate("settings") }
+                                ) {
+                                    Text("Enable Advanced Mode")
+                                }
+                            }
+                        }
+                        
+                        if (!isAdvancedMode) {
+                            Text(
+                                text = "Simple mode: Only general interests (cooking, sports, music)",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(bottom = 8.dp)
                             )
+                        } else {
+                            // Type toggle buttons
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                FilterChip(
+                                    onClick = { selectedType = InterestType.GENERAL },
+                                    label = { Text("General") },
+                                    selected = selectedType == InterestType.GENERAL,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                FilterChip(
+                                    onClick = { selectedType = InterestType.SPECIFIC },
+                                    label = { Text("Specific") },
+                                    selected = selectedType == InterestType.SPECIFIC,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
                         }
                     }
                 }
@@ -151,7 +187,8 @@ fun PersonDetailScreen(
                             InterestItem(
                                 interest = interest,
                                 onToggleOwned = { viewModel.toggleInterestOwned(interest) },
-                                onDelete = { viewModel.deleteInterest(interest) }
+                                onDelete = { viewModel.deleteInterest(interest) },
+                                isAdvancedMode = isAdvancedMode
                             )
                         }
                     }
@@ -167,15 +204,19 @@ fun PersonDetailScreen(
                 showAddDialog = false 
                 newInterestText = ""
             },
-            title = { Text("Add ${selectedType.name.lowercase().replaceFirstChar { it.uppercase() }} Interest") },
+            title = { 
+                val typeToAdd = if (!isAdvancedMode) InterestType.GENERAL else selectedType
+                Text("Add ${typeToAdd.name.lowercase().replaceFirstChar { it.uppercase() }} Interest") 
+            },
             text = {
                 OutlinedTextField(
                     value = newInterestText,
                     onValueChange = { newInterestText = it },
                     label = { Text("Interest") },
                     placeholder = { 
+                        val typeToAdd = if (!isAdvancedMode) InterestType.GENERAL else selectedType
                         Text(
-                            if (selectedType == InterestType.GENERAL) {
+                            if (typeToAdd == InterestType.GENERAL) {
                                 "e.g., cooking, sports, music"
                             } else {
                                 "e.g., Nike Air Max shoes, iPhone 15"
@@ -189,9 +230,10 @@ fun PersonDetailScreen(
                 TextButton(
                     onClick = {
                         if (newInterestText.isNotBlank()) {
+                            val typeToAdd = if (!isAdvancedMode) InterestType.GENERAL else selectedType
                             viewModel.addInterest(
                                 personId = personId,
-                                type = selectedType,
+                                type = typeToAdd,
                                 value = newInterestText.trim()
                             )
                             showAddDialog = false
@@ -221,6 +263,7 @@ private fun InterestItem(
     interest: Interest,
     onToggleOwned: () -> Unit,
     onDelete: () -> Unit,
+    isAdvancedMode: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -240,7 +283,7 @@ private fun InterestItem(
                     text = interest.value,
                     style = MaterialTheme.typography.bodyLarge
                 )
-                if (interest.type == InterestType.SPECIFIC) {
+                if (interest.type == InterestType.SPECIFIC && isAdvancedMode) {
                     Text(
                         text = if (interest.alreadyOwned) "Already owned" else "Available",
                         style = MaterialTheme.typography.bodySmall,
@@ -253,8 +296,8 @@ private fun InterestItem(
             }
             
             Row {
-                // Toggle owned button (only for specific items)
-                if (interest.type == InterestType.SPECIFIC) {
+                // Toggle owned button (only for specific items in advanced mode)
+                if (interest.type == InterestType.SPECIFIC && isAdvancedMode) {
                     TextButton(
                         onClick = onToggleOwned
                     ) {
