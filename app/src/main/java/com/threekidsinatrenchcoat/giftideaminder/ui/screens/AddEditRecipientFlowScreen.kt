@@ -41,6 +41,7 @@ import android.provider.ContactsContract
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
+import com.threekidsinatrenchcoat.giftideaminder.ui.components.ContactAutocompleteTextField
 
 @Composable
 fun AddEditRecipientFlowScreen(
@@ -132,10 +133,15 @@ fun AddEditRecipientFlowScreen(
                         title = "Details"
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            OutlinedTextField(
+                            ContactAutocompleteTextField(
                                 value = state.name,
                                 onValueChange = viewModel::onNameChange,
+                                onContactSelected = { contact ->
+                                    // Auto-fill name from selected contact
+                                    viewModel.onNameChange(contact.name)
+                                },
                                 label = { Text("Name") },
+                                placeholder = { Text("Start typing to search contacts") },
                                 modifier = Modifier.fillMaxWidth()
                             )
                             
