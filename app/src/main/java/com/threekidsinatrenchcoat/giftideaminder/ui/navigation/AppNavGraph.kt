@@ -97,6 +97,15 @@ fun AppNavGraph(
             val personId = backStackEntry.arguments!!.getInt("personId")
             PersonIdeasScreen(personId = personId, navController = navController)
         }
+        composable(
+            route = "person_detail/{personId}",
+            arguments = listOf(
+                navArgument("personId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val personId = backStackEntry.arguments!!.getInt("personId")
+            PersonDetailScreen(personId = personId, navController = navController)
+        }
         composable("add_gift") {
             AddGiftFlowScreenWrapper(
                 onNavigateBack = ::showSnackbarAndPopBackStack,

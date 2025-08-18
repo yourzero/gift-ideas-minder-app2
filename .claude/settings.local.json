@@ -41,6 +41,13 @@
       "mcp__git__git_commit",
       "mcp__serena__get_symbols_overview",
       "mcp__serena__insert_after_symbol"
+      "Bash(.gradlew assembleDebug)",
+      "mcp__git__git_create_branch",
+      "mcp__git__git_checkout",
+      "mcp__git__git_add",
+      "mcp__git__git_commit",
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__insert_after_symbol"
       "Bash(.gradlew assembleDebug)"
       "Bash(.gradlew assembleDebug)",
       "mcp__git__git_branch"

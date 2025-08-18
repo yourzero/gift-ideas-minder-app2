@@ -22,4 +22,16 @@ class Converters {
 
     @TypeConverter
     fun toLocalDate(value: Long?): LocalDate? = value?.let { LocalDate.ofEpochDay(it) }
+
+    @TypeConverter
+    fun fromInterestType(value: InterestType?): String? = value?.name
+
+    @TypeConverter
+    fun toInterestType(value: String?): InterestType? = value?.let { 
+        try {
+            InterestType.valueOf(it)
+        } catch (e: IllegalArgumentException) {
+            InterestType.GENERAL // fallback to general if unknown type
+        }
+    }
 }
