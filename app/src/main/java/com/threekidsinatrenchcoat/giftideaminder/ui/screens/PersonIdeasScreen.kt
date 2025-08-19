@@ -1,18 +1,8 @@
 package com.threekidsinatrenchcoat.giftideaminder.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,6 +15,8 @@ import com.threekidsinatrenchcoat.giftideaminder.viewmodel.GiftViewModel
 import com.threekidsinatrenchcoat.giftideaminder.ui.components.SuggestionsCarousel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
 
 @Composable
 fun PersonIdeasScreen(
@@ -45,23 +37,53 @@ fun PersonIdeasScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Gift Ideas") },
+                title = { 
+                    Column {
+                        Text("Gift Ideas")
+                        peopleMap[personId]?.let { name ->
+                            Text(
+                                text = "for $name",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { 
+                    // Navigate to person detail screen to add interests instead of add gift
+                    navController.navigate("person_detail/$personId") 
+                },
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(
+                    Icons.Filled.Add, 
+                    contentDescription = "Add Interest",
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
         }
     ) { padding: PaddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Text("Ideas for ${peopleMap[personId] ?: "Recipient"}", style = MaterialTheme.typography.titleMedium)
+            // Main content area with suggestions
             SuggestionsCarousel(
                 suggestions = viewModel.suggestions,
                 onAccept = { suggestion -> viewModel.insertGift(suggestion.copy(id = 0)) },
@@ -74,15 +96,47 @@ fun PersonIdeasScreen(
                 isRetrying = viewModel.isRetrying,
                 currentRetryCount = viewModel.currentRetryCount
             )
-            Text(
-                text = "Tip: swipe to view all of the ideas.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-            Button(onClick = { viewModel.fetchSuggestionsForPerson(personId) }) {
-                Text("Refresh")
+            
+            // Bottom section with help text and actions
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "💡 Tip: Swipe to explore all suggestions",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedButton(
+                            onClick = { viewModel.fetchSuggestionsForPerson(personId) },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Refresh Ideas")
+                        }
+                        
+                        Button(
+                            onClick = { navController.navigate("person_detail/$personId") },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Add Interests")
+                        }
+                    }
+                }
             }
-
         }
     }
 }

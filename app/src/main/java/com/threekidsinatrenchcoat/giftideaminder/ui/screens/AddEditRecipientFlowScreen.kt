@@ -42,13 +42,19 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import com.threekidsinatrenchcoat.giftideaminder.ui.components.ContactAutocompleteTextField
+import com.threekidsinatrenchcoat.giftideaminder.data.model.Interest
+import com.threekidsinatrenchcoat.giftideaminder.data.model.InterestType
+import com.threekidsinatrenchcoat.giftideaminder.viewmodel.PersonViewModel
+import com.threekidsinatrenchcoat.giftideaminder.viewmodel.SettingsViewModel
 
 @Composable
 fun AddEditRecipientFlowScreen(
     onNavigateBack: (String?) -> Unit,
     navController: NavController,
     personId: Int? = null,
-    viewModel: PersonFlowViewModel = hiltViewModel()
+    viewModel: PersonFlowViewModel = hiltViewModel(),
+    personViewModel: PersonViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -216,15 +222,46 @@ fun AddEditRecipientFlowScreen(
                     }
                 }
 
-                PersonFlowViewModel.Step.Preferences -> SectionCard(
-                    icon = Icons.Default.FavoriteBorder,
-                    title = "Gift Inspirations"
-                ) {
-                    GiftInspirationsInline(
-                        current = state.preferences,
-                        onAdd = { viewModel.onAddPreference(it) },
-                        onRemove = { viewModel.onRemovePreference(it) }
-                    )
+                PersonFlowViewModel.Step.Preferences -> {
+                    // Get current person ID - either existing or temp ID for new person
+                    val currentPersonId = personId ?: -1 // Use -1 for new person temporarily
+                    
+                    if (currentPersonId != -1) {
+                        // Existing person - use real Interest system
+                        val interests by personViewModel.getInterestsForPerson(currentPersonId).collectAsState(initial = emptyList())
+                        val isAdvancedMode by settingsViewModel.isAdvancedMode.collectAsState()
+                        
+                        SectionCard(
+                            icon = Icons.Default.FavoriteBorder,
+                            title = "Gift Inspirations"
+                        ) {
+                            NewInterestSystem(
+                                interests = interests,
+                                isAdvancedMode = isAdvancedMode,
+                                onAddInterest = { type, value ->
+                                    personViewModel.addInterest(currentPersonId, type, value)
+                                },
+                                onDeleteInterest = { interest ->
+                                    personViewModel.deleteInterest(interest)
+                                },
+                                onToggleOwned = { interest ->
+                                    personViewModel.toggleInterestOwned(interest)
+                                }
+                            )
+                        }
+                    } else {
+                        // New person - use fallback to old system for now
+                        SectionCard(
+                            icon = Icons.Default.FavoriteBorder,
+                            title = "Gift Inspirations"
+                        ) {
+                            GiftInspirationsInline(
+                                current = state.preferences,
+                                onAdd = { viewModel.onAddPreference(it) },
+                                onRemove = { viewModel.onRemovePreference(it) }
+                            )
+                        }
+                    }
                 }
 
                 PersonFlowViewModel.Step.Review -> SectionCard(
@@ -811,6 +848,224 @@ private fun AddNewRelationshipDialog(
             }
         }
     )
+}
+
+@Composable
+private fun NewInterestSystem(
+    interests: List<Interest>,
+    isAdvancedMode: Boolean,
+    onAddInterest: (InterestType, String) -> Unit,
+    onDeleteInterest: (Interest) -> Unit,
+    onToggleOwned: (Interest) -> Unit
+) {
+    var selectedType by remember(isAdvancedMode) { 
+        mutableStateOf(if (isAdvancedMode) InterestType.GENERAL else InterestType.GENERAL) 
+    }
+    var showAddDialog by remember { mutableStateOf(false) }
+    var newInterestText by remember { mutableStateOf("") }
+    
+    // Filter interests by selected type and mode
+    val filteredInterests = interests.filter { 
+        if (!isAdvancedMode) {
+            // Simple mode: only show general interests
+            it.type == InterestType.GENERAL 
+        } else {
+            // Advanced mode: show selected type
+            it.type == selectedType
+        }
+    }
+    
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Type toggle (only show in advanced mode)
+        if (isAdvancedMode) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    onClick = { selectedType = InterestType.GENERAL },
+                    label = { Text("General") },
+                    selected = selectedType == InterestType.GENERAL,
+                    modifier = Modifier.weight(1f)
+                )
+                FilterChip(
+                    onClick = { selectedType = InterestType.SPECIFIC },
+                    label = { Text("Specific") },
+                    selected = selectedType == InterestType.SPECIFIC,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        } else {
+            Text(
+                text = "Simple mode: Only general interests (cooking, sports, music)",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        
+        // Add interest button
+        OutlinedButton(
+            onClick = { showAddDialog = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(8.dp))
+            val typeToAdd = if (!isAdvancedMode) InterestType.GENERAL else selectedType
+            Text("Add ${typeToAdd.name.lowercase().replaceFirstChar { it.uppercase() }} Interest")
+        }
+        
+        // Interests list - make it scrollable
+        if (filteredInterests.isNotEmpty()) {
+            Text(
+                text = "Current interests:",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            LazyColumn(
+                modifier = Modifier.heightIn(max = 200.dp), // Limit height to make scrollable
+                verticalArrangement = Arrangement.spacedBy(4.dp) // Tighter spacing
+            ) {
+                items(filteredInterests) { interest ->
+                    InterestItemInline(
+                        interest = interest,
+                        onToggleOwned = { onToggleOwned(interest) },
+                        onDelete = { onDeleteInterest(interest) },
+                        isAdvancedMode = isAdvancedMode
+                    )
+                }
+            }
+        } else {
+            Text(
+                text = "No ${if (isAdvancedMode) selectedType.name.lowercase() else "general"} interests yet",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+    
+    // Add interest dialog
+    if (showAddDialog) {
+        AlertDialog(
+            onDismissRequest = { 
+                showAddDialog = false 
+                newInterestText = ""
+            },
+            title = { 
+                val typeToAdd = if (!isAdvancedMode) InterestType.GENERAL else selectedType
+                Text("Add ${typeToAdd.name.lowercase().replaceFirstChar { it.uppercase() }} Interest") 
+            },
+            text = {
+                OutlinedTextField(
+                    value = newInterestText,
+                    onValueChange = { newInterestText = it },
+                    label = { Text("Interest") },
+                    placeholder = { 
+                        val typeToAdd = if (!isAdvancedMode) InterestType.GENERAL else selectedType
+                        Text(
+                            if (typeToAdd == InterestType.GENERAL) {
+                                "e.g., cooking, sports, music"
+                            } else {
+                                "e.g., Nike Air Max shoes, iPhone 15"
+                            }
+                        ) 
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (newInterestText.isNotBlank()) {
+                            val typeToAdd = if (!isAdvancedMode) InterestType.GENERAL else selectedType
+                            onAddInterest(typeToAdd, newInterestText.trim())
+                            showAddDialog = false
+                            newInterestText = ""
+                        }
+                    }
+                ) {
+                    Text("Add")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { 
+                        showAddDialog = false
+                        newInterestText = ""
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun InterestItemInline(
+    interest: Interest,
+    onToggleOwned: () -> Unit,
+    onDelete: () -> Unit,
+    isAdvancedMode: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp), // Reduced padding for tighter layout
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = interest.value,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                if (interest.type == InterestType.SPECIFIC && isAdvancedMode) {
+                    Text(
+                        text = if (interest.alreadyOwned) "Already owned" else "Available",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (interest.alreadyOwned) 
+                            MaterialTheme.colorScheme.error 
+                        else 
+                            MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+            
+            Row {
+                // Toggle owned button (only for specific items in advanced mode)
+                if (interest.type == InterestType.SPECIFIC && isAdvancedMode) {
+                    TextButton(onClick = onToggleOwned) {
+                        Text(
+                            text = if (interest.alreadyOwned) "Available" else "Owned",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                }
+                
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        Icons.Filled.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+        }
+    }
 }
 
 // --- Simple FlowRow (copy to avoid extra dependency) ---

@@ -1,5 +1,6 @@
 package com.threekidsinatrenchcoat.giftideaminder.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.ContactInfo
@@ -35,9 +36,12 @@ class ContactsViewModel @Inject constructor(
                 .debounce(300) // Wait 300ms after user stops typing
                 .distinctUntilChanged()
                 .collect { query ->
+                    Log.d("ContactsViewModel", "Debounced query received: '$query' (length: ${query.length})")
                     if (query.length >= 2) { // Only search if at least 2 characters
+                        Log.d("ContactsViewModel", "Query meets minimum length, triggering search")
                         searchContacts(query)
                     } else {
+                        Log.d("ContactsViewModel", "Query too short, clearing suggestions")
                         _contactSuggestions.value = emptyList()
                     }
                 }
@@ -45,24 +49,31 @@ class ContactsViewModel @Inject constructor(
     }
 
     fun updateSearchQuery(query: String) {
+        Log.d("ContactsViewModel", "updateSearchQuery: '$query' (length: ${query.length})")
         _searchQuery.value = query
     }
 
     private fun searchContacts(query: String) {
+        Log.d("ContactsViewModel", "searchContacts: Starting search for '$query'")
         viewModelScope.launch {
             _isSearching.value = true
             try {
+                Log.d("ContactsViewModel", "searchContacts: Calling repository.searchContacts")
                 val contacts = contactsRepository.searchContacts(query)
+                Log.d("ContactsViewModel", "searchContacts: Found ${contacts.size} contacts: ${contacts.map { it.name }}")
                 _contactSuggestions.value = contacts
             } catch (e: Exception) {
+                Log.e("ContactsViewModel", "searchContacts: Error searching contacts", e)
                 _contactSuggestions.value = emptyList()
             } finally {
                 _isSearching.value = false
+                Log.d("ContactsViewModel", "searchContacts: Search completed")
             }
         }
     }
 
     fun clearSuggestions() {
+        Log.d("ContactsViewModel", "clearSuggestions: Clearing all suggestions and search query")
         _contactSuggestions.value = emptyList()
         _searchQuery.value = ""
     }

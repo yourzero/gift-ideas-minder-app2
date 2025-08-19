@@ -1,5 +1,6 @@
 package com.threekidsinatrenchcoat.giftideaminder.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -37,12 +38,15 @@ fun ContactAutocompleteTextField(
     
     // Update search query when value changes
     LaunchedEffect(value) {
+        Log.d("ContactAutocompleteTextField", "LaunchedEffect: value changed to '$value'")
         contactsViewModel.updateSearchQuery(value)
     }
     
     // Show dropdown when focused and has suggestions
     LaunchedEffect(isFocused, contactSuggestions) {
+        Log.d("ContactAutocompleteTextField", "LaunchedEffect: focus=$isFocused, suggestions=${contactSuggestions.size}")
         isExpanded = isFocused && contactSuggestions.isNotEmpty()
+        Log.d("ContactAutocompleteTextField", "LaunchedEffect: isExpanded=$isExpanded")
     }
     
     Column(modifier = modifier) {
@@ -62,8 +66,10 @@ fun ContactAutocompleteTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .onFocusChanged { focusState ->
+                    Log.d("ContactAutocompleteTextField", "onFocusChanged: isFocused=${focusState.isFocused}")
                     isFocused = focusState.isFocused
                     if (!focusState.isFocused) {
+                        Log.d("ContactAutocompleteTextField", "onFocusChanged: Lost focus, collapsing dropdown")
                         isExpanded = false
                     }
                 }
@@ -73,6 +79,7 @@ fun ContactAutocompleteTextField(
         DropdownMenu(
             expanded = isExpanded,
             onDismissRequest = { 
+                Log.d("ContactAutocompleteTextField", "DropdownMenu onDismissRequest: Collapsing dropdown")
                 isExpanded = false
                 focusManager.clearFocus()
             },
@@ -114,6 +121,7 @@ fun ContactAutocompleteTextField(
                             }
                         },
                         onClick = {
+                            Log.d("ContactAutocompleteTextField", "Contact selected: ${contact.name}")
                             onContactSelected(contact)
                             onValueChange(contact.name)
                             isExpanded = false

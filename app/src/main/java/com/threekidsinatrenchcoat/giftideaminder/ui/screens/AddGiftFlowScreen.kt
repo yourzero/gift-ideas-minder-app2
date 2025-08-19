@@ -97,7 +97,7 @@ fun AddGiftFlowScreen(
         Text(text = "Add Gift", style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(8.dp))
         LinearProgressIndicator(
-            progress = { ((stepIndex + 1).coerceAtMost(4)) / 4f },
+            progress = { ((stepIndex + 1).coerceAtMost(3)) / 3f },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.height(16.dp))
@@ -107,16 +107,14 @@ fun AddGiftFlowScreen(
                 selectedPersonName = selectedPersonName,
                 onSelectPersonClick = onSelectPersonClick
             )
-            1 -> StepPickDate(
+            1 -> StepPickDateAndOccasion(
                 dateMillis = eventDateMillis,
+                occasion = occasion,
                 personImportantDates = personImportantDates,
                 onPickClick = { showDatePicker = true },
                 onDateSelected = onDateSelected,
+                onOccasionChange = onOccasionChange,
                 onAddCustomDate = onAddCustomDate
-            )
-            2 -> StepSelectOccasion(
-                occasion = occasion,
-                onOccasionChange = onOccasionChange
             )
             else -> StepDetails(
                 ideaText = ideaText,
@@ -127,7 +125,7 @@ fun AddGiftFlowScreen(
         Spacer(Modifier.height(24.dp))
 
         // Bottom buttons
-        if (stepIndex < 3) {
+        if (stepIndex < 2) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -178,11 +176,13 @@ private fun StepSelectPerson(
 }
 
 @Composable
-private fun StepPickDate(
+private fun StepPickDateAndOccasion(
     dateMillis: Long?,
+    occasion: String,
     personImportantDates: List<ImportantDate>,
     onPickClick: () -> Unit,
     onDateSelected: (Long?) -> Unit,
+    onOccasionChange: (String) -> Unit,
     onAddCustomDate: (String, LocalDate) -> Unit
 ) {
     var showAddDateDialog by remember { mutableStateOf(false) }
@@ -197,7 +197,7 @@ private fun StepPickDate(
     }
     
     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
-        Text("Pick Date", style = MaterialTheme.typography.titleMedium)
+        Text("Pick Date & Occasion", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
         
         if (personImportantDates.isNotEmpty()) {
@@ -322,45 +322,12 @@ private fun StepPickDate(
                 modifier = Modifier.padding(12.dp)
             )
         }
-    }
-    
-    if (showAddDateDialog) {
-        AddDateDialog(
-            customDateLabel = customDateLabel,
-            selectedDate = selectedLocalDate,
-            saveToProfile = saveToProfile,
-            onLabelChange = { customDateLabel = it },
-            onDateChange = { selectedLocalDate = it },
-            onSaveToProfileChange = { saveToProfile = it },
-            onConfirm = {
-                if (customDateLabel.isNotBlank()) {
-                    if (saveToProfile) {
-                        onAddCustomDate(customDateLabel, selectedLocalDate)
-                    }
-                    val millis = selectedLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                    onDateSelected(millis)
-                    showAddDateDialog = false
-                    customDateLabel = ""
-                    selectedLocalDate = LocalDate.now()
-                    saveToProfile = true
-                }
-            },
-            onDismiss = { 
-                showAddDateDialog = false 
-                customDateLabel = ""
-                selectedLocalDate = LocalDate.now()
-                saveToProfile = true
-            }
-        )
-    }
-}
-
-@Composable
-private fun StepSelectOccasion(
-    occasion: String,
-    onOccasionChange: (String) -> Unit
-) {
-    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start) {
+        
+        // Occasion Selection Section
+        Spacer(Modifier.height(24.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(16.dp))
+        
         Text("What's the occasion?", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
         
@@ -407,7 +374,38 @@ private fun StepSelectOccasion(
             modifier = Modifier.fillMaxWidth()
         )
     }
+    
+    if (showAddDateDialog) {
+        AddDateDialog(
+            customDateLabel = customDateLabel,
+            selectedDate = selectedLocalDate,
+            saveToProfile = saveToProfile,
+            onLabelChange = { customDateLabel = it },
+            onDateChange = { selectedLocalDate = it },
+            onSaveToProfileChange = { saveToProfile = it },
+            onConfirm = {
+                if (customDateLabel.isNotBlank()) {
+                    if (saveToProfile) {
+                        onAddCustomDate(customDateLabel, selectedLocalDate)
+                    }
+                    val millis = selectedLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                    onDateSelected(millis)
+                    showAddDateDialog = false
+                    customDateLabel = ""
+                    selectedLocalDate = LocalDate.now()
+                    saveToProfile = true
+                }
+            },
+            onDismiss = { 
+                showAddDateDialog = false 
+                customDateLabel = ""
+                selectedLocalDate = LocalDate.now()
+                saveToProfile = true
+            }
+        )
+    }
 }
+
 
 @Composable
 private fun StepDetails(
