@@ -20,6 +20,21 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * Temporary cache for SMS analysis suggestions to pass between ViewModels
+ */
+object SmsAnalysisCache {
+    private val suggestions = mutableMapOf<Int, List<com.threekidsinatrenchcoat.giftideaminder.data.model.Gift>>()
+    
+    fun storeSuggestions(personId: Int, giftSuggestions: List<com.threekidsinatrenchcoat.giftideaminder.data.model.Gift>) {
+        suggestions[personId] = giftSuggestions
+    }
+    
+    fun getSuggestions(personId: Int): List<com.threekidsinatrenchcoat.giftideaminder.data.model.Gift> {
+        return suggestions.remove(personId) ?: emptyList() // Remove after getting to prevent stale data
+    }
+}
+
 @HiltViewModel
 class PersonFlowViewModel @Inject constructor(
     private val personRepo: PersonRepository,
@@ -204,11 +219,14 @@ class PersonFlowViewModel @Inject constructor(
                 viewModelScope.launch { 
                     finalPersonId = persistPersonAndDates()
                     if (shouldAnalyzeSms && finalPersonId != null) {
-                        // Start SMS analysis in background
-                        launch {
-                            smsAnalysisRepo.analyzeSmsForPerson(finalPersonId!!) { personId ->
-                                // SMS analysis completed, suggestions generated
-                            }
+                        // Wait for SMS analysis to complete
+                        val analysisResult = smsAnalysisRepo.analyzeSmsForPerson(finalPersonId!!) { personId ->
+                            // Navigation will be handled by NavResult
+                        }
+                        
+                        // Store suggestions in global companion object for pickup by PersonIdeasScreen
+                        if (analysisResult is com.threekidsinatrenchcoat.giftideaminder.data.repository.SmsAnalysisResult.Success) {
+                            SmsAnalysisCache.storeSuggestions(finalPersonId!!, analysisResult.generatedSuggestions)
                         }
                     }
                 }

@@ -193,6 +193,10 @@ class GiftViewModel @Inject constructor(
     val suggestionsError: StateFlow<String?> = _suggestionsError.asStateFlow()
     private var lastSuggestionsFetchMs: Long = 0L
 
+    // SMS-based suggestions storage
+    private val _smsSuggestions = MutableStateFlow<Map<Int, List<Gift>>>(emptyMap())
+    val smsSuggestions: StateFlow<Map<Int, List<Gift>>> = _smsSuggestions.asStateFlow()
+
     // Retry state
     private val _currentRetryCount = MutableStateFlow(0)
     val currentRetryCount: StateFlow<Int> = _currentRetryCount.asStateFlow()
@@ -408,6 +412,32 @@ class GiftViewModel @Inject constructor(
                 date = date
             )
             importantDateRepository.insert(importantDate)
+        }
+    }
+
+    /** Store SMS-based suggestions for a specific person */
+    fun setSmsGiftSuggestions(personId: Int, suggestions: List<Gift>) {
+        _smsSuggestions.update { map ->
+            map + (personId to suggestions)
+        }
+    }
+
+    /** Get SMS-based suggestions for a specific person */
+    fun getSmsGiftSuggestions(personId: Int): List<Gift> {
+        return _smsSuggestions.value[personId] ?: emptyList()
+    }
+
+    /** Load SMS suggestions for person view (alternative to regular AI suggestions) */
+    fun loadSmsBasedSuggestions(personId: Int) {
+        val smsBasedSuggestions = getSmsGiftSuggestions(personId)
+        if (smsBasedSuggestions.isNotEmpty()) {
+            _suggestions.value = smsBasedSuggestions
+            _suggestionsError.value = null
+            _isLoadingSuggestions.value = false
+        } else {
+            _suggestions.value = emptyList()
+            _suggestionsError.value = "No SMS-based gift suggestions available"
+            _isLoadingSuggestions.value = false
         }
     }
 }

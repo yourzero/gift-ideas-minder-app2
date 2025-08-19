@@ -73,7 +73,13 @@ fun AppNavGraph(
             ImportScreen(navController = navController)
         }
         composable("add_person") {
-            AddEditRecipientFlowScreen(onNavigateBack = ::showSnackbarAndPopBackStack, navController = navController)
+            AddEditRecipientFlowScreen(
+                onNavigateBack = ::showSnackbarAndPopBackStack, 
+                navController = navController,
+                onNavigateToSuggestions = { personId ->
+                    navController.navigate("person_ideas/$personId?smsAnalysis=true")
+                }
+            )
         }
         composable(
             route = "edit_person/{personId}",
@@ -88,17 +94,29 @@ fun AppNavGraph(
             AddEditRecipientFlowScreen(
                 personId = personId,
                 onNavigateBack = ::showSnackbarAndPopBackStack,
-                navController = navController
+                navController = navController,
+                onNavigateToSuggestions = { personId ->
+                    navController.navigate("person_ideas/$personId?smsAnalysis=true")
+                }
             )
         }
         composable(
-            route = "person_ideas/{personId}",
+            route = "person_ideas/{personId}?smsAnalysis={smsAnalysis}",
             arguments = listOf(
-                navArgument("personId") { type = NavType.IntType }
+                navArgument("personId") { type = NavType.IntType },
+                navArgument("smsAnalysis") { 
+                    type = NavType.BoolType
+                    defaultValue = false
+                }
             )
         ) { backStackEntry ->
             val personId = backStackEntry.arguments!!.getInt("personId")
-            PersonIdeasScreen(personId = personId, navController = navController)
+            val smsAnalysis = backStackEntry.arguments!!.getBoolean("smsAnalysis")
+            PersonIdeasScreen(
+                personId = personId, 
+                navController = navController,
+                smsAnalysis = smsAnalysis
+            )
         }
         composable(
             route = "person_detail/{personId}",

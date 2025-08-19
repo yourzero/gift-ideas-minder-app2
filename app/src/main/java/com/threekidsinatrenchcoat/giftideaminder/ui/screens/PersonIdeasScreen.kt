@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.threekidsinatrenchcoat.giftideaminder.viewmodel.GiftViewModel
+import com.threekidsinatrenchcoat.giftideaminder.viewmodel.SmsAnalysisCache
 import com.threekidsinatrenchcoat.giftideaminder.ui.components.SuggestionsCarousel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -22,6 +23,7 @@ import androidx.compose.material3.FloatingActionButton
 fun PersonIdeasScreen(
     personId: Int,
     navController: NavController,
+    smsAnalysis: Boolean = false,
     viewModel: GiftViewModel = hiltViewModel()
 ) {
     val suggestions by viewModel.suggestions.collectAsState()
@@ -29,9 +31,19 @@ fun PersonIdeasScreen(
     val error by viewModel.suggestionsError.collectAsState()
     val peopleMap by viewModel.peopleById.collectAsState()
 
-    LaunchedEffect(personId) {
-        // Fetch suggestions specifically for this person only
-        viewModel.fetchSuggestionsForPerson(personId)
+    LaunchedEffect(personId, smsAnalysis) {
+        if (smsAnalysis) {
+            // Get SMS-based suggestions from cache and store in ViewModel
+            val smsBasedSuggestions = SmsAnalysisCache.getSuggestions(personId)
+            if (smsBasedSuggestions.isNotEmpty()) {
+                viewModel.setSmsGiftSuggestions(personId, smsBasedSuggestions)
+            }
+            // Load SMS-based suggestions 
+            viewModel.loadSmsBasedSuggestions(personId)
+        } else {
+            // Fetch regular AI suggestions for this person
+            viewModel.fetchSuggestionsForPerson(personId)
+        }
     }
 
     Scaffold(
@@ -39,10 +51,10 @@ fun PersonIdeasScreen(
             TopAppBar(
                 title = { 
                     Column {
-                        Text("Gift Ideas")
+                        Text(if (smsAnalysis) "SMS Gift Ideas" else "Gift Ideas")
                         peopleMap[personId]?.let { name ->
                             Text(
-                                text = "for $name",
+                                text = "for $name" + if (smsAnalysis) " (from messages)" else "",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -122,10 +134,16 @@ fun PersonIdeasScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         OutlinedButton(
-                            onClick = { viewModel.fetchSuggestionsForPerson(personId) },
+                            onClick = { 
+                                if (smsAnalysis) {
+                                    viewModel.loadSmsBasedSuggestions(personId)
+                                } else {
+                                    viewModel.fetchSuggestionsForPerson(personId)
+                                }
+                            },
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Refresh Ideas")
+                            Text(if (smsAnalysis) "Reload SMS Ideas" else "Refresh Ideas")
                         }
                         
                         Button(
