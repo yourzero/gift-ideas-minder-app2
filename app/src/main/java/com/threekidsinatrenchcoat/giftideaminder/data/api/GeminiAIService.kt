@@ -53,6 +53,7 @@ class GeminiAIService(
         Log.d("GeminiAIService", "Starting getSuggestions - building prompt")
         val prompt = buildSuggestionsPrompt(request)
         Log.d("GeminiAIService", "Prompt built, calling Gemini API")
+        Log.d("GeminiAIService", "Full prompt: $prompt")
         
         // Check for budget constraint
         val budgetHint = request.gifts.find { it.title == "__BUDGET_HINT__" }
@@ -73,6 +74,7 @@ class GeminiAIService(
         }
         
         Log.d("GeminiAIService", "Gemini API response received: ${jsonText.take(500)}...")
+        Log.d("GeminiAIService", "Full response: $jsonText")
         
         val jsonArray: JsonElement? = extractTopLevelJsonArray(jsonText)
         if (jsonArray == null || !jsonArray.isJsonArray) {
@@ -104,7 +106,8 @@ class GeminiAIService(
                 val gift = Gift(
                     title = title,
                     description = description,
-                    url = imageUrl ?: url,  // Prioritize image URL for display, fallback to product URL
+                    url = url,  // Product purchase URL
+                    imageUrl = imageUrl,  // Image URL for display
                     currentPrice = estimatedPrice,
                     personId = personId,
                     tags = tags
@@ -147,8 +150,11 @@ class GeminiAIService(
     }
 
     override suspend fun summarizeMessages(request: SummarizeMessagesRequest): SummarizeMessagesResponse {
+        Log.d("GeminiAIService", "Starting summarizeMessages - building prompt")
         val prompt: String = buildSummarizePrompt(request)
+        Log.d("GeminiAIService", "Summarize prompt: $prompt")
         val jsonText: String = callGemini(prompt)
+        Log.d("GeminiAIService", "Summarize response: $jsonText")
         val jsonObj: JsonObject? = extractTopLevelJsonObject(jsonText)
         if (jsonObj == null || !jsonObj.has("insights")) {
             return SummarizeMessagesResponse(insights = emptyList())

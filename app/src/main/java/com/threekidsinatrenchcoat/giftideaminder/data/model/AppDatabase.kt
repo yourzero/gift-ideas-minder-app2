@@ -18,7 +18,7 @@ import com.threekidsinatrenchcoat.giftideaminder.data.model.SuggestionDismissal
 
 @Database(
     entities = [Gift::class, Person::class, PriceRecord::class, Suggestion::class, Settings::class, RelationshipType::class, ImportantDate::class, SuggestionDismissal::class, Interest::class],
-    version = 2,  // Incremented version for new Interest table
+    version = 3,  // Incremented version for Gift.imageUrl column
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -34,5 +34,12 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun interestDao(): InterestDao
 
     // For development: no explicit migrations. Use fallbackToDestructiveMigration in builder.
-    companion object {}
+    companion object {
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Add imageUrl column to gifts table
+                database.execSQL("ALTER TABLE gifts ADD COLUMN imageUrl TEXT")
+            }
+        }
+    }
 }

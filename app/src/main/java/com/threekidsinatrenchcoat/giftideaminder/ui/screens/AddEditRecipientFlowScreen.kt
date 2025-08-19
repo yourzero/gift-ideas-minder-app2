@@ -145,6 +145,44 @@ fun AddEditRecipientFlowScreen(
                                 onContactSelected = { contact ->
                                     // Auto-fill name from selected contact
                                     viewModel.onNameChange(contact.name)
+                                    
+                                    // Auto-select relationship if detected
+                                    contact.detectedRelationship?.let { relationship ->
+                                        // Map to available relationship options
+                                        val mappedRelationship = when (relationship) {
+                                            "Mother", "Father", "Sister", "Brother", "Aunt", "Uncle", 
+                                            "Cousin", "Grandmother", "Grandfather", "Child", "Spouse" -> "Family"
+                                            "Friend" -> "Friend"
+                                            "Colleague" -> "Coworker"
+                                            "Partner" -> "Family"  // Partners are typically family-like relationships
+                                            else -> null
+                                        }
+                                        
+                                        mappedRelationship?.let { mapped ->
+                                            // Map detected relationships to PersonFlow available relationships
+                                            val relationshipMapping = when (mapped) {
+                                                "Family" -> when (relationship) {
+                                                    "Mother", "Father" -> "Parent"
+                                                    "Sister", "Brother" -> "Sibling"
+                                                    "Child" -> "Child"
+                                                    "Spouse" -> "Spouse"
+                                                    "Partner" -> "Partner"
+                                                    else -> null
+                                                }
+                                                "Friend" -> "Friend"
+                                                "Coworker" -> "Coworker"
+                                                else -> null
+                                            }
+                                            
+                                            relationshipMapping?.let { targetRelationship ->
+                                                // Check if it's in available options and not already selected
+                                                if (targetRelationship in state.availableRelationships && 
+                                                    targetRelationship !in state.selectedRelationships) {
+                                                    viewModel.onRelationshipSelected(targetRelationship)
+                                                }
+                                            }
+                                        }
+                                    }
                                 },
                                 label = { Text("Name") },
                                 placeholder = { Text("Start typing to search contacts") },

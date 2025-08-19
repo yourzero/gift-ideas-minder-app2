@@ -39,6 +39,7 @@ object DatabaseModule {
         if (BuildConfig.DEBUG) {
             builder
                 .fallbackToDestructiveMigration()
+                .addMigrations(AppDatabase.MIGRATION_2_3)
                 .addCallback(object : RoomDatabase.Callback() {
                     override fun onDestructiveMigration(db: SupportSQLiteDatabase) {
                         Handler(Looper.getMainLooper()).post {
@@ -50,6 +51,8 @@ object DatabaseModule {
                         }
                     }
                 })
+        } else {
+            builder.addMigrations(AppDatabase.MIGRATION_2_3)
         }
 
         return builder.build()

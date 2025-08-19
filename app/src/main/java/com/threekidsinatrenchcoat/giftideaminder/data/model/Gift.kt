@@ -22,6 +22,7 @@ data class Gift(
     val title: String,
     val description: String? = null,
     val url: String? = null,
+    val imageUrl: String? = null,
     val asin: String? = null,
     val currencyCode: String = "USD",
     val originalPrice: Double? = null,

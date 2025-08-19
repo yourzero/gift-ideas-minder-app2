@@ -12,7 +12,8 @@ import javax.inject.Singleton
 data class ContactInfo(
     val id: String,
     val name: String,
-    val phoneNumber: String? = null
+    val phoneNumber: String? = null,
+    val detectedRelationship: String? = null  // Detected from contact name or other fields
 )
 
 @Singleton
@@ -70,10 +71,13 @@ class ContactsRepository @Inject constructor(
                         phoneNumber = getPhoneNumber(id)
                     }
                     
+                    // Detect relationship from contact name
+                    val detectedRelationship = detectRelationshipFromName(name)
+                    
                     // Avoid duplicate names
                     if (seen.add(name)) {
-                        contacts.add(ContactInfo(id = id, name = name, phoneNumber = phoneNumber))
-                        Log.d("ContactsRepository", "searchContacts: Added contact: $name (${phoneNumber ?: "no phone"})")
+                        contacts.add(ContactInfo(id = id, name = name, phoneNumber = phoneNumber, detectedRelationship = detectedRelationship))
+                        Log.d("ContactsRepository", "searchContacts: Added contact: $name (${phoneNumber ?: "no phone"}) ${if (detectedRelationship != null) "- detected: $detectedRelationship" else ""}")
                     } else {
                         Log.d("ContactsRepository", "searchContacts: Skipped duplicate: $name")
                     }
@@ -117,6 +121,76 @@ class ContactsRepository @Inject constructor(
         }
     }
     
+    private fun detectRelationshipFromName(name: String): String? {
+        val lowercaseName = name.lowercase()
+        
+        // Common relationship patterns in parentheses
+        val parenthesesPattern = "\\((.*?)\\)".toRegex()
+        val parenthesesMatch = parenthesesPattern.find(lowercaseName)
+        if (parenthesesMatch != null) {
+            val relationshipText = parenthesesMatch.groupValues[1].trim()
+            return mapRelationshipText(relationshipText)
+        }
+        
+        // Relationship keywords at the end of names
+        val relationshipKeywords = mapOf(
+            "mom" to "Mother",
+            "mother" to "Mother", 
+            "dad" to "Father",
+            "father" to "Father",
+            "sister" to "Sister",
+            "brother" to "Brother",
+            "wife" to "Spouse",
+            "husband" to "Spouse",
+            "girlfriend" to "Partner",
+            "boyfriend" to "Partner",
+            "aunt" to "Aunt",
+            "uncle" to "Uncle",
+            "cousin" to "Cousin",
+            "grandma" to "Grandmother",
+            "grandmother" to "Grandmother",
+            "grandpa" to "Grandfather", 
+            "grandfather" to "Grandfather",
+            "son" to "Child",
+            "daughter" to "Child",
+            "friend" to "Friend",
+            "coworker" to "Colleague",
+            "colleague" to "Colleague",
+            "boss" to "Colleague"
+        )
+        
+        for ((keyword, relationship) in relationshipKeywords) {
+            if (lowercaseName.contains(keyword)) {
+                Log.d("ContactsRepository", "detectRelationshipFromName: Found '$keyword' in '$name', mapped to '$relationship'")
+                return relationship
+            }
+        }
+        
+        return null
+    }
+    
+    private fun mapRelationshipText(text: String): String? {
+        val lowercaseText = text.lowercase()
+        return when {
+            lowercaseText.contains("sister") -> "Sister"
+            lowercaseText.contains("brother") -> "Brother"
+            lowercaseText.contains("mom") || lowercaseText.contains("mother") -> "Mother"
+            lowercaseText.contains("dad") || lowercaseText.contains("father") -> "Father"
+            lowercaseText.contains("wife") || lowercaseText.contains("husband") -> "Spouse"
+            lowercaseText.contains("girlfriend") || lowercaseText.contains("boyfriend") -> "Partner"
+            lowercaseText.contains("aunt") -> "Aunt"
+            lowercaseText.contains("uncle") -> "Uncle"
+            lowercaseText.contains("cousin") -> "Cousin"
+            lowercaseText.contains("grandma") || lowercaseText.contains("grandmother") -> "Grandmother"
+            lowercaseText.contains("grandpa") || lowercaseText.contains("grandfather") -> "Grandfather"
+            lowercaseText.contains("son") || lowercaseText.contains("daughter") -> "Child"
+            lowercaseText.contains("friend") -> "Friend"
+            lowercaseText.contains("coworker") || lowercaseText.contains("colleague") -> "Colleague"
+            lowercaseText.contains("boss") -> "Colleague"
+            else -> null
+        }
+    }
+    
     suspend fun getAllContactNames(limit: Int = 50): List<ContactInfo> = withContext(Dispatchers.IO) {
         val contacts = mutableListOf<ContactInfo>()
         val projection = arrayOf(
@@ -148,9 +222,12 @@ class ContactsRepository @Inject constructor(
                     val name = it.getString(nameIndex) ?: continue
                     val phoneNumber = it.getString(phoneIndex)
                     
+                    // Detect relationship from contact name
+                    val detectedRelationship = detectRelationshipFromName(name)
+                    
                     // Avoid duplicate names
                     if (seen.add(name)) {
-                        contacts.add(ContactInfo(id = id, name = name, phoneNumber = phoneNumber))
+                        contacts.add(ContactInfo(id = id, name = name, phoneNumber = phoneNumber, detectedRelationship = detectedRelationship))
                     }
                 }
             }

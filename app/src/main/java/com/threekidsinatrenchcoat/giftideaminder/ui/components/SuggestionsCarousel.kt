@@ -119,10 +119,10 @@ private fun SuggestionCard(
             val uriHandler = LocalUriHandler.current
             
             // Image display with proper sizing and fallback
-            if (!suggestion.url.isNullOrBlank()) {
+            if (!suggestion.imageUrl.isNullOrBlank()) {
                 SubcomposeAsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(suggestion.url)
+                        .data(suggestion.imageUrl)
                         .crossfade(true)
                         .build(),
                     contentDescription = suggestion.title,
@@ -211,7 +211,7 @@ private fun SuggestionCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
             ) {
-                // Globe/WWW icon for opening URL
+                // Globe/WWW icon for opening product URL
                 if (!suggestion.url.isNullOrBlank()) {
                     IconButton(
                         onClick = { 
