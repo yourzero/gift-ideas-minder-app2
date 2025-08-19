@@ -26,4 +26,7 @@ interface PersonDao {
 
     @Query("SELECT * FROM persons WHERE (roles & :roleBit) != 0 ORDER BY name ASC")
     suspend fun getPeopleWithRole(roleBit: Int): List<Person>
+    
+    @Query("SELECT * FROM persons ORDER BY name ASC")
+    suspend fun getAllPersonsSuspend(): List<Person>
 }

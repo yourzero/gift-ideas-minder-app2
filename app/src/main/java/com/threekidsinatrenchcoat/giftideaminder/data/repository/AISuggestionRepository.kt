@@ -2,6 +2,7 @@ package com.threekidsinatrenchcoat.giftideaminder.data.repository
 
 import com.threekidsinatrenchcoat.giftideaminder.data.api.AIRequest
 import com.threekidsinatrenchcoat.giftideaminder.data.api.AIService
+import com.threekidsinatrenchcoat.giftideaminder.data.api.PersonDTO
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.GiftDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.PersonDao
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.ImportantDateDao
@@ -26,7 +27,17 @@ class AISuggestionRepository(
     suspend fun fetchSuggestions(): List<Gift> {
         val gifts: List<Gift> = giftDao.getAllGifts().first()
         val persons: List<Person> = personDao.getAllPersons().first()
-        val response: List<Gift> = aiService.getSuggestions(AIRequest(gifts = gifts, persons = persons))
+        val personDTOs = persons.map { person ->
+            PersonDTO(
+                id = person.id,
+                name = person.name,
+                relationships = person.relationships,
+                notes = person.notes,
+                preferences = person.preferences,
+                defaultBudget = person.defaultBudget
+            )
+        }
+        val response: List<Gift> = aiService.getSuggestions(AIRequest(gifts = gifts, persons = personDTOs))
         val dismissedKeys: List<String> = dismissalDao.getAllDismissedKeys().first()
         return response.filterNot { gift ->
             val key = buildSuggestionKey(gift)
@@ -61,9 +72,19 @@ class AISuggestionRepository(
             ))
         }
         
+        val personDTOs = persons.map { person ->
+            PersonDTO(
+                id = person.id,
+                name = person.name,
+                relationships = person.relationships,
+                notes = person.notes,
+                preferences = person.preferences,
+                defaultBudget = person.defaultBudget
+            )
+        }
         val response = aiService.getSuggestions(AIRequest(
             gifts = gifts + personHint + interestHints, 
-            persons = persons
+            persons = personDTOs
         ))
         val dismissedKeys = dismissalDao.getAllDismissedKeys().first().toSet()
         val filtered = response.filterNot { buildSuggestionKey(it) in dismissedKeys }
@@ -158,7 +179,17 @@ class AISuggestionRepository(
         val persons: List<Person> = personDao.getAllPersons().first()
         // Temporary: pass a synthetic gift as a hint in the request (backend interprets budget)
         val budgetHint = Gift(title = "__BUDGET_HINT__", description = "$min-$max", personId = personId)
-        val response = aiService.getSuggestions(AIRequest(gifts = gifts + budgetHint, persons = persons))
+        val personDTOs = persons.map { person ->
+            PersonDTO(
+                id = person.id,
+                name = person.name,
+                relationships = person.relationships,
+                notes = person.notes,
+                preferences = person.preferences,
+                defaultBudget = person.defaultBudget
+            )
+        }
+        val response = aiService.getSuggestions(AIRequest(gifts = gifts + budgetHint, persons = personDTOs))
         val dismissedKeys: List<String> = dismissalDao.getAllDismissedKeys().first()
         return response.filterNot { gift ->
             val key = buildSuggestionKey(gift)
@@ -180,7 +211,17 @@ class AISuggestionRepository(
         // Add occasion hint
         hints.add(Gift(title = "__OCCASION_HINT__", description = occasion))
         
-        val response = aiService.getSuggestions(AIRequest(gifts = gifts + hints, persons = persons))
+        val personDTOs = persons.map { person ->
+            PersonDTO(
+                id = person.id,
+                name = person.name,
+                relationships = person.relationships,
+                notes = person.notes,
+                preferences = person.preferences,
+                defaultBudget = person.defaultBudget
+            )
+        }
+        val response = aiService.getSuggestions(AIRequest(gifts = gifts + hints, persons = personDTOs))
         val dismissedKeys: List<String> = dismissalDao.getAllDismissedKeys().first()
         
         return response.filterNot { gift ->

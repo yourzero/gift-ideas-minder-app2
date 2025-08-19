@@ -20,4 +20,6 @@ class GiftRepository(private val giftDao: GiftDao) {
     }
 
     fun getGiftById(id: Int): Flow<Gift> = giftDao.getGiftById(id)
+    
+    suspend fun getByPersonId(personId: Int): List<Gift> = giftDao.getGiftsByPersonIdSuspend(personId)
 } 

@@ -9,6 +9,7 @@ import com.threekidsinatrenchcoat.giftideaminder.data.repository.ImportantDateRe
 import com.threekidsinatrenchcoat.giftideaminder.data.model.ImportantDate
 import com.threekidsinatrenchcoat.giftideaminder.data.model.RelationshipType
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.RelationshipTypeRepository
+import com.threekidsinatrenchcoat.giftideaminder.data.repository.SmsAnalysisRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,6 +25,7 @@ class PersonFlowViewModel @Inject constructor(
     private val personRepo: PersonRepository,
     private val importantDateRepo: ImportantDateRepository,
     private val relRepo: RelationshipTypeRepository,
+    private val smsAnalysisRepo: SmsAnalysisRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -43,10 +45,17 @@ class PersonFlowViewModel @Inject constructor(
         // Labels for extra date rows the user added (can exist without a picked date)
         val additionalDateLabels: List<String> = emptyList(),
         // Labels the user chose to remove/hide from the list (e.g., hiding prompts)
-        val removedDateLabels: Set<String> = emptySet()
+        val removedDateLabels: Set<String> = emptySet(),
+        // SMS scanning for gift insights
+        val smsAnalysisEnabled: Boolean = false
     )
 
-    data class NavResult(val navigateBack: Boolean = false, val saved: Boolean = false, val successMessage: String? = null)
+    data class NavResult(
+        val navigateBack: Boolean = false, 
+        val saved: Boolean = false, 
+        val successMessage: String? = null,
+        val navigateToSuggestions: Int? = null // personId to navigate to suggestions for
+    )
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -189,9 +198,34 @@ class PersonFlowViewModel @Inject constructor(
                 NavResult()
             }
             Step.Review -> {
-                viewModelScope.launch { persistPersonAndDates() }
-                val msg = if (_uiState.value.isEditing) "${_uiState.value.name} was updated" else "${_uiState.value.name} was added"
-                NavResult(saved = true, successMessage = msg)
+                val shouldAnalyzeSms = current.smsAnalysisEnabled
+                var finalPersonId: Int? = null
+                
+                viewModelScope.launch { 
+                    finalPersonId = persistPersonAndDates()
+                    if (shouldAnalyzeSms && finalPersonId != null) {
+                        // Start SMS analysis in background
+                        launch {
+                            smsAnalysisRepo.analyzeSmsForPerson(finalPersonId!!) { personId ->
+                                // SMS analysis completed, suggestions generated
+                            }
+                        }
+                    }
+                }
+                
+                val msg = if (_uiState.value.isEditing) {
+                    if (shouldAnalyzeSms) "${_uiState.value.name} was updated! Analyzing messages for gift ideas..." 
+                    else "${_uiState.value.name} was updated"
+                } else {
+                    if (shouldAnalyzeSms) "${_uiState.value.name} was added! Analyzing messages for gift ideas..." 
+                    else "${_uiState.value.name} was added"
+                }
+                
+                NavResult(
+                    saved = true, 
+                    successMessage = msg,
+                    navigateToSuggestions = if (shouldAnalyzeSms) current.personId else null
+                )
             }
         }
     }
@@ -246,6 +280,10 @@ class PersonFlowViewModel @Inject constructor(
         }
     }
 
+    fun onSmsAnalysisToggle(enabled: Boolean) {
+        _uiState.update { it.copy(smsAnalysisEnabled = enabled) }
+    }
+
     private fun generateUniqueLabel(base: String, state: UiState, excluding: String? = null): String {
         val occupied = (state.pickedDates.keys + state.additionalDateLabels + state.datePrompts)
             .filter { it != excluding }
@@ -260,7 +298,7 @@ class PersonFlowViewModel @Inject constructor(
         return candidate
     }
 
-    private suspend fun persistPersonAndDates() {
+    private suspend fun persistPersonAndDates(): Int? {
         val s = _uiState.value
         val person = Person(
             id = s.personId ?: 0,
@@ -285,6 +323,8 @@ class PersonFlowViewModel @Inject constructor(
             .map { (label, date) -> ImportantDate(personId = finalPersonId, label = label, date = date) }
         
         importantDateRepo.replaceForPerson(finalPersonId, dates)
+        
+        return finalPersonId
     }
 }
 

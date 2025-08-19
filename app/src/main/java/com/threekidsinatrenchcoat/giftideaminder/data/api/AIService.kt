@@ -7,7 +7,7 @@ import retrofit2.http.POST
 
 data class AIRequest(
     val gifts: List<Gift>,
-    val persons: List<Person>  // Assuming Person is imported or defined
+    val persons: List<PersonDTO>
 )
 
 data class MessagePayload(
@@ -36,6 +36,15 @@ data class PersonInsightDTO(
 
 data class SummarizeMessagesResponse(
     val insights: List<PersonInsightDTO>
+)
+
+data class PersonDTO(
+    val id: Int,
+    val name: String,
+    val relationships: List<String> = emptyList(),
+    val notes: String? = null,
+    val preferences: List<String> = emptyList(),
+    val defaultBudget: Double? = null
 )
 
 interface AIService {

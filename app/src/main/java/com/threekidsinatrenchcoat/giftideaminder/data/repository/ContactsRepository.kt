@@ -21,6 +21,38 @@ class ContactsRepository @Inject constructor(
     private val contentResolver: ContentResolver
 ) {
     
+    companion object {
+        /**
+         * Get contact name by phone number (static utility method)
+         */
+        fun getContactNameByPhoneNumber(context: android.content.Context, phoneNumber: String): String? {
+            return try {
+                val uri = android.net.Uri.withAppendedPath(
+                    ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+                    android.net.Uri.encode(phoneNumber)
+                )
+                
+                val cursor = context.contentResolver.query(
+                    uri,
+                    arrayOf(ContactsContract.PhoneLookup.DISPLAY_NAME),
+                    null,
+                    null,
+                    null
+                )
+                
+                cursor?.use { c ->
+                    if (c.moveToFirst()) {
+                        val nameIndex = c.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME)
+                        c.getString(nameIndex)
+                    } else null
+                }
+            } catch (e: Exception) {
+                Log.e("ContactsRepository", "Error looking up contact name for $phoneNumber", e)
+                null
+            }
+        }
+    }
+    
     suspend fun searchContacts(query: String): List<ContactInfo> = withContext(Dispatchers.IO) {
         Log.d("ContactsRepository", "searchContacts: Starting search for '$query'")
         if (query.isBlank()) {

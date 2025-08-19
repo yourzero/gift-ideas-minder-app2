@@ -6,6 +6,9 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.annotations.SerializedName
 import com.threekidsinatrenchcoat.giftideaminder.data.model.Gift
+import com.threekidsinatrenchcoat.giftideaminder.data.model.SmsAnalysisRequest
+import com.threekidsinatrenchcoat.giftideaminder.data.model.SmsAnalysisResponse
+import com.threekidsinatrenchcoat.giftideaminder.data.model.SmsPersonInsight
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -185,6 +188,70 @@ class GeminiAIService(
             }
         }
         return SummarizeMessagesResponse(insights = insights)
+    }
+
+    /**
+     * Analyze SMS conversations to extract gift-related insights
+     */
+    suspend fun analyzeSmsConversations(request: SmsAnalysisRequest): SmsAnalysisResponse {
+        Log.d("GeminiAIService", "Starting analyzeSmsConversations - building prompt")
+        val prompt = buildSmsAnalysisPrompt(request)
+        Log.d("GeminiAIService", "SMS analysis prompt built, calling Gemini API")
+        Log.d("GeminiAIService", "SMS analysis prompt: $prompt")
+        
+        val jsonText: String = try {
+            callGemini(prompt)
+        } catch (e: Exception) {
+            Log.e("GeminiAIService", "Error calling Gemini API for SMS analysis", e)
+            throw e
+        }
+        
+        Log.d("GeminiAIService", "SMS analysis response received: ${jsonText.take(500)}...")
+        Log.d("GeminiAIService", "Full SMS analysis response: $jsonText")
+        
+        val jsonObj: JsonObject? = extractTopLevelJsonObject(jsonText)
+        if (jsonObj == null || !jsonObj.has("insights")) {
+            Log.w("GeminiAIService", "Failed to extract insights from SMS analysis response")
+            return SmsAnalysisResponse(insights = emptyList())
+        }
+        
+        val insightsArray: JsonElement = jsonObj.get("insights")
+        val insights = mutableListOf<SmsPersonInsight>()
+        
+        if (insightsArray.isJsonArray) {
+            insightsArray.asJsonArray.forEach { element ->
+                runCatching {
+                    val obj = element.asJsonObject
+                    val contactName = obj.get("contactName")?.takeIf { !it.isJsonNull }?.asString
+                    val phoneNumber = obj.get("phoneNumber")?.asString ?: return@runCatching
+                    val extractedInterests = obj.get("extractedInterests")?.takeIf { it.isJsonArray }?.asJsonArray?.mapNotNull { it.asString } ?: emptyList()
+                    val mentionedItems = obj.get("mentionedItems")?.takeIf { it.isJsonArray }?.asJsonArray?.mapNotNull { it.asString } ?: emptyList()
+                    val avoidItems = obj.get("avoidItems")?.takeIf { it.isJsonArray }?.asJsonArray?.mapNotNull { it.asString } ?: emptyList()
+                    val specialDates = obj.get("specialDates")?.takeIf { it.isJsonArray }?.asJsonArray?.mapNotNull { it.asString } ?: emptyList()
+                    val notes = obj.get("notes")?.takeIf { !it.isJsonNull }?.asString
+                    val confidence = obj.get("confidence")?.takeIf { !it.isJsonNull }?.asFloat ?: 0.5f
+                    
+                    insights.add(
+                        SmsPersonInsight(
+                            contactName = contactName,
+                            phoneNumber = phoneNumber,
+                            extractedInterests = extractedInterests,
+                            mentionedItems = mentionedItems,
+                            avoidItems = avoidItems,
+                            specialDates = specialDates,
+                            notes = notes,
+                            confidence = confidence
+                        )
+                    )
+                    Log.d("GeminiAIService", "Parsed SMS insight for ${contactName ?: phoneNumber}")
+                }.onFailure { e ->
+                    Log.w("GeminiAIService", "Failed to parse SMS insight from JSON element", e)
+                }
+            }
+        }
+        
+        Log.d("GeminiAIService", "SMS analysis complete: ${insights.size} insights extracted")
+        return SmsAnalysisResponse(insights = insights)
     }
 
     // --- Internal helpers ---
@@ -430,6 +497,101 @@ class GeminiAIService(
             appendLine()
             appendLine("Return ONLY a strict JSON object with key 'insights' mapping to an array of person insights.")
             appendLine("Each insight must be: { name: string, interests: string[], avoid: string[], sizes?: string, notes?: string, specialDates: string[] }")
+        }
+    }
+
+    private fun buildSmsAnalysisPrompt(request: SmsAnalysisRequest): String {
+        val conversationsJson = gson.toJson(request.conversations.map { conversation ->
+            mapOf(
+                "contactName" to conversation.contactName,
+                "phoneNumber" to conversation.phoneNumber,
+                "lastMessageDate" to conversation.lastMessageDate,
+                "messages" to conversation.messages.map { message ->
+                    mapOf(
+                        "id" to message.id,
+                        "body" to message.body,
+                        "date" to message.date,
+                        "type" to message.type, // 1 = received, 2 = sent
+                        "address" to message.address
+                    )
+                }
+            )
+        })
+
+        val personHintsJson = gson.toJson(request.personHints.map { person ->
+            mapOf(
+                "id" to person.id,
+                "name" to person.name,
+                "relationships" to person.relationships,
+                "notes" to (person.notes ?: ""),
+                "preferences" to person.preferences
+            )
+        })
+
+        return buildString {
+            appendLine("You are an AI assistant that analyzes SMS conversations to extract gift-related insights and preferences.")
+            appendLine()
+            appendLine("TASK: Analyze the provided SMS conversations to identify:")
+            appendLine("1. Interests and hobbies mentioned by each contact")
+            appendLine("2. Items they want, need, or have expressed interest in")
+            appendLine("3. Things they dislike or already own (to avoid as gifts)")
+            appendLine("4. Special dates mentioned (birthdays, anniversaries, etc.)")
+            appendLine("5. General notes about their preferences or lifestyle")
+            appendLine()
+            
+            appendLine("ANALYSIS GUIDELINES:")
+            appendLine("- Focus on gift-relevant information only")
+            appendLine("- Look for mentions of hobbies, interests, wants, needs")
+            appendLine("- Identify items they've purchased, received, or talked about wanting")
+            appendLine("- Note any size preferences, brand preferences, or specific requirements")
+            appendLine("- Pay attention to upcoming events or occasions they mention")
+            appendLine("- Assign confidence scores based on clarity and frequency of mentions")
+            appendLine("- Only include insights with confidence >= 0.3")
+            appendLine()
+            
+            appendLine("SMS CONVERSATIONS:")
+            appendLine(conversationsJson)
+            appendLine()
+            
+            appendLine("PERSON CONTEXT (existing contacts to potentially match):")
+            appendLine(personHintsJson)
+            appendLine()
+            
+            if (request.dateRangeStart != null && request.dateRangeEnd != null) {
+                appendLine("DATE FILTER: Only analyze messages between ${request.dateRangeStart} and ${request.dateRangeEnd}")
+                appendLine()
+            }
+            
+            appendLine("Return ONLY a strict JSON object with the following structure:")
+            appendLine("{")
+            appendLine("  \"insights\": [")
+            appendLine("    {")
+            appendLine("      \"contactName\": \"string (null if unknown)\",")
+            appendLine("      \"phoneNumber\": \"string (required)\",")
+            appendLine("      \"extractedInterests\": [\"string array of interests/hobbies\"],")
+            appendLine("      \"mentionedItems\": [\"string array of specific items they want/need\"],")
+            appendLine("      \"avoidItems\": [\"string array of items they dislike/already have\"],")
+            appendLine("      \"specialDates\": [\"string array of important dates mentioned\"],")
+            appendLine("      \"notes\": \"string (additional context or preferences)\",")
+            appendLine("      \"confidence\": 0.0-1.0")
+            appendLine("    }")
+            appendLine("  ]")
+            appendLine("}")
+            appendLine()
+            
+            appendLine("CONFIDENCE SCORING:")
+            appendLine("- 0.9-1.0: Explicitly stated preferences (\"I love...\", \"I want...\", \"I need...\")")
+            appendLine("- 0.7-0.8: Strong implications from context (frequent mentions, enthusiastic discussion)")
+            appendLine("- 0.5-0.6: Moderate implications (casual mentions, indirect references)")
+            appendLine("- 0.3-0.4: Weak implications (single mentions, unclear context)")
+            appendLine("- Below 0.3: Exclude from results")
+            appendLine()
+            
+            appendLine("IMPORTANT:")
+            appendLine("- Only return insights with meaningful gift-related information")
+            appendLine("- Ignore generic pleasantries, work discussions, or irrelevant chat")
+            appendLine("- Focus on actionable gift insights only")
+            appendLine("- Be conservative with confidence scores - accuracy is more important than quantity")
         }
     }
 

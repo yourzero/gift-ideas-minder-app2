@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Switch
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
@@ -35,6 +37,7 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ContactPage
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.ui.platform.testTag
 import android.net.Uri
 import android.provider.ContactsContract
@@ -52,6 +55,7 @@ fun AddEditRecipientFlowScreen(
     onNavigateBack: (String?) -> Unit,
     navController: NavController,
     personId: Int? = null,
+    onNavigateToSuggestions: (Int) -> Unit = {},
     viewModel: PersonFlowViewModel = hiltViewModel(),
     personViewModel: PersonViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel()
@@ -95,7 +99,13 @@ fun AddEditRecipientFlowScreen(
                     Button(
                         onClick = {
                             val result = viewModel.onNextOrSave()
-                            if (result.saved) onNavigateBack(result.successMessage)
+                            if (result.saved) {
+                                if (result.navigateToSuggestions != null) {
+                                    onNavigateToSuggestions(result.navigateToSuggestions)
+                                } else {
+                                    onNavigateBack(result.successMessage)
+                                }
+                            }
                         },
                         modifier = Modifier.weight(1f)
                     ) { Text(if (state.step == PersonFlowViewModel.Step.Review) "Save" else "Next") }
@@ -330,6 +340,47 @@ fun AddEditRecipientFlowScreen(
                                     Text("• $preference")
                                 }
                             }
+                        }
+                        
+                        // SMS Analysis Option
+                        Spacer(modifier = Modifier.height(8.dp))
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant
+                        )
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    Icons.Filled.Message,
+                                    contentDescription = "SMS Analysis",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        "Analyze text messages",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                    Text(
+                                        "Scan conversations for gift ideas and preferences",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            Switch(
+                                checked = state.smsAnalysisEnabled,
+                                onCheckedChange = viewModel::onSmsAnalysisToggle
+                            )
                         }
                     }
                 }

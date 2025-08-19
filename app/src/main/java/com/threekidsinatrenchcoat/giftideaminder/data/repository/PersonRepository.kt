@@ -24,4 +24,8 @@ class PersonRepository(private val personDao: PersonDao) {
     suspend fun getPersonByIdSuspend(id: Int): Person? = personDao.getPersonByIdSuspend(id)
 
     suspend fun getPeopleWithRole(roleBit: Int): List<Person> = personDao.getPeopleWithRole(roleBit)
+    
+    suspend fun getById(id: Int): Person? = personDao.getPersonByIdSuspend(id)
+    
+    suspend fun getAll(): List<Person> = personDao.getAllPersonsSuspend()
 } 

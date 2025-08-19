@@ -25,4 +25,7 @@ interface GiftDao {
     @Transaction
     @Query("SELECT * FROM gifts WHERE id = :id")
     fun getGiftWithHistoryById(id: Int): Flow<GiftWithHistory>
+    
+    @Query("SELECT * FROM gifts WHERE personId = :personId ORDER BY id DESC")
+    suspend fun getGiftsByPersonIdSuspend(personId: Int): List<Gift>
 }
