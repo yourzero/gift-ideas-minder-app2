@@ -33,6 +33,6 @@ class SettingsRepository @Inject constructor(
     companion object {
         const val KEY_DEBUG_AI_PROMPTS = "debug_ai_prompts"
         const val KEY_PLAY_LOADING_SOUNDS = "play_loading_sounds"
-        const val KEY_INTERESTS_ADVANCED_MODE = "interests_advanced_mode"
+        // KEY_INTERESTS_ADVANCED_MODE removed - simplified UX with always-available tabs
     }
 }

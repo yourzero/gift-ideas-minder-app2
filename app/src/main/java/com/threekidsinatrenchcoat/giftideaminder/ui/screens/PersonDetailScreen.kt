@@ -7,65 +7,44 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.threekidsinatrenchcoat.giftideaminder.data.model.Interest
 import com.threekidsinatrenchcoat.giftideaminder.data.model.InterestType
 import com.threekidsinatrenchcoat.giftideaminder.data.model.Person
 import com.threekidsinatrenchcoat.giftideaminder.viewmodel.PersonViewModel
-import com.threekidsinatrenchcoat.giftideaminder.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PersonDetailScreen(
     personId: Int,
     navController: NavController,
-    viewModel: PersonViewModel = hiltViewModel(),
-    settingsViewModel: SettingsViewModel = hiltViewModel()
+    viewModel: PersonViewModel = hiltViewModel()
 ) {
     val person by viewModel.getPersonById(personId).collectAsState(initial = null)
     val interests by viewModel.getInterestsForPerson(personId).collectAsState(initial = emptyList())
-    val isAdvancedMode by settingsViewModel.isAdvancedMode.collectAsState()
     
-    // Force General mode if not in advanced mode
-    var selectedType by remember(isAdvancedMode) { 
-        mutableStateOf(if (isAdvancedMode) InterestType.GENERAL else InterestType.GENERAL) 
-    }
+    // Simple tab-based navigation between interests and wishlist
+    var selectedTab by remember { mutableStateOf(0) } // 0 = Interests, 1 = Wishlist
     var showAddDialog by remember { mutableStateOf(false) }
     var newInterestText by remember { mutableStateOf("") }
+    var showSuggestionPrompt by remember { mutableStateOf(false) }
+    var suggestedTab by remember { mutableStateOf(0) }
     
-    // Track specific-sounding interests added in simple mode
-    var showAdvancedModePrompt by remember { mutableStateOf(false) }
-    
-    // Check if we should show advanced mode prompt
-    LaunchedEffect(interests, isAdvancedMode) {
-        if (!isAdvancedMode) {
-            // Count interests that sound specific (contain specific keywords or patterns)
-            val specificSoundingInterests = interests.count { interest ->
-                isSpecificSounding(interest.value)
-            }
-            
-            // Show prompt if 3+ specific-sounding interests in simple mode
-            if (specificSoundingInterests >= 3) {
-                showAdvancedModePrompt = true
-            }
-        }
-    }
-    
-    // Filter interests by selected type and mode
+    // Filter interests based on selected tab
     val filteredInterests = interests.filter { 
-        if (!isAdvancedMode) {
-            // Simple mode: only show general interests
-            it.type == InterestType.GENERAL 
-        } else {
-            // Advanced mode: show selected type
-            it.type == selectedType
+        when (selectedTab) {
+            0 -> it.type == InterestType.GENERAL  // Interests tab
+            1 -> it.type == InterestType.SPECIFIC // Wishlist tab
+            else -> true
         }
     }
     
@@ -78,6 +57,14 @@ fun PersonDetailScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { navController.navigate("edit_person/${personId}") }) {
+                        Icon(
+                            imageVector = Icons.Filled.Settings,
+                            contentDescription = "Settings"
                         )
                     }
                 }
@@ -121,7 +108,7 @@ fun PersonDetailScreen(
                     }
                 }
                 
-                // Interest type toggle
+                // Tab navigation for Interests and Wishlist
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -130,52 +117,42 @@ fun PersonDetailScreen(
                     Column(
                         modifier = Modifier.padding(16.dp)
                     ) {
+                        Text(
+                            text = "${person?.name}'s Profile",
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        
+                        // Tab selector
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(
-                                text = "Interests & Inspirations",
-                                style = MaterialTheme.typography.titleLarge
+                            FilterChip(
+                                onClick = { selectedTab = 0 },
+                                label = { Text("Interests") },
+                                selected = selectedTab == 0,
+                                modifier = Modifier.weight(1f)
                             )
-                            
-                            if (!isAdvancedMode) {
-                                TextButton(
-                                    onClick = { navController.navigate("settings") }
-                                ) {
-                                    Text("Enable Advanced Mode")
-                                }
-                            }
+                            FilterChip(
+                                onClick = { selectedTab = 1 },
+                                label = { Text("Wishlist") },
+                                selected = selectedTab == 1,
+                                modifier = Modifier.weight(1f)
+                            )
                         }
                         
-                        if (!isAdvancedMode) {
-                            Text(
-                                text = "Simple mode: Only general interests (cooking, sports, music)",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-                        } else {
-                            // Type toggle buttons
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                FilterChip(
-                                    onClick = { selectedType = InterestType.GENERAL },
-                                    label = { Text("General") },
-                                    selected = selectedType == InterestType.GENERAL,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                FilterChip(
-                                    onClick = { selectedType = InterestType.SPECIFIC },
-                                    label = { Text("Specific") },
-                                    selected = selectedType == InterestType.SPECIFIC,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
+                        // Tab descriptions
+                        Text(
+                            text = when (selectedTab) {
+                                0 -> "General interests like hobbies, activities, and preferences"
+                                1 -> "Specific items they want or already own"
+                                else -> ""
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
                     }
                 }
                 
@@ -190,11 +167,29 @@ fun PersonDetailScreen(
                                 .padding(32.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = "No ${selectedType.name.lowercase()} interests yet.\nTap + to add some!",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = when (selectedTab) {
+                                        0 -> "No interests added yet"
+                                        1 -> "No wishlist items yet"
+                                        else -> "No items yet"
+                                    },
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = when (selectedTab) {
+                                        0 -> "Add hobbies, activities, or things they enjoy"
+                                        1 -> "Add specific products or items they want"
+                                        else -> "Tap + to add items"
+                                    },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                            }
                         }
                     }
                 } else {
@@ -206,7 +201,7 @@ fun PersonDetailScreen(
                                 interest = interest,
                                 onToggleOwned = { viewModel.toggleInterestOwned(interest) },
                                 onDelete = { viewModel.deleteInterest(interest) },
-                                isAdvancedMode = isAdvancedMode
+                                isWishlistTab = selectedTab == 1
                             )
                         }
                     }
@@ -223,32 +218,87 @@ fun PersonDetailScreen(
                 newInterestText = ""
             },
             title = { 
-                val typeToAdd = if (!isAdvancedMode) InterestType.GENERAL else selectedType
-                Text("Add ${typeToAdd.name.lowercase().replaceFirstChar { it.uppercase() }} Interest") 
+                Text(when (selectedTab) {
+                    0 -> "Add Interest"
+                    1 -> "Add Wishlist Item"
+                    else -> "Add Item"
+                })
             },
             text = {
-                OutlinedTextField(
-                    value = newInterestText,
-                    onValueChange = { newInterestText = it },
-                    label = { Text("Interest") },
-                    placeholder = { 
-                        val typeToAdd = if (!isAdvancedMode) InterestType.GENERAL else selectedType
-                        Text(
-                            if (typeToAdd == InterestType.GENERAL) {
-                                "e.g., cooking, sports, music"
+                Column {
+                    OutlinedTextField(
+                        value = newInterestText,
+                        onValueChange = { text -> 
+                            newInterestText = text
+                            // Check if we should suggest switching tabs
+                            val suggestion = getTabSuggestion(text)
+                            if (suggestion != selectedTab && text.trim().length > 3) {
+                                suggestedTab = suggestion
+                                showSuggestionPrompt = true
                             } else {
-                                "e.g., Nike Air Max shoes, iPhone 15"
+                                showSuggestionPrompt = false
                             }
-                        ) 
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                        },
+                        label = { Text(when (selectedTab) {
+                            0 -> "Interest"
+                            1 -> "Wishlist Item"
+                            else -> "Item"
+                        }) },
+                        placeholder = { 
+                            Text(when (selectedTab) {
+                                0 -> "e.g., cooking, hiking, board games"
+                                1 -> "e.g., Nike Air Max, iPhone 15, guitar"
+                                else -> "Enter item"
+                            })
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    
+                    // Smart suggestion prompt
+                    if (showSuggestionPrompt) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "This looks like ${if (suggestedTab == 0) "an interest" else "a specific item"}. Switch to ${if (suggestedTab == 0) "Interests" else "Wishlist"} tab?",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                TextButton(
+                                    onClick = {
+                                        selectedTab = suggestedTab
+                                        showSuggestionPrompt = false
+                                    }
+                                ) {
+                                    Text("Switch")
+                                }
+                            }
+                        }
+                    }
+                }
             },
             confirmButton = {
                 TextButton(
                     onClick = {
                         if (newInterestText.isNotBlank()) {
-                            val typeToAdd = if (!isAdvancedMode) InterestType.GENERAL else selectedType
+                            val typeToAdd = when (selectedTab) {
+                                0 -> InterestType.GENERAL
+                                1 -> InterestType.SPECIFIC
+                                else -> InterestType.GENERAL
+                            }
                             viewModel.addInterest(
                                 personId = personId,
                                 type = typeToAdd,
@@ -274,98 +324,68 @@ fun PersonDetailScreen(
             }
         )
     }
-    
-    // Advanced mode suggestion prompt
-    if (showAdvancedModePrompt) {
-        AlertDialog(
-            onDismissRequest = { showAdvancedModePrompt = false },
-            title = { Text("Enable Advanced Mode?") },
-            text = {
-                Column {
-                    Text("It looks like you're adding specific items like product names or brands.")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Advanced Mode lets you:")
-                    Text("• Separate general interests from specific items")
-                    Text("• Mark specific items as 'already owned'")
-                    Text("• Get better AI suggestions")
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        settingsViewModel.setAdvancedMode(true)
-                        showAdvancedModePrompt = false
-                    }
-                ) {
-                    Text("Enable Advanced Mode")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showAdvancedModePrompt = false }
-                ) {
-                    Text("Keep Simple Mode")
-                }
-            }
-        )
-    }
 }
 
 /**
- * Checks if an interest value sounds specific (like a product name or brand)
- * rather than general (like "cooking" or "sports")
+ * Analyzes text to suggest the most appropriate tab (Interests vs Wishlist)
+ * Returns 0 for Interests, 1 for Wishlist
  */
-private fun isSpecificSounding(interest: String): Boolean {
-    val lowercaseInterest = interest.lowercase().trim()
+private fun getTabSuggestion(text: String): Int {
+    val lowercaseText = text.lowercase().trim()
     
-    // Check for specific patterns that indicate specific items
+    // Specific product indicators suggest Wishlist (tab 1)
+    val specificIndicators = listOf(
+        // Brand names
+        "nike", "adidas", "apple", "samsung", "sony", "microsoft", "google",
+        "amazon", "netflix", "spotify", "airpods", "iphone", "ipad", "macbook",
+        "playstation", "xbox", "nintendo", "switch", "kindle",
+        
+        // Product types with specific descriptors
+        "pro", "max", "plus", "ultra", "premium", "deluxe", "edition",
+        
+        // Size/color/model indicators
+        "size", "color", "black", "white", "red", "blue", "green", "gold", "silver",
+        "large", "medium", "small", "xl", "xxl", "32gb", "64gb", "128gb", "256gb",
+        
+        // Specific product categories
+        "shoes size", "model", "version", "generation", "gb", "tb", "inch", "cm"
+    )
+    
+    // General interest indicators suggest Interests (tab 0)
+    val generalIndicators = listOf(
+        "love", "enjoy", "like", "interested in", "passion for", "hobby",
+        "activity", "sport", "music", "art", "reading", "writing", "cooking",
+        "traveling", "hiking", "running", "swimming", "dancing", "singing",
+        "gaming", "movies", "books", "photography", "gardening", "crafting"
+    )
+    
+    // Check for specific indicators first (higher priority)
+    val hasSpecificIndicators = specificIndicators.any { lowercaseText.contains(it) }
+    val hasGeneralIndicators = generalIndicators.any { lowercaseText.contains(it) }
+    
+    // Additional checks for specific items
+    val hasNumbers = lowercaseText.matches(Regex(".*\\d+.*"))
+    val hasSpecificPhrases = lowercaseText.length > 20 && lowercaseText.contains(" ")
+    val hasCurrency = lowercaseText.contains("$") || lowercaseText.contains("dollar") || lowercaseText.contains("price")
+    
     return when {
-        // Contains brand names or specific product indicators
-        lowercaseInterest.contains("nike") || 
-        lowercaseInterest.contains("adidas") ||
-        lowercaseInterest.contains("apple") ||
-        lowercaseInterest.contains("samsung") ||
-        lowercaseInterest.contains("iphone") ||
-        lowercaseInterest.contains("macbook") ||
-        lowercaseInterest.contains("playstation") ||
-        lowercaseInterest.contains("xbox") ||
-        lowercaseInterest.contains("switch") -> true
-        
-        // Contains model numbers or specific product patterns
-        lowercaseInterest.matches(Regex(".*\\d+.*")) && 
-        (lowercaseInterest.contains("max") || 
-         lowercaseInterest.contains("pro") ||
-         lowercaseInterest.contains("plus") ||
-         lowercaseInterest.contains("air")) -> true
-        
-        // Contains specific product categories with descriptors
-        lowercaseInterest.contains("shoes") && 
-        (lowercaseInterest.contains(" ") && lowercaseInterest.length > 10) -> true
-        
-        // Long descriptive phrases (likely specific items)
-        lowercaseInterest.contains(" ") && lowercaseInterest.length > 15 -> true
-        
-        // Contains specific size/color/model indicators
-        lowercaseInterest.contains("size") ||
-        lowercaseInterest.contains("color") ||
-        lowercaseInterest.contains("black") ||
-        lowercaseInterest.contains("white") ||
-        lowercaseInterest.contains("red") ||
-        lowercaseInterest.contains("blue") ||
-        lowercaseInterest.contains("large") ||
-        lowercaseInterest.contains("medium") ||
-        lowercaseInterest.contains("small") -> true
-        
-        else -> false
+        hasSpecificIndicators -> 1 // Wishlist
+        hasCurrency -> 1 // Wishlist
+        hasNumbers && (lowercaseText.contains("gb") || lowercaseText.contains("inch") || lowercaseText.contains("size")) -> 1 // Wishlist
+        hasGeneralIndicators -> 0 // Interests
+        hasSpecificPhrases -> 1 // Long descriptive phrases are likely specific items
+        lowercaseText.split(" ").size == 1 && lowercaseText.length < 15 -> 0 // Single words are likely general interests
+        else -> 0 // Default to interests for ambiguous cases
     }
 }
+
 
 @Composable
 private fun InterestItem(
     interest: Interest,
     onToggleOwned: () -> Unit,
     onDelete: () -> Unit,
-    isAdvancedMode: Boolean = true,
+    isWishlistTab: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -385,12 +405,12 @@ private fun InterestItem(
                     text = interest.value,
                     style = MaterialTheme.typography.bodyLarge
                 )
-                if (interest.type == InterestType.SPECIFIC && isAdvancedMode) {
+                if (isWishlistTab && interest.type == InterestType.SPECIFIC) {
                     Text(
-                        text = if (interest.alreadyOwned) "Already owned" else "Available",
+                        text = if (interest.alreadyOwned) "Already owned" else "Want this",
                         style = MaterialTheme.typography.bodySmall,
                         color = if (interest.alreadyOwned) 
-                            MaterialTheme.colorScheme.error 
+                            MaterialTheme.colorScheme.outline 
                         else 
                             MaterialTheme.colorScheme.primary
                     )
@@ -398,12 +418,12 @@ private fun InterestItem(
             }
             
             Row {
-                // Toggle owned button (only for specific items in advanced mode)
-                if (interest.type == InterestType.SPECIFIC && isAdvancedMode) {
+                // Toggle owned button (only for wishlist items)
+                if (isWishlistTab && interest.type == InterestType.SPECIFIC) {
                     TextButton(
                         onClick = onToggleOwned
                     ) {
-                        Text(if (interest.alreadyOwned) "Mark Available" else "Mark Owned")
+                        Text(if (interest.alreadyOwned) "Mark as Want" else "Mark as Owned")
                     }
                 }
                 

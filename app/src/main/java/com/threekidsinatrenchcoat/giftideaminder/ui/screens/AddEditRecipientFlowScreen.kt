@@ -267,7 +267,6 @@ fun AddEditRecipientFlowScreen(
                     if (currentPersonId != -1) {
                         // Existing person - use real Interest system
                         val interests by personViewModel.getInterestsForPerson(currentPersonId).collectAsState(initial = emptyList())
-                        val isAdvancedMode by settingsViewModel.isAdvancedMode.collectAsState()
                         
                         SectionCard(
                             icon = Icons.Default.FavoriteBorder,
@@ -275,7 +274,7 @@ fun AddEditRecipientFlowScreen(
                         ) {
                             NewInterestSystem(
                                 interests = interests,
-                                isAdvancedMode = isAdvancedMode,
+                                isAdvancedMode = true, // Always use simplified always-available tabs
                                 onAddInterest = { type, value ->
                                     personViewModel.addInterest(currentPersonId, type, value)
                                 },
@@ -896,51 +895,33 @@ private fun NewInterestSystem(
     onDeleteInterest: (Interest) -> Unit,
     onToggleOwned: (Interest) -> Unit
 ) {
-    var selectedType by remember(isAdvancedMode) { 
-        mutableStateOf(if (isAdvancedMode) InterestType.GENERAL else InterestType.GENERAL) 
-    }
+    var selectedType by remember { mutableStateOf(InterestType.GENERAL) }
     var showAddDialog by remember { mutableStateOf(false) }
     var newInterestText by remember { mutableStateOf("") }
     
-    // Filter interests by selected type and mode
-    val filteredInterests = interests.filter { 
-        if (!isAdvancedMode) {
-            // Simple mode: only show general interests
-            it.type == InterestType.GENERAL 
-        } else {
-            // Advanced mode: show selected type
-            it.type == selectedType
-        }
-    }
+    // Filter interests by selected type (always show both tabs)
+    val filteredInterests = interests.filter { it.type == selectedType }
     
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Type toggle (only show in advanced mode)
-        if (isAdvancedMode) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilterChip(
-                    onClick = { selectedType = InterestType.GENERAL },
-                    label = { Text("General") },
-                    selected = selectedType == InterestType.GENERAL,
-                    modifier = Modifier.weight(1f)
-                )
-                FilterChip(
-                    onClick = { selectedType = InterestType.SPECIFIC },
-                    label = { Text("Specific") },
-                    selected = selectedType == InterestType.SPECIFIC,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        } else {
-            Text(
-                text = "Simple mode: Only general interests (cooking, sports, music)",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+        // Always show both tabs - simplified UX
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FilterChip(
+                onClick = { selectedType = InterestType.GENERAL },
+                label = { Text("Interests") },
+                selected = selectedType == InterestType.GENERAL,
+                modifier = Modifier.weight(1f)
+            )
+            FilterChip(
+                onClick = { selectedType = InterestType.SPECIFIC },
+                label = { Text("Wishlist") },
+                selected = selectedType == InterestType.SPECIFIC,
+                modifier = Modifier.weight(1f)
             )
         }
         
@@ -951,8 +932,7 @@ private fun NewInterestSystem(
         ) {
             Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
-            val typeToAdd = if (!isAdvancedMode) InterestType.GENERAL else selectedType
-            Text("Add ${typeToAdd.name.lowercase().replaceFirstChar { it.uppercase() }} Interest")
+            Text("Add ${if (selectedType == InterestType.GENERAL) "Interest" else "Wishlist Item"}")
         }
         
         // Interests list - make it scrollable
@@ -978,7 +958,7 @@ private fun NewInterestSystem(
             }
         } else {
             Text(
-                text = "No ${if (isAdvancedMode) selectedType.name.lowercase() else "general"} interests yet",
+                text = "No ${if (selectedType == InterestType.GENERAL) "interests" else "wishlist items"} yet",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -993,8 +973,7 @@ private fun NewInterestSystem(
                 newInterestText = ""
             },
             title = { 
-                val typeToAdd = if (!isAdvancedMode) InterestType.GENERAL else selectedType
-                Text("Add ${typeToAdd.name.lowercase().replaceFirstChar { it.uppercase() }} Interest") 
+                Text("Add ${if (selectedType == InterestType.GENERAL) "Interest" else "Wishlist Item"}")
             },
             text = {
                 OutlinedTextField(
@@ -1002,14 +981,11 @@ private fun NewInterestSystem(
                     onValueChange = { newInterestText = it },
                     label = { Text("Interest") },
                     placeholder = { 
-                        val typeToAdd = if (!isAdvancedMode) InterestType.GENERAL else selectedType
-                        Text(
-                            if (typeToAdd == InterestType.GENERAL) {
-                                "e.g., cooking, sports, music"
-                            } else {
-                                "e.g., Nike Air Max shoes, iPhone 15"
-                            }
-                        ) 
+                        Text(if (selectedType == InterestType.GENERAL) {
+                            "e.g., cooking, sports, music"
+                        } else {
+                            "e.g., Nike Air Max shoes, iPhone 15"
+                        })
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -1018,8 +994,7 @@ private fun NewInterestSystem(
                 TextButton(
                     onClick = {
                         if (newInterestText.isNotBlank()) {
-                            val typeToAdd = if (!isAdvancedMode) InterestType.GENERAL else selectedType
-                            onAddInterest(typeToAdd, newInterestText.trim())
+                            onAddInterest(selectedType, newInterestText.trim())
                             showAddDialog = false
                             newInterestText = ""
                         }
@@ -1070,7 +1045,7 @@ private fun InterestItemInline(
                     text = interest.value,
                     style = MaterialTheme.typography.bodyMedium
                 )
-                if (interest.type == InterestType.SPECIFIC && isAdvancedMode) {
+                if (interest.type == InterestType.SPECIFIC) {
                     Text(
                         text = if (interest.alreadyOwned) "Already owned" else "Available",
                         style = MaterialTheme.typography.bodySmall,
@@ -1083,8 +1058,8 @@ private fun InterestItemInline(
             }
             
             Row {
-                // Toggle owned button (only for specific items in advanced mode)
-                if (interest.type == InterestType.SPECIFIC && isAdvancedMode) {
+                // Toggle owned button (only for specific items)
+                if (interest.type == InterestType.SPECIFIC) {
                     TextButton(onClick = onToggleOwned) {
                         Text(
                             text = if (interest.alreadyOwned) "Available" else "Owned",

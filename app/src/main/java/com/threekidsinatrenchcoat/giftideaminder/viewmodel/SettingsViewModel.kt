@@ -15,21 +15,9 @@ class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
-    // Interests advanced mode (default is true for backward compatibility)
-    val isAdvancedMode: StateFlow<Boolean> = settingsRepository
-        .getBooleanSetting(SettingsRepository.KEY_INTERESTS_ADVANCED_MODE, defaultValue = true)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = true
-        )
-
-    fun setAdvancedMode(enabled: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.setBooleanSetting(
-                SettingsRepository.KEY_INTERESTS_ADVANCED_MODE, 
-                enabled
-            )
-        }
-    }
+    // Advanced Mode removed - UI now uses simple Interests/Wishlist tabs
+    // All previous user interests remain accessible in their appropriate tabs
+    
+    // Future settings can be added here as needed
+    // Example: Debug settings, notification preferences, etc.
 }

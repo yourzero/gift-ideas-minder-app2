@@ -18,7 +18,6 @@ fun SettingsScreen(
     navController: NavController,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val isAdvancedMode by viewModel.isAdvancedMode.collectAsState()
 
     Scaffold(
         topBar = {
@@ -42,7 +41,7 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Interests Mode Section
+            // Settings content - Advanced Mode removed for simplified UX
             Card(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -51,86 +50,35 @@ fun SettingsScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "Interests & Inspirations",
+                        text = "Gift Idea Minder",
                         style = MaterialTheme.typography.titleMedium
                     )
                     
                     Text(
-                        text = "Choose how detailed you want the interests feature to be.",
+                        text = "Interests are now organized into simple Interests and Wishlist tabs for better usability. No mode switching required.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Advanced Mode",
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Text(
-                                text = if (isAdvancedMode) {
-                                    "Both general and specific interests with 'already owned' tracking"
-                                } else {
-                                    "Only general interests (cooking, sports, etc.)"
-                                },
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        
-                        Switch(
-                            checked = isAdvancedMode,
-                            onCheckedChange = { viewModel.setAdvancedMode(it) }
-                        )
-                    }
                     
-                    if (!isAdvancedMode) {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            ),
-                            modifier = Modifier.fillMaxWidth()
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp)
                         ) {
-                            Column(
-                                modifier = Modifier.padding(12.dp)
-                            ) {
-                                Text(
-                                    text = "Simple Mode",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                                Text(
-                                    text = "Perfect for basic gift ideas. You can add general interests like 'cooking', 'sports', or 'music' to help generate better suggestions.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
-                        }
-                    } else {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(12.dp)
-                            ) {
-                                Text(
-                                    text = "Advanced Mode",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                                Text(
-                                    text = "For detailed gift planning. Add both general interests AND specific items (e.g., 'Nike Air Max shoes'). Mark specific items as 'already owned' to avoid duplicate suggestions.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                            }
+                            Text(
+                                text = "Simplified Interface",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Text(
+                                text = "• Interests tab: hobbies and general preferences\n• Wishlist tab: specific items they want\n• Smart suggestions help categorize items automatically",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
                         }
                     }
                 }
