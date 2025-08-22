@@ -338,6 +338,267 @@ fun AddEditRecipientFlowScreen(
 }
 
 @Composable
+fun EditRecipientTabsScreen(
+    onNavigateBack: (String?) -> Unit,
+    navController: NavController,
+    personId: Int,
+    viewModel: PersonFlowViewModel = hiltViewModel(),
+    personViewModel: PersonViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel()
+) {
+    val state by viewModel.uiState.collectAsState()
+    var selectedTab by remember { mutableStateOf(0) } // 0 = Details, 1 = Dates, 2 = Preferences
+
+    Scaffold(
+        topBar = {
+            MediumTopAppBar(
+                title = { Text("Edit Recipient") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            )
+        },
+        bottomBar = {
+            Surface(tonalElevation = 2.dp) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedButton(
+                        onClick = { navController.popBackStack() },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("Cancel") }
+
+                    Button(
+                        onClick = {
+                            val result = viewModel.onSave()
+                            if (result.saved) onNavigateBack(result.successMessage)
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("Save") }
+                }
+            }
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+                .padding(top = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Tab navigation
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    listOf(
+                        Triple(0, Icons.Default.Person, "Details"),
+                        Triple(1, Icons.Default.CalendarToday, "Dates"),
+                        Triple(2, Icons.Default.FavoriteBorder, "Preferences")
+                    ).forEach { (index, icon, label) ->
+                        FilterChip(
+                            onClick = { selectedTab = index },
+                            label = { 
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Text(label)
+                                }
+                            },
+                            selected = selectedTab == index,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+
+            // Tab content
+            when (selectedTab) {
+                0 -> { // Details Tab
+                    val context = LocalContext.current
+                    
+                    val contactPicker = rememberLauncherForActivityResult(
+                        ActivityResultContracts.PickContact()
+                    ) { uri: Uri? ->
+                        uri?.let {
+                            context.contentResolver.query(it, null, null, null, null)?.use { cursor ->
+                                if (cursor.moveToFirst()) {
+                                    val name = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
+                                    viewModel.onNameChange(name)
+                                }
+                            }
+                        }
+                    }
+                    
+                    SectionCard(
+                        icon = Icons.Default.Person,
+                        title = "Personal Details"
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            ContactAutocompleteTextField(
+                                value = state.name,
+                                onValueChange = viewModel::onNameChange,
+                                onContactSelected = { contact ->
+                                    viewModel.onNameChange(contact.name)
+                                    
+                                    contact.detectedRelationship?.let { relationship ->
+                                        val mappedRelationship = when (relationship) {
+                                            "Mother", "Father", "Sister", "Brother", "Aunt", "Uncle", 
+                                            "Cousin", "Grandmother", "Grandfather", "Child", "Spouse" -> "Family"
+                                            "Friend" -> "Friend"
+                                            "Colleague" -> "Coworker"
+                                            "Partner" -> "Family"
+                                            else -> null
+                                        }
+                                        
+                                        mappedRelationship?.let { mapped ->
+                                            val relationshipMapping = when (mapped) {
+                                                "Family" -> when (relationship) {
+                                                    "Mother", "Father" -> "Parent"
+                                                    "Sister", "Brother" -> "Sibling"
+                                                    "Child" -> "Child"
+                                                    "Spouse" -> "Spouse"
+                                                    "Partner" -> "Partner"
+                                                    else -> null
+                                                }
+                                                "Friend" -> "Friend"
+                                                "Coworker" -> "Coworker"
+                                                else -> null
+                                            }
+                                            
+                                            relationshipMapping?.let { targetRelationship ->
+                                                if (targetRelationship in state.availableRelationships && 
+                                                    targetRelationship !in state.selectedRelationships) {
+                                                    viewModel.onRelationshipSelected(targetRelationship)
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                label = { Text("Name") },
+                                placeholder = { Text("Start typing to search contacts") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            
+                            OutlinedButton(
+                                onClick = { contactPicker.launch(null) },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Icon(
+                                    Icons.Default.ContactPage,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text("Import from Contacts")
+                            }
+                            
+                            Text("Relationship", style = MaterialTheme.typography.titleSmall)
+                            RelationshipSelector(
+                                options = state.availableRelationships,
+                                selected = state.selectedRelationships,
+                                onSelected = { viewModel.onRelationshipSelected(it) },
+                                onAddNew = { name, hasBirthday, hasAnniversary -> 
+                                    viewModel.onAddNewRelationshipType(name, hasBirthday, hasAnniversary)
+                                }
+                            )
+                        }
+                    }
+                }
+
+                1 -> { // Dates Tab
+                    SectionCard(
+                        icon = Icons.Default.CalendarToday,
+                        title = "Important Dates"
+                    ) {
+                        val visibleLabels = remember(
+                            state.datePrompts,
+                            state.additionalDateLabels,
+                            state.pickedDates,
+                            state.removedDateLabels
+                        ) {
+                            (state.datePrompts + state.additionalDateLabels + state.pickedDates.keys)
+                                .distinct()
+                                .filter { it !in state.removedDateLabels }
+                        }
+
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            visibleLabels.forEach { label ->
+                                ImprovedDateRow(
+                                    label = label,
+                                    date = state.pickedDates[label],
+                                    onLabelChange = { newLabel -> viewModel.onChangeDateLabel(label, newLabel) },
+                                    onPicked = { picked -> viewModel.onDatePicked(label, picked) },
+                                    onRemove = { viewModel.onRemoveDateItem(label) }
+                                )
+                            }
+
+                            OutlinedButton(
+                                onClick = { viewModel.onAddDateItem("Custom") },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Icon(Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text("Add Another Date")
+                            }
+                        }
+                    }
+                }
+
+                2 -> { // Preferences Tab
+                    val interests by personViewModel.getInterestsForPerson(personId).collectAsState(initial = emptyList())
+                    
+                    SectionCard(
+                        icon = Icons.Default.FavoriteBorder,
+                        title = "Gift Inspirations"
+                    ) {
+                        NewInterestSystem(
+                            interests = interests,
+                            isAdvancedMode = true,
+                            onAddInterest = { type, value ->
+                                personViewModel.addInterest(personId, type, value)
+                            },
+                            onDeleteInterest = { interest ->
+                                personViewModel.deleteInterest(interest)
+                            },
+                            onToggleOwned = { interest ->
+                                personViewModel.toggleInterestOwned(interest)
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun SectionCard(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
