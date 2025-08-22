@@ -919,7 +919,7 @@ private fun NewInterestSystem(
             )
             FilterChip(
                 onClick = { selectedType = InterestType.SPECIFIC },
-                label = { Text("Wishlist") },
+                label = { Text("They Own") },
                 selected = selectedType == InterestType.SPECIFIC,
                 modifier = Modifier.weight(1f)
             )
@@ -932,7 +932,7 @@ private fun NewInterestSystem(
         ) {
             Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
-            Text("Add ${if (selectedType == InterestType.GENERAL) "Interest" else "Wishlist Item"}")
+            Text("Add ${if (selectedType == InterestType.GENERAL) "Interest" else "Owned Item"}")
         }
         
         // Interests list - make it scrollable
@@ -958,7 +958,7 @@ private fun NewInterestSystem(
             }
         } else {
             Text(
-                text = "No ${if (selectedType == InterestType.GENERAL) "interests" else "wishlist items"} yet",
+                text = "No ${if (selectedType == InterestType.GENERAL) "interests" else "owned items"} yet",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -973,7 +973,7 @@ private fun NewInterestSystem(
                 newInterestText = ""
             },
             title = { 
-                Text("Add ${if (selectedType == InterestType.GENERAL) "Interest" else "Wishlist Item"}")
+                Text("Add ${if (selectedType == InterestType.GENERAL) "Interest" else "Owned Item"}")
             },
             text = {
                 OutlinedTextField(
@@ -984,7 +984,7 @@ private fun NewInterestSystem(
                         Text(if (selectedType == InterestType.GENERAL) {
                             "e.g., cooking, sports, music"
                         } else {
-                            "e.g., Nike Air Max shoes, iPhone 15"
+                            "e.g., iPhone 14, Nike Air Max 90, MacBook Pro"
                         })
                     },
                     modifier = Modifier.fillMaxWidth()

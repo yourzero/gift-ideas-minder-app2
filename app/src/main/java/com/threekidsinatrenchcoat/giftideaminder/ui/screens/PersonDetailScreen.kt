@@ -136,7 +136,7 @@ fun PersonDetailScreen(
                             )
                             FilterChip(
                                 onClick = { selectedTab = 1 },
-                                label = { Text("Wishlist") },
+                                label = { Text("They Own") },
                                 selected = selectedTab == 1,
                                 modifier = Modifier.weight(1f)
                             )
@@ -146,7 +146,7 @@ fun PersonDetailScreen(
                         Text(
                             text = when (selectedTab) {
                                 0 -> "General interests like hobbies, activities, and preferences"
-                                1 -> "Specific items they want or already own"
+                                1 -> "Specific items they already own (avoid gifting duplicates)"
                                 else -> ""
                             },
                             style = MaterialTheme.typography.bodySmall,
@@ -173,7 +173,7 @@ fun PersonDetailScreen(
                                 Text(
                                     text = when (selectedTab) {
                                         0 -> "No interests added yet"
-                                        1 -> "No wishlist items yet"
+                                        1 -> "No owned items tracked yet"
                                         else -> "No items yet"
                                     },
                                     style = MaterialTheme.typography.bodyLarge,
@@ -182,7 +182,7 @@ fun PersonDetailScreen(
                                 Text(
                                     text = when (selectedTab) {
                                         0 -> "Add hobbies, activities, or things they enjoy"
-                                        1 -> "Add specific products or items they want"
+                                        1 -> "Track items they already own to avoid duplicate gifts"
                                         else -> "Tap + to add items"
                                     },
                                     style = MaterialTheme.typography.bodySmall,
@@ -220,7 +220,7 @@ fun PersonDetailScreen(
             title = { 
                 Text(when (selectedTab) {
                     0 -> "Add Interest"
-                    1 -> "Add Wishlist Item"
+                    1 -> "Add Owned Item"
                     else -> "Add Item"
                 })
             },
@@ -241,13 +241,13 @@ fun PersonDetailScreen(
                         },
                         label = { Text(when (selectedTab) {
                             0 -> "Interest"
-                            1 -> "Wishlist Item"
+                            1 -> "Owned Item"
                             else -> "Item"
                         }) },
                         placeholder = { 
                             Text(when (selectedTab) {
                                 0 -> "e.g., cooking, hiking, board games"
-                                1 -> "e.g., Nike Air Max, iPhone 15, guitar"
+                                1 -> "e.g., iPhone 14, Nike Air Max 90, MacBook Pro"
                                 else -> "Enter item"
                             })
                         },
@@ -272,7 +272,7 @@ fun PersonDetailScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "This looks like ${if (suggestedTab == 0) "an interest" else "a specific item"}. Switch to ${if (suggestedTab == 0) "Interests" else "Wishlist"} tab?",
+                                    text = "This looks like ${if (suggestedTab == 0) "an interest" else "a specific item they own"}. Switch to ${if (suggestedTab == 0) "Interests" else "They Own"} tab?",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     modifier = Modifier.weight(1f)
@@ -327,8 +327,8 @@ fun PersonDetailScreen(
 }
 
 /**
- * Analyzes text to suggest the most appropriate tab (Interests vs Wishlist)
- * Returns 0 for Interests, 1 for Wishlist
+ * Analyzes text to suggest the most appropriate tab (Interests vs They Own)
+ * Returns 0 for Interests, 1 for They Own (specific items)
  */
 private fun getTabSuggestion(text: String): Int {
     val lowercaseText = text.lowercase().trim()
@@ -407,7 +407,7 @@ private fun InterestItem(
                 )
                 if (isWishlistTab && interest.type == InterestType.SPECIFIC) {
                     Text(
-                        text = if (interest.alreadyOwned) "Already owned" else "Want this",
+                        text = if (interest.alreadyOwned) "They own this" else "Available to gift",
                         style = MaterialTheme.typography.bodySmall,
                         color = if (interest.alreadyOwned) 
                             MaterialTheme.colorScheme.outline 
@@ -423,7 +423,7 @@ private fun InterestItem(
                     TextButton(
                         onClick = onToggleOwned
                     ) {
-                        Text(if (interest.alreadyOwned) "Mark as Want" else "Mark as Owned")
+                        Text(if (interest.alreadyOwned) "Mark Available" else "Mark as Owned")
                     }
                 }
                 
