@@ -60,6 +60,8 @@ Prioritize:
 
 
 ## Notifications
-- **Permission prompts**: powershell.exe -c "(New-Object Media.SoundPlayer 'C:\Users\justin\Music\notifications\new-notification-022-370046.wav').PlaySync()"
-- **Task completion**: powershell.exe -c "(New-Object Media.SoundPlayer 'C:\Users\justin\Music\notifications\notification-sound-3-262896.wav').PlaySync()"
-- **Errors/Warnings**: powershell.exe -c "(New-Object Media.SoundPlayer 'C:\Users\justin\Music\notifications\error-04-199275.wav').PlaySync()"
+- Play these notification sounds after each listed event:
+  - **Permission prompts**: powershell.exe -c "(New-Object Media.SoundPlayer 'C:\Users\justin\Music\notifications\new-notification-022-370046.wav').PlaySync()"
+    - If I (the user) don't respond to a permission prompt, remind me with the same sound every 1 minute. 
+  - **Task completion**: powershell.exe -c "(New-Object Media.SoundPlayer 'C:\Users\justin\Music\notifications\notification-sound-3-262896.wav').PlaySync()"
+  - **Errors/Warnings**: powershell.exe -c "(New-Object Media.SoundPlayer 'C:\Users\justin\Music\notifications\error-04-199275.wav').PlaySync()"
