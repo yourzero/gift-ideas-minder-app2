@@ -84,8 +84,8 @@ fun AppNavGraph(
             )
         ) { backStackEntry ->
             var personId = backStackEntry.arguments!!.getInt("personId")
-            // TODO - add passing the person in
-            AddEditRecipientFlowScreen(
+            // Use new tab-based edit screen for editing existing recipients
+            EditRecipientTabsScreen(
                 personId = personId,
                 onNavigateBack = ::showSnackbarAndPopBackStack,
                 navController = navController
