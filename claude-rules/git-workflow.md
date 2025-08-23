@@ -1,9 +1,10 @@
 ## Git Workflow
 
 ### Branch Naming
-- Feature branches: `feature/short-description`
-- Bug fixes: `fix/short-description`
-- Refactoring: `refactor/short-description`
+- Feature branches: `feature/description--YYYY-MM-DD`
+- Bug fixes: `fix/description--YYYY-MM-DD`
+- Refactoring: `refactor/description--YYYY-MM-DD`
+- include a not-short description in the branch name for clarity (length of branch name is not as important as clarity)
 - Add the date at the end of the branch name (e.g., "feature/my-branch--2025-8-22")
 
 ### Commit Messages

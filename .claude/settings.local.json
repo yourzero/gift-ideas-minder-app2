@@ -52,8 +52,9 @@
       "Bash(.gradlew assembleDebug)",
       "mcp__git__git_branch",
       "Bash(.gradlew assembleDebug)",
-      "Bash(powershell.exe -c \"(New-Object Media.SoundPlayer*"
-
+      "Bash(powershell.exe -c \"(New-Object Media.SoundPlayer*",
+      "mcp__serena__find_file",
+      "mcp__serena__*"
     ],
     "deny": [],
     "ask": [],

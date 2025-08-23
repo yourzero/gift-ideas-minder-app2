@@ -65,3 +65,5 @@ Prioritize:
     - If I (the user) don't respond to a permission prompt, remind me with the same sound every 1 minute. 
   - **Task completion**: powershell.exe -c "(New-Object Media.SoundPlayer 'C:\Users\justin\Music\notifications\notification-sound-3-262896.wav').PlaySync()"
   - **Errors/Warnings**: powershell.exe -c "(New-Object Media.SoundPlayer 'C:\Users\justin\Music\notifications\error-04-199275.wav').PlaySync()"
+  - **Claude Code is fully loaded and ready to take input**: - **Task completion**: powershell.exe -c "(New-Object Media.SoundPlayer 'C:\Users\justin\Music\notifications\notification-sound-3-262896.wav').PlaySync()"
+- 
