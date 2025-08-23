@@ -54,7 +54,11 @@
       "Bash(.gradlew assembleDebug)",
       "Bash(powershell.exe -c \"(New-Object Media.SoundPlayer*",
       "mcp__serena__find_file",
-      "mcp__serena__*"
+      "mcp__serena__*",
+      "mcp__git__git_*",
+      "mcp__git__git_status",
+      "mcp__git__git_diff_unstaged",
+      "mcp__git__git_diff_staged"
     ],
     "deny": [],
     "ask": [],
@@ -62,7 +66,16 @@
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
-    "intellij"
+    "intellij",
+    "adb",
+    "search_serpapi",
+    "git",
+    "serena",
+    "sequential-thinking",
+    "supabase",
+    "sentry",
+    "context7",
+    "playwright"
   ],
   "mcpServers": {
     "intellij": {

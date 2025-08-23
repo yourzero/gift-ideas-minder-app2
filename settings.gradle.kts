@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "GiftIdeaMinder"
+rootProject.name = "GiftIdeaMinder--AI-working-copy"
 include(":app") 

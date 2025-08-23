@@ -12,7 +12,10 @@
 - Examples: `feat(ui): add dark mode toggle`, `fix(api): handle null responses`
 
 ### Branch Management
-- When adding a new feature or fix that is being performed from instructions in the todo.md file, create a new branch
+- When adding a new feature or fix that is being performed from instructions in the todo.md file:
+  - create a new branch
+  - add the branch name to the todo.md file
+  - check the checkbox(es) in the todo.md file after each item is completed (and compiles)
 - Create all branches from the current branch - prompt first if this seems like a bad idea
 - Once a new feature/fix/change is done, commit it with a descriptive thorough commit message.
 - Do not merge branches after commit

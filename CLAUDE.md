@@ -57,8 +57,6 @@ Prioritize:
 - Use PowerShell for all shell commands
 - Default shell: `powershell.exe`
 
-
-
 ## Notifications
 - Play these notification sounds after each listed event:
   - **Permission prompts**: powershell.exe -c "(New-Object Media.SoundPlayer 'C:\Users\justin\Music\notifications\new-notification-022-370046.wav').PlaySync()"
