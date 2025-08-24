@@ -52,8 +52,8 @@
       "Bash(.gradlew assembleDebug)",
       "mcp__git__git_branch",
       "Bash(.gradlew assembleDebug)",
-      "Bash(powershell.exe -c \"(New-Object Media.SoundPlayer*"
-
+      "Bash(powershell.exe -c \"(New-Object Media.SoundPlayer*",
+      "Bash(git merge-base:*)"
     ],
     "deny": [],
     "ask": [],
