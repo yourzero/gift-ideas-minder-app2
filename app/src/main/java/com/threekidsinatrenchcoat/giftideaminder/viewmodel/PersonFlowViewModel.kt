@@ -196,6 +196,12 @@ class PersonFlowViewModel @Inject constructor(
         }
     }
 
+    fun onSave(): NavResult {
+        viewModelScope.launch { persistPersonAndDates() }
+        val msg = if (_uiState.value.isEditing) "${_uiState.value.name} was updated" else "${_uiState.value.name} was added"
+        return NavResult(saved = true, successMessage = msg)
+    }
+
     fun onDatePicked(label: String, date: java.time.LocalDate) {
         _uiState.update { it.copy(pickedDates = it.pickedDates + (label to date)) }
     }

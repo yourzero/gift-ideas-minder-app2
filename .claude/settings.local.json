@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+      "*",
       "Bash(./gradlew:*)",
       "mcp__intellij__execute_terminal_command",
       "mcp__intellij__get_file_text_by_path",
@@ -64,6 +65,7 @@
       "Bash(git checkout:*)",
       "mcp__git__git_log",
       "mcp__git__git_show"
+
     ],
     "deny": [],
     "ask": [],
