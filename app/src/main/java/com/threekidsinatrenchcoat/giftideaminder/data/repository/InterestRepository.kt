@@ -3,6 +3,7 @@ package com.threekidsinatrenchcoat.giftideaminder.data.repository
 
 import com.threekidsinatrenchcoat.giftideaminder.data.dao.InterestDao
 import com.threekidsinatrenchcoat.giftideaminder.data.model.Interest
+import com.threekidsinatrenchcoat.giftideaminder.data.model.InterestEntity
 import com.threekidsinatrenchcoat.giftideaminder.data.model.InterestType
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -39,4 +40,35 @@ class InterestRepository @Inject constructor(
     
     suspend fun deleteAllForPerson(personId: Int) =
         interestDao.deleteAllForPerson(personId)
+    
+    // InterestEntity methods
+    fun getParentInterests(personId: Int): Flow<List<InterestEntity>> =
+        interestDao.getParentInterests(personId)
+    
+    fun getChildInterests(parentId: Int): Flow<List<InterestEntity>> =
+        interestDao.getChildInterests(parentId)
+    
+    fun getParentInterestsNonDislike(personId: Int): Flow<List<InterestEntity>> =
+        interestDao.getParentInterestsNonDislike(personId)
+    
+    suspend fun getChildCount(parentId: Int): Int =
+        interestDao.getChildCount(parentId)
+    
+    suspend fun insertInterestEntity(interestEntity: InterestEntity) =
+        interestDao.insertEntity(interestEntity)
+    
+    suspend fun updateInterestEntity(interestEntity: InterestEntity) =
+        interestDao.updateEntity(interestEntity)
+    
+    suspend fun deleteInterestEntity(interestEntity: InterestEntity) =
+        interestDao.deleteEntity(interestEntity)
+    
+    suspend fun toggleOwned(id: Int, isOwned: Boolean) =
+        interestDao.toggleOwned(id, isOwned)
+    
+    suspend fun toggleDislike(id: Int, isDislike: Boolean) =
+        interestDao.toggleDislike(id, isDislike)
+    
+    suspend fun deleteAllEntitiesForPerson(personId: Int) =
+        interestDao.deleteAllEntitiesForPerson(personId)
 }
