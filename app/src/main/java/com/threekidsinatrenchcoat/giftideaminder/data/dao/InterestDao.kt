@@ -38,20 +38,20 @@ interface InterestDao {
     suspend fun deleteById(id: Int)
     
     // New InterestEntity methods
-    @Query("SELECT * FROM interest_entities WHERE personId = :personId AND parentId IS NULL ORDER BY label")
-    fun getParentInterests(personId: Int): Flow<List<InterestEntity>>
+    @Query("SELECT * FROM interest_entities WHERE personId = :personId AND parentId IS NULL ORDER BY name")
+    fun getParentInterests(personId: Long): Flow<List<InterestEntity>>
     
-    @Query("SELECT * FROM interest_entities WHERE parentId = :parentId ORDER BY label")
-    fun getChildInterests(parentId: Int): Flow<List<InterestEntity>>
+    @Query("SELECT * FROM interest_entities WHERE parentId = :parentId ORDER BY name")
+    fun getChildInterests(parentId: Long): Flow<List<InterestEntity>>
     
-    @Query("SELECT * FROM interest_entities WHERE personId = :personId AND parentId IS NULL AND isDislike = 0 ORDER BY label")
-    fun getParentInterestsNonDislike(personId: Int): Flow<List<InterestEntity>>
+    @Query("SELECT * FROM interest_entities WHERE personId = :personId AND parentId IS NULL AND isDislike = 0 ORDER BY name")
+    fun getParentInterestsNonDislike(personId: Long): Flow<List<InterestEntity>>
     
     @Query("SELECT COUNT(*) FROM interest_entities WHERE parentId = :parentId")
-    suspend fun getChildCount(parentId: Int): Int
+    suspend fun getChildCount(parentId: Long): Int
     
     @Insert
-    suspend fun insertEntity(interestEntity: InterestEntity)
+    suspend fun insertEntity(interestEntity: InterestEntity): Long
     
     @Update
     suspend fun updateEntity(interestEntity: InterestEntity)
@@ -60,11 +60,11 @@ interface InterestDao {
     suspend fun deleteEntity(interestEntity: InterestEntity)
     
     @Query("UPDATE interest_entities SET isOwned = :isOwned WHERE id = :id")
-    suspend fun toggleOwned(id: Int, isOwned: Boolean)
+    suspend fun toggleOwned(id: Long, isOwned: Boolean)
     
     @Query("UPDATE interest_entities SET isDislike = :isDislike WHERE id = :id")
-    suspend fun toggleDislike(id: Int, isDislike: Boolean)
+    suspend fun toggleDislike(id: Long, isDislike: Boolean)
     
     @Query("DELETE FROM interest_entities WHERE personId = :personId")
-    suspend fun deleteAllEntitiesForPerson(personId: Int)
+    suspend fun deleteAllEntitiesForPerson(personId: Long)
 }
