@@ -42,19 +42,19 @@ class InterestRepository @Inject constructor(
         interestDao.deleteAllForPerson(personId)
     
     // InterestEntity methods
-    fun getParentInterests(personId: Int): Flow<List<InterestEntity>> =
+    fun getParentInterests(personId: Long): Flow<List<InterestEntity>> =
         interestDao.getParentInterests(personId)
     
-    fun getChildInterests(parentId: Int): Flow<List<InterestEntity>> =
+    fun getChildInterests(parentId: Long): Flow<List<InterestEntity>> =
         interestDao.getChildInterests(parentId)
     
-    fun getParentInterestsNonDislike(personId: Int): Flow<List<InterestEntity>> =
+    fun getParentInterestsNonDislike(personId: Long): Flow<List<InterestEntity>> =
         interestDao.getParentInterestsNonDislike(personId)
     
-    suspend fun getChildCount(parentId: Int): Int =
+    suspend fun getChildCount(parentId: Long): Int =
         interestDao.getChildCount(parentId)
     
-    suspend fun insertInterestEntity(interestEntity: InterestEntity) =
+    suspend fun insertInterestEntity(interestEntity: InterestEntity): Long =
         interestDao.insertEntity(interestEntity)
     
     suspend fun updateInterestEntity(interestEntity: InterestEntity) =
@@ -63,12 +63,12 @@ class InterestRepository @Inject constructor(
     suspend fun deleteInterestEntity(interestEntity: InterestEntity) =
         interestDao.deleteEntity(interestEntity)
     
-    suspend fun toggleOwned(id: Int, isOwned: Boolean) =
+    suspend fun toggleOwned(id: Long, isOwned: Boolean) =
         interestDao.toggleOwned(id, isOwned)
     
-    suspend fun toggleDislike(id: Int, isDislike: Boolean) =
+    suspend fun toggleDislike(id: Long, isDislike: Boolean) =
         interestDao.toggleDislike(id, isDislike)
     
-    suspend fun deleteAllEntitiesForPerson(personId: Int) =
+    suspend fun deleteAllEntitiesForPerson(personId: Long) =
         interestDao.deleteAllEntitiesForPerson(personId)
 }

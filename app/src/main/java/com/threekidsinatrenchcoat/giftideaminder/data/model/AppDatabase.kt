@@ -50,11 +50,14 @@ abstract class AppDatabase : RoomDatabase() {
                         `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                         `personId` INTEGER NOT NULL,
                         `parentId` INTEGER,
-                        `label` TEXT NOT NULL,
+                        `name` TEXT NOT NULL,
+                        `description` TEXT,
                         `isDislike` INTEGER NOT NULL DEFAULT 0,
                         `isOwned` INTEGER NOT NULL DEFAULT 0,
                         `createdAt` INTEGER NOT NULL,
-                        FOREIGN KEY(`personId`) REFERENCES `persons`(`id`) ON DELETE CASCADE
+                        `updatedAt` INTEGER NOT NULL,
+                        FOREIGN KEY(`personId`) REFERENCES `persons`(`id`) ON DELETE CASCADE,
+                        FOREIGN KEY(`parentId`) REFERENCES `interest_entities`(`id`) ON DELETE CASCADE
                     )
                 """.trimIndent())
                 
