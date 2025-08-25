@@ -1,3 +1,81 @@
 <resources>
     <string name="app_name">Gift Idea Minder</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_gifts">Gifts</string>
+    <string name="nav_people">People</string>
+    <string name="nav_achievements">Achievements</string>
+    
+    <!-- Interests -->
+    <string name="interests_title">Interests</string>
+    <string name="interests_details_title">Interest Details</string>
+    <string name="add_interest_detail">Add Detail</string>
+    <string name="interest_owned">Owned</string>
+    <string name="interest_dislike">Hard No</string>
+    <string name="disinterests_filter">Show Hard No\'s</string>
+    <string name="interests_filter">Show Interests</string>
+    
+    <!-- 20 Questions -->
+    <string name="twenty_questions_title">20 Questions</string>
+    <string name="select_category">Select Category</string>
+    <string name="questions_for_category">Questions for %1$s</string>
+    <string name="question_progress">Question %1$d of %2$d</string>
+    <string name="skip_question">Skip</string>
+    <string name="next_question">Next</string>
+    <string name="finish_questions">Finish</string>
+    <string name="review_interests">Review Interests</string>
+    <string name="start_twenty_questions">Start 20 Questions</string>
+    
+    <!-- Achievements -->
+    <string name="achievements_title">Achievements</string>
+    <string name="achievement_unlocked">Achievement Unlocked!</string>
+    <string name="achievements_unlocked">Achievements Unlocked!</string>
+    <string name="available_ai_suggestions">Available AI Suggestions: %1$d</string>
+    <string name="check_progress">Check Progress</string>
+    <string name="awesome">Awesome!</string>
+    <string name="unlocked_on">Unlocked: %1$s</string>
+    
+    <!-- Achievement Titles & Descriptions -->
+    <string name="achievement_first_recipient_title">Getting Started</string>
+    <string name="achievement_first_recipient_desc">Add your first recipient</string>
+    <string name="achievement_five_recipients_title">Growing Circle</string>
+    <string name="achievement_five_recipients_desc">Add 5 recipients</string>
+    <string name="achievement_five_recipients_benefit">Unlock 1 free AI suggestion per recipient</string>
+    <string name="achievement_ten_recipients_title">Social Butterfly</string>
+    <string name="achievement_ten_recipients_desc">Add 10 recipients</string>
+    <string name="achievement_ten_recipients_benefit">Unlock premium features</string>
+    <string name="achievement_first_20q_title">Discovery Mode</string>
+    <string name="achievement_first_20q_desc">Complete your first 20 Questions session</string>
+    <string name="achievement_ten_details_title">Detail Oriented</string>
+    <string name="achievement_ten_details_desc">Add 10 interest details</string>
+    <string name="achievement_first_gift_title">Thoughtful Giver</string>
+    <string name="achievement_first_gift_desc">Add your first gift idea</string>
+    
+    <!-- Common Actions -->
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="back">Back</string>
+    <string name="next">Next</string>
+    <string name="done">Done</string>
+    <string name="close">Close</string>
+    
+    <!-- Content Descriptions -->
+    <string name="cd_add_person">Add person</string>
+    <string name="cd_add_gift">Add gift</string>
+    <string name="cd_add_event">Add event</string>
+    <string name="cd_close_menu">Close menu</string>
+    <string name="cd_add_options">Add options</string>
+    <string name="cd_gift_ideas">Gift ideas</string>
+    <string name="cd_interests">Interests</string>
+    <string name="cd_dislike_interest">Mark as hard no</string>
+    <string name="cd_like_interest">Remove hard no</string>
+    <string name="cd_interest_owned">Mark as owned</string>
+    <string name="cd_interest_not_owned">Mark as not owned</string>
+    <string name="cd_locked_achievement">Locked achievement</string>
+    <string name="cd_unlocked_achievement">Unlocked achievement</string>
+    <string name="cd_refresh_achievements">Refresh achievements</string>
 </resources> 
