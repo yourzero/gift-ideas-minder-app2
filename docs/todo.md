@@ -133,3 +133,59 @@ All features have been implemented across 6 feature branches created from master
 - Each branch contains complete, functional implementation of its respective feature
 
 
+## Merge Instructions
+
+🔄 Recommended Merge Order:
+
+Phase 1: Foundation (Critical first steps)
+
+1. feature/cross-cutting-tasks--2025-08-25 ⭐ MERGE FIRST
+   - Provides Analytics, FeatureFlags, and Hilt modules
+   - Required by other features for dependency injection
+2. feature/interest-entity-implementation--2025-08-25 ⭐ MERGE SECOND
+   - Creates InterestEntity table and Room migration
+   - Foundation for all interest-related features
+
+Phase 2: Independent Features (Can merge in parallel)
+
+3. feature/recipients-list-improvements--2025-08-25
+   - Just UI changes to PersonItem.kt
+   - No dependencies, can merge anytime
+
+Phase 3: Interest Features (Must be sequential)
+
+4. feature/interest-drill-down-details--2025-08-25
+   - Builds InterestsScreen UI on InterestEntity foundation
+   - Requires: #1, #2
+5. feature/disinterests-hard-nos--2025-08-25
+   - Extends InterestsScreen with hard no's functionality
+   - Requires: #1, #2, #4
+
+Phase 4: Advanced Features (Either order)
+
+6. feature/twenty-questions-mode--2025-08-25
+   - Creates interests using the complete system
+   - Requires: #1, #2 (works best after #4, #5)
+7. feature/trophies-gamification--2025-08-25
+   - Achievement system tracking milestones from other features
+   - Mostly independent, can merge anytime after #1
+
+⚠️ Critical Dependencies:
+
+- #1 must be first - Provides Hilt modules needed by other features
+- #2 must be early - Database foundation for interests
+- #4 before #5 - Disinterests extends the drill-down UI
+- #3 can go anywhere - Completely independent
+
+🔀 Alternative: Quick Merge Strategy
+
+If you want to merge faster with minimal risk:
+1. cross-cutting-tasks (infrastructure)
+2. recipients-list-improvements (safe, independent)
+3. interest-entity-implementation (database foundation)
+4. interest-drill-down-details (UI foundation)
+5. disinterests-hard-nos (UI extension)
+6. twenty-questions-mode (feature complete)
+7. trophies-gamification (final enhancement)
+
+The main risk is merge conflicts between #4 and #5 since they both modify InterestsScreen.kt, but following this order should minimize issues.
