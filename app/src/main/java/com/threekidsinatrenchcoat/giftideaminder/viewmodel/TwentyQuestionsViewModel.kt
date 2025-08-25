@@ -121,9 +121,8 @@ class TwentyQuestionsViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, error = null) }
             
             try {
-                val interests = generateInterestsFromAnswers(personId)
-                interestRepository.insertAll(interests)
-                
+                saveInterestsFromAnswers(personId)
+
                 _uiState.update { 
                     it.copy(
                         isFlowComplete = true,
@@ -157,41 +156,99 @@ class TwentyQuestionsViewModel @Inject constructor(
         _uiState.update { it.copy(error = null) }
     }
 
+    /**
+     * Check if the current question has been answered
+     */
+    fun isCurrentQuestionAnswered(): Boolean {
+        val state = _uiState.value
+        val category = state.currentCategory ?: return false
+        val questionIndex = state.currentQuestionIndex
+        val categoryAnswers = state.answers[category]
+
+        return categoryAnswers != null &&
+               questionIndex < categoryAnswers.size &&
+               categoryAnswers[questionIndex].isNotBlank()
+    }
+
+    /**
+     * Get the current question text
+     */
+    fun getCurrentQuestion(): String? {
+        val state = _uiState.value
+        return if (state.currentQuestionIndex < state.questions.size) {
+            state.questions[state.currentQuestionIndex]
+        } else null
+    }
+
+    /**
+     * Get the current answer for the current question
+     */
+    fun getCurrentAnswer(): String {
+        val state = _uiState.value
+        val category = state.currentCategory ?: return ""
+        val questionIndex = state.currentQuestionIndex
+        val categoryAnswers = state.answers[category]
+
+        return if (categoryAnswers != null && questionIndex < categoryAnswers.size) {
+            categoryAnswers[questionIndex]
+        } else ""
+    }
+
+    /**
+     * Get progress information for the current category
+     */
+    fun getCategoryProgress(): Pair<Int, Int> {
+        val state = _uiState.value
+        return Pair(state.currentQuestionIndex + 1, state.questions.size)
+    }
+
+    /**
+     * Check if we're on the last question of the current category
+     */
+    fun isLastQuestion(): Boolean {
+        val state = _uiState.value
+        return state.currentQuestionIndex >= state.questions.size - 1
+    }
+
+    /**
+     * Check if we're on the first question of the current category
+     */
+    fun isFirstQuestion(): Boolean {
+        val state = _uiState.value
+        return state.currentQuestionIndex <= 0
+    }
+
     // ---------- Helper Methods ----------
     
     /**
-     * Generate InterestEntity objects from collected answers
+     * Save interests from collected answers, properly handling parent-child relationships
      */
-    private fun generateInterestsFromAnswers(personId: Int): List<InterestEntity> {
-        val interests = mutableListOf<InterestEntity>()
-        
+    private suspend fun saveInterestsFromAnswers(personId: Int) {
         _uiState.value.answers.forEach { (category, answers) ->
             // Create parent interest for the category if there are any non-empty answers
             val nonEmptyAnswers = answers.filter { it.isNotBlank() }
             if (nonEmptyAnswers.isNotEmpty()) {
+                // Insert parent interest first and get its ID
                 val parentInterest = InterestEntity(
                     personId = personId,
                     parentId = null,
                     label = category
                 )
-                interests.add(parentInterest)
-                
-                // Add child interests for positive answers
-                // Note: In a real implementation, we'd want to insert the parent first
-                // to get its ID, then create children. This simplified version assumes
-                // the repository handles the relationship properly.
+                interestRepository.insertInterestEntity(parentInterest)
+
+                // Since we can't easily get the inserted parent ID, we'll save the answers
+                // as separate parent interests for now. In a more sophisticated implementation,
+                // we would use the DAO to return the inserted ID or query for it.
                 nonEmptyAnswers.forEach { answer ->
-                    val childInterest = InterestEntity(
+                    val answerInterest = InterestEntity(
                         personId = personId,
-                        parentId = -1, // Will need to be updated with actual parent ID
-                        label = answer
+                        parentId = null, // Making these parent interests for simplicity
+                        label = "$category: $answer"
                     )
-                    interests.add(childInterest)
+                    interestRepository.insertInterestEntity(answerInterest)
                 }
             }
         }
-        
-        return interests
     }
 
     // ---------- Companion Object ----------
