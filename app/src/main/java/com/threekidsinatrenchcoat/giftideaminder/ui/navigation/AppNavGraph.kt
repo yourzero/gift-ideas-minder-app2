@@ -9,6 +9,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.threekidsinatrenchcoat.giftideaminder.ui.screens.*
+import com.threekidsinatrenchcoat.giftideaminder.ui.screens.achievements.AchievementsScreen
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
@@ -68,6 +69,9 @@ fun AppNavGraph(
         }
         composable("settings") {
             SettingsScreen(navController = navController)
+        }
+        composable("achievements") {
+            AchievementsScreen(modifier = modifier)
         }
         composable("import") {
             ImportScreen(navController = navController)

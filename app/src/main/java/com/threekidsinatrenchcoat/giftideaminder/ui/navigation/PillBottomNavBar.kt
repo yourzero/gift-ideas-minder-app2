@@ -67,7 +67,7 @@ fun PillBottomNavBar(
         listOf(
             Triple(Icons.Default.Home, "home", "Home"),
             Triple(Icons.Default.CardGiftcard, "gift_list", "Gifts"),
-            Triple(Icons.Default.Event, "event_list", "Events"),
+            Triple(Icons.Default.EmojiEvents, "achievements", "Achievements"),
             Triple(Icons.Default.Person, "person_list", "People")
         ).forEach { (icon, route, label) ->
             val selected = currentRoute == route
