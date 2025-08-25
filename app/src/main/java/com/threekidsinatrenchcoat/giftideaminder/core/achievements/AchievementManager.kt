@@ -1,8 +1,11 @@
 package com.threekidsinatrenchcoat.giftideaminder.core.achievements
 
-// DataStore imports removed for now - using in-memory storage
-import com.threekidsinatrenchcoat.giftideaminder.data.repository.InterestRepository
-import com.threekidsinatrenchcoat.giftideaminder.data.repository.PersonRepository
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
+import com.threekidsinatrenchcoat.giftideaminder.core.repository.InterestRepository
+import com.threekidsinatrenchcoat.giftideaminder.core.repository.PersonRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow

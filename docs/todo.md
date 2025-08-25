@@ -3,13 +3,14 @@
 This file contains detailed steps for implementing the four new features.
 
 ---
-## 1) 
-- [ ] Recipients list screen
-    - Move the "idea generator" icon to the far left, to set it apart from the other actions which are all more edit-related. Also make the colors of the ideas and interests icons different (appropriate to whatever the icons are)
-    -
+## 1) Recipients List Screen Improvements 
+**Branch**: `feature/recipients-list-improvements`
+- [ ] Move the "idea generator" icon to the far left, to set it apart from the other actions which are all more edit-related
+- [ ] Make the colors of the ideas and interests icons different (appropriate to whatever the icons are)
 
 
 ## 2) Interest Drill‑Down Details (Guidance + Constraints)
+**Branch**: `feature/interest-entity-implementation`
 - [ ] Add `InterestEntity` Room table with parent/child relationship and flags `isDislike`, `isOwned`.
 - [ ] DAO + Repository for parent list, child list, add detail, toggle flags.
 - [ ] UI: InterestsScreen (flat parent list, `+n` badge if children), InterestDetailsSheet (chips, owned toggle, add detail).
@@ -17,12 +18,14 @@ This file contains detailed steps for implementing the four new features.
 - [ ] AI Suggestion stub: map parent labels to canned detail suggestions.
 - [ ] Acceptance: Add detail works, toggle owned/dislike persists, suggestions appear.
 
-## 3) Disinterests / Hard No’s
+## 3) Disinterests / Hard No's
+**Branch**: `feature/disinterests-hard-nos`
 - [ ] Use `isDislike` boolean on both parent and child interests.
 - [ ] UI toggle icon (🚫) on rows, persisted via repo.
 - [ ] Acceptance: toggling works, indicated visually, persists.
 
 ## 4) 20 Questions Mode (AI‑Guided Interest Discovery)
+**Branch**: `feature/twenty-questions-mode`
 - [ ] Flow: CategoryPickerScreen → CategoryQuestionScreen → Review.
 - [ ] Categories: static list (Outdoors, Video games, Tech, Sports, etc.).
 - [ ] Question logic: local stub mapping categories to canned questions; max 3 per category.
@@ -31,6 +34,7 @@ This file contains detailed steps for implementing the four new features.
 - [ ] Acceptance: user can add interests via flow; can skip/stop anytime.
 
 ## 5) Trophies & Unlocks (Gamified Freemium)
+**Branch**: `feature/trophies-gamification`
 - [ ] Track milestones: first recipient, 5 recipients, 10 details, first 20Q session.
 - [ ] AchievementEntity or DataStore for unlockedAt timestamps.
 - [ ] Unlock rule: 5 recipients unlock 1 free AI suggestion per recipient.

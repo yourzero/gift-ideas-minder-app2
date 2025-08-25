@@ -54,35 +54,40 @@ fun PersonItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = onInterests) {
-                    Icon(
-                        Icons.Filled.Favorite,
-                        contentDescription = "Interests",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
+                // Idea generator icon on the far left, separated from edit actions
                 IconButton(onClick = onIdeas) {
                     Icon(
                         Icons.Filled.Lightbulb,
                         contentDescription = "Gift Ideas",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.tertiary
                     )
                 }
-                IconButton(onClick = onEdit) {
-                    Icon(
-                        Icons.Filled.Edit,
-                        contentDescription = "Edit",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Filled.Delete,
-                        contentDescription = "Delete",
-                        tint = MaterialTheme.colorScheme.error
-                    )
+                
+                // Edit-related actions grouped on the right
+                Row {
+                    IconButton(onClick = onInterests) {
+                        Icon(
+                            Icons.Filled.Favorite,
+                            contentDescription = "Interests",
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    IconButton(onClick = onEdit) {
+                        Icon(
+                            Icons.Filled.Edit,
+                            contentDescription = "Edit",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            Icons.Filled.Delete,
+                            contentDescription = "Delete",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
         }
