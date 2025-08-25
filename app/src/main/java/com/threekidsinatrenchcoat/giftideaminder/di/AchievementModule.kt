@@ -1,7 +1,7 @@
 package com.threekidsinatrenchcoat.giftideaminder.di
 
 import android.content.Context
-import com.threekidsinatrenchcoat.giftideaminder.core.achievements.AchievementManager
+// import com.threekidsinatrenchcoat.giftideaminder.core.achievements.AchievementManager
 import com.threekidsinatrenchcoat.giftideaminder.core.analytics.Analytics
 import com.threekidsinatrenchcoat.giftideaminder.core.flags.FeatureFlags
 import com.threekidsinatrenchcoat.giftideaminder.data.repository.PersonRepository
@@ -16,14 +16,15 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AchievementModule {
     
-    @Provides
-    @Singleton
-    fun provideAchievementManager(
-        @ApplicationContext context: Context,
-        personRepository: PersonRepository
-    ): AchievementManager {
-        return AchievementManager(context, personRepository)
-    }
+    // AchievementManager will be uncommented when trophies branch is merged
+    // @Provides
+    // @Singleton
+    // fun provideAchievementManager(
+    //     @ApplicationContext context: Context,
+    //     personRepository: PersonRepository
+    // ): AchievementManager {
+    //     return AchievementManager(context, personRepository)
+    // }
     
     @Provides
     @Singleton

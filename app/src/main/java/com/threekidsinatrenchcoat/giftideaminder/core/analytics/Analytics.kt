@@ -1,5 +1,6 @@
 package com.threekidsinatrenchcoat.giftideaminder.core.analytics
 
+import com.threekidsinatrenchcoat.giftideaminder.BuildConfig
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -88,7 +89,3 @@ class Analytics @Inject constructor() {
     }
 }
 
-// Build configuration stub - normally would come from BuildConfig
-private object BuildConfig {
-    const val DEBUG = true
-}
