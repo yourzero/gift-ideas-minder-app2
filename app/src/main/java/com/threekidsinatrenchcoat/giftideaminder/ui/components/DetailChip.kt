@@ -17,6 +17,7 @@ import com.threekidsinatrenchcoat.giftideaminder.data.model.InterestEntity
 fun DetailChip(
     interest: InterestEntity,
     onToggleOwned: () -> Unit,
+    onToggleDislike: () -> Unit = {},
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -26,10 +27,10 @@ fun DetailChip(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (interest.isOwned) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
+            containerColor = when {
+                interest.isDislike -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+                interest.isOwned -> MaterialTheme.colorScheme.primaryContainer
+                else -> MaterialTheme.colorScheme.surfaceVariant
             }
         )
     ) {
@@ -92,10 +93,10 @@ fun DetailChip(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Owned toggle button
+            // Toggle buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 FilterChip(
                     onClick = onToggleOwned,
@@ -118,6 +119,22 @@ fun DetailChip(
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = MaterialTheme.colorScheme.primary,
                         selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+                
+                FilterChip(
+                    onClick = onToggleDislike,
+                    label = { 
+                        Text(
+                            "🚫",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    },
+                    selected = interest.isDislike,
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.errorContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onErrorContainer
                     )
                 )
             }

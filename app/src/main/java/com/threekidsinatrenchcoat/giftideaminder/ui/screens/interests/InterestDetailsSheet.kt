@@ -160,6 +160,9 @@ fun InterestDetailsSheet(
                                     onToggleOwned = {
                                         viewModel.toggleOwned(childInterest.id, !childInterest.isOwned)
                                     },
+                                    onToggleDislike = {
+                                        viewModel.toggleDislike(childInterest.id, !childInterest.isDislike)
+                                    },
                                     onDelete = {
                                         viewModel.deleteInterest(childInterest)
                                     },

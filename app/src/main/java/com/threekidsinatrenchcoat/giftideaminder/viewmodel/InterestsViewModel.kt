@@ -36,6 +36,10 @@ class InterestsViewModel @Inject constructor(
         return interestRepository.getParentInterests(personId)
     }
     
+    fun getParentInterestsNonDislike(personId: Long): Flow<List<InterestEntity>> {
+        return interestRepository.getParentInterestsNonDislike(personId)
+    }
+    
     fun getChildInterests(parentId: Long): Flow<List<InterestEntity>> {
         return interestRepository.getChildInterests(parentId)
     }

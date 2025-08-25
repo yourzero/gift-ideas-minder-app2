@@ -22,10 +22,18 @@ fun InterestsScreen(
     personId: Long,
     viewModel: InterestsViewModel = hiltViewModel()
 ) {
+    var showDisinterests by remember { mutableStateOf(false) }
     val parentInterests by viewModel.getParentInterests(personId).collectAsStateWithLifecycle(emptyList())
+    val regularInterests by viewModel.getParentInterestsNonDislike(personId).collectAsStateWithLifecycle(emptyList())
     var showBottomSheet by remember { mutableStateOf(false) }
     var selectedInterest by remember { mutableStateOf<InterestEntity?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
+    
+    val displayInterests = if (showDisinterests) {
+        parentInterests.filter { it.isDislike }
+    } else {
+        regularInterests
+    }
     
     LaunchedEffect(personId) {
         viewModel.setPersonId(personId)
@@ -44,7 +52,7 @@ fun InterestsScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                "Interests",
+                if (showDisinterests) "Hard No's" else "Interests",
                 style = MaterialTheme.typography.headlineMedium
             )
             
@@ -56,20 +64,43 @@ fun InterestsScreen(
             }
         }
         
-        if (parentInterests.isEmpty()) {
+        // Filter chips
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FilterChip(
+                onClick = { showDisinterests = false },
+                label = { Text("Interests") },
+                selected = !showDisinterests
+            )
+            FilterChip(
+                onClick = { showDisinterests = true },
+                label = { Text("Hard No's") },
+                selected = showDisinterests,
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.errorContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onErrorContainer
+                )
+            )
+        }
+        
+        if (displayInterests.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        "No interests yet",
+                        if (showDisinterests) "No hard no's yet" else "No interests yet",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        "Add some interests to get started",
+                        if (showDisinterests) "Mark interests as dislikes to see them here" else "Add some interests to get started",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -79,7 +110,7 @@ fun InterestsScreen(
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(parentInterests) { interest ->
+                items(displayInterests) { interest ->
                     InterestRow(
                         interest = interest,
                         onInterestClick = {
